@@ -1,0 +1,36 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+#cercleLogin {
+    background-color: white;
+    border: 0.7rem solid white;
+    border-radius: 50%;
+}
+
+#teteEscrime {
+    height: auto;
+    width: 4vh;
+}
+
+nav {
+    background-color: #DD2323;
+}
+
+nav img {
+    height: auto;
+    width: 10vh;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+}
