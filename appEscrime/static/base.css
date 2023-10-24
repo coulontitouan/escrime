@@ -8,16 +8,23 @@ a {
     color: black;
 }
 
-#cercleLogin {
+/* #cercleLogin {
     background-color: white;
-    border: 0.7rem solid white;
+    border-top: 0.1rem solid black;
+    border-right: 0.1rem solid black;
+    border-bottom: 0.1rem solid black;
     border-radius: 50%;
-}
+    height: 6vh;
+    width: 8vw;
+    text-align: center;
+    position: relative;
+    right: 1vw;
+} */
 
-#teteEscrime {
+/* #teteEscrime {
     height: auto;
     width: 4vh;
-}
+} */
 
 nav {
     background-color: #DD2323;
@@ -34,3 +41,4 @@ footer {
     width: 100%;
     text-align: center;
 }
+
