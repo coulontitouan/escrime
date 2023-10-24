@@ -12,6 +12,7 @@
             {{ bootstrap.load_css() }}
             <!-- Custom styles -->
             <link rel="stylesheet" href="{{ url_for('static', filename='base.css')}}">
+            <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
         {% endblock %}
         
         <title>Compétition ESCRIME</title>
@@ -21,35 +22,36 @@
     <body>
         <header>
             <!-- Fixed navbar -->
-            <nav class="navbar navbar-expand-md navbar-dark fixed-top">
-                <div class="container-fluid">
-                  <img src="{{ url_for('static', filename='images/escrimeurNav.png')}}" alt="un escrimeur qui pointe son épée">
-                    <a class="navbar-brand" href="{{ url_for('home') }}">Accueil</a>
-                        <button class="navbar-toggler" type="button"
-                        data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
-                        aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle
-                        navigation">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
-                    <div class="collapse navbar-collapse" id="navbarCollapse">
-                        <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                            <li class="nav-item">
-                                <a class="nav-link active" href="#">La compétition</a>
+            <nav>
+                <ul>
+                    <li>
+                        <img src="{{ url_for('static', filename='images/escrimeurNav.png')}}" alt="un escrimeur qui pointe son épée">
+                        <ul class="liens">
+                            <li>
+                                <a href="{{ url_for('home') }}">Accueil</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link active">Les tireurs</a>
+                            <li>
+                                <a href="#">La compétition</a>
+                            </li>
+                            <li>
+                                <a href="#">Les tireurs</a>
                             </li>
                         </ul>
-                        <form class="d-flex" role="search">
-                            <input class="form-control me-2" type="search"
-                            placeholder="Search" aria-label="Search">
+                    </li>
+                    <li id = "navbar2">
+                        <form class="form-inline ">
+                            <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Search"
+                                aria-label="Search">
+                                <i class="fas fa-search" aria-hidden="true"></i>
                         </form>
-                        <button type="button" class="btn btn-light"><a id="connex" href="#">Connexion</a></button>
-                        <!-- <div id="cercleLogin">
-                            <img id= "teteEscrime" src="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur">
-                        </div> -->
-                    </div>
-                </div>
+                        <div>
+                            <button type="button" class="btn btn-light buttonLogin"><a id="connex" href="#">Connexion</a></button>
+                            <div id="cercleLogin">
+                                <img id= "teteEscrime" src="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
             </nav>
         </header>
     

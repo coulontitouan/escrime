@@ -8,31 +8,65 @@ a {
     color: black;
 }
 
-/* #cercleLogin {
+.buttonLogin {
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
     background-color: white;
-    border-top: 0.1rem solid black;
-    border-right: 0.1rem solid black;
-    border-bottom: 0.1rem solid black;
+}
+
+#cercleLogin {
+    background-color: white;
     border-radius: 50%;
-    height: 6vh;
-    width: 8vw;
+    border: 0.5rem solid white;
     text-align: center;
     position: relative;
-    right: 1vw;
-} */
+    right: 14px;
+}
 
-/* #teteEscrime {
+#teteEscrime {
     height: auto;
-    width: 4vh;
-} */
+    width: 3vh;
+}
 
 nav {
     background-color: #DD2323;
+    display: flex;
+}
+
+nav > ul{
+    display: flex;
+    justify-content: space-between;
+    flex-basis:100%;
+}
+
+li>ul{
+    display: flex;
+    flex-basis: 100%;
+    justify-content: space-between;
+    
+}
+#navbar2{
+    display: flex;
+    justify-content: space-between;
 }
 
 nav img {
     height: auto;
     width: 10vh;
+}
+
+li {
+    list-style: none;
+}
+
+.form-inline {
+    display: flex;
+    align-items:center;
+}
+
+.form-inline > i {
+    position: relative;
+    right: 20px;
 }
 
 footer {
