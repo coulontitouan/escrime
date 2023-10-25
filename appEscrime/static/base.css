@@ -5,7 +5,58 @@
 
 a {
     text-decoration: none;
-    color: black;
+    color: white;
+}
+
+header {
+    background-color: #DD2323;
+    display: flex;
+    align-items: center;
+    padding: 0.5em;
+}
+
+header img {
+    height: auto;
+    width: 10vh;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    flex-basis:100%;
+}
+
+nav > ul{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-basis:100%;
+    margin: 0;
+    padding: 0;
+}
+
+nav > ul > li {
+    flex-basis: 50%;
+}
+
+.liens {
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+#navbar2{
+    display: flex;
+    justify-content: flex-end;
+}
+
+li {
+    list-style: none;
+}
+
+#blocLogin {
+    display: flex;
+    align-items: center;
 }
 
 .buttonLogin {
@@ -26,37 +77,6 @@ a {
 #teteEscrime {
     height: auto;
     width: 3vh;
-}
-
-nav {
-    background-color: #DD2323;
-    display: flex;
-}
-
-nav > ul{
-    display: flex;
-    justify-content: space-between;
-    flex-basis:100%;
-}
-
-li>ul{
-    display: flex;
-    flex-basis: 100%;
-    justify-content: space-between;
-    
-}
-#navbar2{
-    display: flex;
-    justify-content: space-between;
-}
-
-nav img {
-    height: auto;
-    width: 10vh;
-}
-
-li {
-    list-style: none;
 }
 
 .form-inline {
