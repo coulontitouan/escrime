@@ -58,6 +58,10 @@ li {
     display: flex;
     align-items: center;
 }
+#cercleLogin:hover{
+background-color:#d2d3d4;
+}
+
 
 .buttonLogin {
     border-top-left-radius: 15px;
@@ -68,7 +72,7 @@ li {
 #cercleLogin {
     background-color: white;
     border-radius: 50%;
-    border: 0.5rem solid white;
+    padding: 0.5rem;
     text-align: center;
     position: relative;
     right: 14px;
