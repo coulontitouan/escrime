@@ -28,27 +28,18 @@ Spécifications techniques :
 et sabre femme) et 9 catégories (U13, U15, U17, U20, senior, V1, V2, V3, V4).
 ---
 # Mise en place de l'application
-Création de l'environnement virtuelle
----
+Pour lancer l'application il vous suffit d'éxécuter les commande bash suivante :
 ```
-python3 -m venv <nom_environnement> (Windows)
-virtualenv -p python3 <nom_environnement> (Linux)
+git clone https://github.com/coulontitouan/escrime.git
+cd escrime
+source start.sh
 ```
-Activation de l'environnement virtuel
----
+Ensuite il vous suffit de cliquer sur "http://192.168.28.66:8080"
 ```
-<nom_environnement>\Scripts\Activate.ps1 (Windows)
-source <nom_environnement>/bin/activate (Linux)
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.28.66:8080
+Press CTRL+C to quit
 ```
-Installation des packages nécessaire
----
-```
-    pip install flask
-    pip install python-dotenv
-    pip install pyYAML
-    pip install bootstrap-flask
-    pip install flask-sqlalchemy
-    pip install flask-wtf
-    pip install flask-login
-    pip install --force-reinstall Werkzeug==2.3.0
-```
+Pour fermer l'application il suffit de faire la combinaison de touche CTRL+C dans le terminal
