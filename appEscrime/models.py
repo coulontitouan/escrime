@@ -37,7 +37,7 @@ class Categorisation(db.Model):
     __tablename__ = 'categorisation'
     classement = db.Column(db.Integer)
     points = db.Column(db.Integer)
-    num_licence = db.Column(db.Integer, db.ForeignKey('tireur.num_licence'), primary_key = True)
+    num_licence = db.Column(db.Integer, db.ForeignKey('escrimeur.num_licence'), primary_key = True)
     tireur = db.relationship('Escrimeur', backref = db.backref('categorisation', lazy = 'dynamic'))
     id_arme = db.Column(db.Integer, db.ForeignKey('arme.id'), primary_key = True)
     arme = db.relationship('Arme', backref = db.backref('categorisation', lazy = 'dynamic'))
@@ -50,6 +50,7 @@ class Competition(db.Model):
     nom = db.Column(db.String(64))
     date = db.Column(db.Date)
     saison = db.Column(db.Integer)
+    coefficient = db.Column(db.Integer)
     id_lieu = db.Column(db.Integer, db.ForeignKey('lieu.id'))
     lieu = db.relationship('Lieu', backref = db.backref('competition', lazy = 'dynamic'))
 
@@ -66,10 +67,6 @@ class Phase(db.Model):
     competition = db.relationship('Competition', backref = db.backref('phase', lazy = 'dynamic'))
     libelle = db.Column(db.Integer, db.ForeignKey('type_phase.id'))
     type_phase = db.relationship('Type_phase', backref = db.backref('phase', lazy = 'dynamic'))
-    # id_feuille = db.Column(db.Integer, db.ForeignKey('feuille.id'))
-    # feuille = db.relationship('Feuille', backref = db.backref('phase', lazy = 'dynamic'))
-    num_arbitre = db.Column(db.Integer, db.ForeignKey('arbitre.num_licence'))
-    arbitre = db.relationship('Escrimeur', backref = db.backref('phase', lazy = 'dynamic'))
 
 class Etat(db.Model):
     __tablename__ = 'etat'
@@ -86,5 +83,5 @@ class Match(db.Model):
     piste = db.Column(db.Integer)
     id_etat = db.Column(db.Integer, db.ForeignKey('etat.id'))
     etat = db.relationship('Etat', backref = db.backref('match', lazy = 'dynamic'))
-
-
+    num_arbitre = db.Column(db.Integer, db.ForeignKey('escrimeur.num_licence'))
+    arbitre = db.relationship('Escrimeur', backref = db.backref('match', lazy = 'dynamic'))
