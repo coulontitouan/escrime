@@ -71,13 +71,8 @@ class Phase(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     id_competition = db.Column(db.Integer, db.ForeignKey('competition.id'), primary_key = True)
     competition = db.relationship('Competition', backref = db.backref('phase', lazy = 'dynamic'))
-    libelle = db.Column(db.Integer, db.ForeignKey('type_phase.id'))
+    libelle = db.Column(db.String(32), db.ForeignKey('type_phase.id'))
     type_phase = db.relationship('Type_phase', backref = db.backref('phase', lazy = 'dynamic'))
-
-class Etat(db.Model):
-    __tablename__ = 'etat'
-    id = db.Column(db.Integer, primary_key = True)
-    libelle = db.Column(db.String(16))
 
 class Match(db.Model):
     __tablename__ = 'match'
@@ -87,8 +82,7 @@ class Match(db.Model):
     id_competition = db.Column(db.Integer, db.ForeignKey('competition.id'), primary_key = True)
     competition = db.relationship('Competition', backref = db.backref('match', lazy = 'dynamic'))
     piste = db.Column(db.Integer)
-    id_etat = db.Column(db.Integer, db.ForeignKey('etat.id'))
-    etat = db.relationship('Etat', backref = db.backref('match', lazy = 'dynamic'))
+    etat = db.Column(db.String(16))
     num_arbitre = db.Column(db.Integer, db.ForeignKey('escrimeur.num_licence'))
     arbitre = db.relationship('Escrimeur', backref = db.backref('match', lazy = 'dynamic'))
 
