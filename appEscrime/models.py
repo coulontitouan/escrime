@@ -31,7 +31,7 @@ class Escrimeur(db.Model):
 class Arme(db.Model):
     __tablename__ = 'arme'
     id = db.Column(db.Integer, primary_key = True)
-    libelle = db.Column(db.String(32))
+    libelle = db.Column(db.String(32))  
 
 class Categorisation(db.Model):
     __tablename__ = 'categorisation'
@@ -53,6 +53,13 @@ class Competition(db.Model):
     coefficient = db.Column(db.Integer)
     id_lieu = db.Column(db.Integer, db.ForeignKey('lieu.id'))
     lieu = db.relationship('Lieu', backref = db.backref('competition', lazy = 'dynamic'))
+
+class Inscription(db.Model):
+    __tablename__ = 'inscription'
+    id_competition = db.Column(db.Integer, db.ForeignKey('competition'), primary_key = True)
+    competition = db.relationship('Competition', backref = db.backref('inscription', lazy = 'dynamic'))
+    id_escrimeur = db.Column(db.Integer, db.ForeignKey('escrimeur'), primary_key = True)
+    escrimeur = db.relationship('Escrimeur', backref = db.backref('inscription', lazy = 'dynamic'))
 
 class Type_phase(db.Model):
     __tablename__ = 'type_phase'
@@ -85,3 +92,12 @@ class Match(db.Model):
     etat = db.relationship('Etat', backref = db.backref('match', lazy = 'dynamic'))
     num_arbitre = db.Column(db.Integer, db.ForeignKey('escrimeur.num_licence'))
     arbitre = db.relationship('Escrimeur', backref = db.backref('match', lazy = 'dynamic'))
+
+class Participation(db.Model):
+    __tablename__ = 'participation'
+    id_match = db.Column(db.Integer, db.ForeignKey('match'), primary_key = True)
+    match = db.relationship('Match', backref = db.backref('participation', lazy = 'dynamic'))
+    id_escrimeur = db.Column(db.Integer, db.ForeignKey('escrimeur'), primary_key = True)
+    escrimeur = db.relationship('Escrimeur', backref = db.backref('participation', lazy = 'dynamic'))
+    statut = db.Column(db.String(16))
+    touches = db.Column(db.Integer)
