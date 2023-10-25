@@ -25,6 +25,8 @@ class Escrimeur(db.Model):
     num_licence = db.Column(db.Integer, primary_key = True)
     prenom = db.Column(db.String(32))
     nom = db.Column(db.String(32))
+    sexe = db.Column(db.String(5))
+    date_naissance = db.Column(db.Date)
     club_id = db.Column(db.Integer, db.ForeignKey('club.id'))
     club = db.relationship('Club', backref = db.backref('escrimeur', lazy = 'dynamic'))
 
@@ -49,7 +51,6 @@ class Competition(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     nom = db.Column(db.String(64))
     date = db.Column(db.Date)
-    saison = db.Column(db.Integer)
     coefficient = db.Column(db.Integer)
     id_lieu = db.Column(db.Integer, db.ForeignKey('lieu.id'))
     lieu = db.relationship('Lieu', backref = db.backref('competition', lazy = 'dynamic'))
