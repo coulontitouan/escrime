@@ -63,8 +63,7 @@ class Inscription(db.Model):
 
 class Type_phase(db.Model):
     __tablename__ = 'type_phase'
-    id = db.Column(db.Integer, primary_key = True)
-    libelle = db.Column(db.String(32))
+    libelle = db.Column(db.String(32), primary_key = True)
     nb_touches = db.Column(db.Integer)
 
 class Phase(db.Model):
