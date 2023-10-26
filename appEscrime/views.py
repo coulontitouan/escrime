@@ -43,3 +43,9 @@ def connexion():
     return render_template(
         "connexion.html"
     )
+
+@app.route("/competition/<int:id>")
+def competition(id):
+    return render_template(
+        "competition.html"
+    )
