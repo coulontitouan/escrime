@@ -88,10 +88,6 @@ div > form > input{
 	cursor: pointer;
 }
 
-.buttonSign:hover{
-	background: #6d44b8;
-}
-
 .login{
 	height: 30rem;
 	background: #eee;
