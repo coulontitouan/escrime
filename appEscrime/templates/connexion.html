@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{url_for('static', filename='connexion.css')}}">
+{% endblock %}
+{% block content %}
+	<section id="carre">
+		<input type="checkbox" id="chk" aria-hidden="true">
+			<div class="signup">
+				<form>
+					<label for="chk" aria-hidden="true">Inscription</label>
+					<input type="text" name="txt" placeholder="Numéro de licence" required="">
+					<input type="text" name="txt" placeholder="Nom" required="">
+					<input type="text" name="txt" placeholder="Prenom" required="">
+					<div id="select">
+						<div>
+							<label for="homme">Homme</label>
+							<input type="radio" id="hommeradio" name="sexe" value="homme"/>
+						</div>
+						<div>
+							<label for="femme">Femme</label>
+							<input type="radio" id="femmeradio" name="sexe" value="femme"/>
+						</div>
+					</div>
+					<input type="password" name="pswd" placeholder="Mot de passe" required="">
+					<button class="buttonSign" >S'inscrire</button>
+				</form>
+			</div>
+
+			<div class="login">
+				<form>
+					<label for="chk" aria-hidden="true">Connexion</label>
+					<input type="text" name="txt" placeholder="Numéro de licence" required="">
+					<input type="password" name="pswd" placeholder="Mot de passe" required="">
+					<button class="buttonSign">Se connecter</button>
+				</form>
+			</div>
+	</section>
+{% endblock %}
