@@ -1,26 +1,22 @@
-# Create a virtual environment using Python 3
+# Create a Python virtual environment
 python -m venv venv
 
 # Activate the virtual environment
-. .\venv\Scripts\Activate
+venv\Scripts\Activate
 
-# Execute the Python script check.py
-python .\check.py
+# Run the check.py script
+python check.py
 
-# Check the exit code of the previous command
+# Check the exit code of check.py
 if ($LASTEXITCODE -eq 0) {
-    # Install Python packages from requirements.txt
-    pip install -r .\requirements.txt
+    # Install Python dependencies from requirements.txt
+    pip install -r requirements.txt
 }
 
-# Change the working directory to appEscrime
-cd .\appEscrime
+# Change directory to appEscrime
+Set-Location -Path .\appEscrime
 
-# Run the Flask application
+# Start the Flask application
 flask run -h 0.0.0.0 -p 8080
 
-# Change the working directory back to the parent directory
-cd ..
-
-# Deactivate the virtual environment
-deactivate
+exit
