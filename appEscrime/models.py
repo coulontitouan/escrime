@@ -20,7 +20,7 @@ class Categorie(db.Model):
     libelle = db.Column(db.String(32))
     age_maxi = db.Column(db.Integer)
 
-class Escrimeur(db.Model):
+class Escrimeur(db.Model, UserMixin):
     __tablename__ = 'escrimeur'
     num_licence = db.Column(db.Integer, primary_key = True)
     prenom = db.Column(db.String(32))
@@ -29,6 +29,10 @@ class Escrimeur(db.Model):
     date_naissance = db.Column(db.Date)
     club_id = db.Column(db.Integer, db.ForeignKey('club.id'))
     club = db.relationship('Club', backref = db.backref('escrimeur', lazy = 'dynamic'))
+    mot_de_passe = db.Column(db.String(64), default = '')
+
+    def set_mdp(self, mdp):
+        self.mot_de_passe = mdp
 
 class Arme(db.Model):
     __tablename__ = 'arme'

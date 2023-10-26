@@ -8,7 +8,7 @@ from .app import app , db
 from .models import *
 
 @app.cli.command()
-def loaddb():
+def load_bd():
     """Creates the tables and populates them with data."""
 
     # création de toutes les tables
@@ -39,13 +39,15 @@ def loaddb():
     for categorie in categories.values():
         db.session.add(categorie)
     
+    # création de l'instance de club permettant d'identifier les administrateurs
+    clubs = {'CEB Admin': Club(nom = 'CEB Admin')}
+
     db.session.commit()
 
     escrimeurs = dict()
-    clubs = dict()
 
+    # chargement de toutes les données
     for nom_fichier in os.listdir('data'):
-        # chargement de notre jeu de données
         with open(nom_fichier, newline = '', encoding = 'utf-8') as fichier:
             lecteur = csv.DictReader(fichier)
             contenu = nom_fichier.split('_')
@@ -72,7 +74,8 @@ def loaddb():
                                               nom = ligne['nom'],
                                               sexe = contenu[2],
                                               date_naissance = datetime(int(naissance[2]), int(naissance[1]), int(naissance[0])),
-                                              club_id = club.id)
+                                              club_id = club.id,
+                                              mot_de_passe = '')
                         escrimeurs[licence] = escrimeur
                         db.session.add(escrimeur)
 
@@ -86,6 +89,16 @@ def loaddb():
                                                   id_categorie = categorie.id))
                     
                     db.session.commit()
+            
+            elif contenu[0] == 'connexion':
+
+                for ligne in lecteur:
+
+                    mdp = ligne['mdp']
+                    escrimeur = escrimeurs[ligne['adherent']]
+                    escrimeur.set_mdp(mdp)
+
+
 
 @app.cli.command()
 def syncdb():
