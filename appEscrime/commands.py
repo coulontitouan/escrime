@@ -82,7 +82,7 @@ def load_bd():
                     arme = armes[contenu[1]]
                     categorie = categories[contenu[3]]
                     escrimeur = escrimeurs[ligne['adherent']]
-                    db.session.add(Categorisation(classement = ligne['rang'],
+                    db.session.add(Classement(classement = ligne['rang'],
                                                   points = ligne['points'],
                                                   num_licence = escrimeur.num_licence,
                                                   id_arme = arme.id,
