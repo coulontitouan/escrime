@@ -32,7 +32,8 @@ Pour lancer l'application il vous suffit d'éxécuter les commande bash suivante
 ```
 git clone https://github.com/coulontitouan/escrime.git
 cd escrime
-source start.sh
+source start.sh (Linux)
+.\start.ps1 (Windows)
 ```
 Ensuite il vous suffit de cliquer sur "http://192.168.28.66:8080"
 ```
