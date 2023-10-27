@@ -1,5 +1,6 @@
 from .app import db
 from sqlalchemy import *
+from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin
 
 Base = declarative_base()
@@ -91,8 +92,12 @@ class Competition(db.Model):
     nom = db.Column(db.String(64))
     date = db.Column(db.Date)
     coefficient = db.Column(db.Integer)
+    # Clé étrangère vers le lieu
     id_lieu = db.Column(db.Integer, db.ForeignKey('lieu.id'))
+    # Relation plusieurs-à-un : Une compétition se déroule dans un seul lieu
     lieu = db.relationship('Lieu', backref = db.backref('competition', lazy = 'dynamic'))
+    # Relation un-à-plusieurs : Une compétition contient différentes phases
+    phases = db.relationship('Phase', back_populates = 'competition', lazy = 'dynamic')
     # Relation plusieurs-à-plusieurs : Une compétition acceuille différents escrimeurs
     escrimeurs = db.relationship('Escrimeur', secondary = Inscription, back_populates = 'competitions')
 
@@ -106,20 +111,24 @@ class Type_phase(db.Model):
 class Phase(db.Model):
     __tablename__ = 'phase'
     id = db.Column(db.Integer, primary_key = True)
+    # Clé étrangère vers la compétition comprenant la phase
     id_competition = db.Column(db.Integer, db.ForeignKey('competition.id'), primary_key = True)
-    competition = db.relationship('Competition', backref = db.backref('phase', lazy = 'dynamic'))
+    # Relation plusieurs-à-un : Une phase est comprise dans une seule compétition
+    competition = db.relationship('Competition', back_populates = 'phases', lazy = 'dynamic')
     # Clé étrangère vers le type de phase
     libelle = db.Column(db.String(32), db.ForeignKey('type_phase.id'))
     # Relation plusieurs-à-un : Une phase est décrite par un seul type de phase
     type = db.relationship('Type_phase', back_populates = 'phases', lazy = 'dynamic')
+    # Relation un-à-plusieurs : Une compétition contient différentes phases
+    matchs = db.relationship('Match', back_populates = 'phase', lazy = 'dynamic')
 
 class Match(db.Model):
     __tablename__ = 'match'
     id = db.Column(db.Integer, primary_key = True)
+    # Clé étrangère vers la phase comprenant le match
     id_phase = db.Column(db.Integer, db.ForeignKey('phase.id'), primary_key = True)
-    phase = db.relationship('Phase', backref = db.backref('match', lazy = 'dynamic'))
-    id_competition = db.Column(db.Integer, db.ForeignKey('competition.id'), primary_key = True)
-    competition = db.relationship('Competition', backref = db.backref('match', lazy = 'dynamic'))
+    # Relation plusieurs-à-un : Un match est compris dans une seule phase d'une compétition
+    phase = db.relationship('Phase', back_populates = 'matchs', lazy = 'dynamic')
     piste = db.Column(db.Integer)
     etat = db.Column(db.String(16))
     # Clé étrangère vers l'arbitre escrimeur
