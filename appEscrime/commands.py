@@ -68,14 +68,13 @@ def load_bd():
                     licence = ligne['adherent']
                     if licence not in escrimeurs:
                         naissance = ligne['date naissance'].split('/')
-                        club = clubs[ligne['club']]
+                        cclub = clubs[ligne['club']]
                         escrimeur = Escrimeur(num_licence = licence,
                                               prenom = ligne['prenom'],
                                               nom = ligne['nom'],
                                               sexe = contenu[2],
                                               date_naissance = datetime(int(naissance[2]), int(naissance[1]), int(naissance[0])),
-                                              club_id = club.id,
-                                              mot_de_passe = '')
+                                              club = cclub)
                         escrimeurs[licence] = escrimeur
                         db.session.add(escrimeur)
 
@@ -83,10 +82,10 @@ def load_bd():
                     categorie = categories[contenu[3]]
                     escrimeur = escrimeurs[ligne['adherent']]
                     db.session.add(Classement(classement = ligne['rang'],
-                                                  points = ligne['points'],
-                                                  num_licence = escrimeur.num_licence,
-                                                  id_arme = arme.id,
-                                                  id_categorie = categorie.id))
+                                              points = ligne['points'],
+                                              num_licence = escrimeur.num_licence,
+                                              id_arme = arme.id,
+                                              id_categorie = categorie.id))
                     
                     db.session.commit()
             
