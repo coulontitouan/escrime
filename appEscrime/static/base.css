@@ -5,34 +5,92 @@
 
 a {
     text-decoration: none;
-    color: black;
+    color: white;
 }
 
-/* #cercleLogin {
-    background-color: white;
-    border-top: 0.1rem solid black;
-    border-right: 0.1rem solid black;
-    border-bottom: 0.1rem solid black;
-    border-radius: 50%;
-    height: 6vh;
-    width: 8vw;
-    text-align: center;
-    position: relative;
-    right: 1vw;
-} */
-
-/* #teteEscrime {
-    height: auto;
-    width: 4vh;
-} */
-
-nav {
+header {
     background-color: #DD2323;
+    display: flex;
+    align-items: center;
+    padding: 0.5em;
 }
 
-nav img {
+header img {
     height: auto;
     width: 10vh;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    flex-basis:100%;
+}
+
+nav > ul{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-basis:100%;
+    margin: 0;
+    padding: 0;
+}
+
+nav > ul > li {
+    flex-basis: 50%;
+}
+
+.liens {
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+#navbar2{
+    display: flex;
+    justify-content: flex-end;
+}
+
+li {
+    list-style: none;
+}
+
+#blocLogin {
+    display: flex;
+    align-items: center;
+}
+#cercleLogin:hover{
+background-color:#d2d3d4;
+}
+
+
+.buttonLogin {
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    background-color: white;
+}
+
+#cercleLogin {
+    background-color: white;
+    border-radius: 50%;
+    padding: 0.5rem;
+    text-align: center;
+    position: relative;
+    right: 14px;
+}
+
+#teteEscrime {
+    height: auto;
+    width: 3vh;
+}
+
+.form-inline {
+    display: flex;
+    align-items:center;
+}
+
+.form-inline > i {
+    position: relative;
+    right: 20px;
 }
 
 footer {
