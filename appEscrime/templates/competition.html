@@ -4,73 +4,52 @@
 <link rel="stylesheet" href="{{url_for('static', filename='competition.css')}}">
 {% endblock %}
 {% block content %}
-<h1>Poules :</h1>
-<div class="scrollingtable">
-    <div>
-        <div>
-            <table>
-                <thead>
-                    <tr>
-                        <th><div label="Column 1"></div></th>
-                        <th><div label="Column 2"></div></th>
-                        <th><div label="Column 3"></div></th>
-                        <th>
-                            <!--more versatile way of doing column label; requires 2 identical copies of label-->
-                            <div><div>Column 4</div><div>Column 4</div></div>
-                        </th>
-                        <th class="scrollbarhead"/> <!--ALWAYS ADD THIS EXTRA CELL AT END OF HEADER ROW-->
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                </tbody>
-            </table>
-        </div>
+<div id="body">
+    <div id="un">
+        <h1>Poules :</h1>
+        <table class = "scroll">
+            <thead>
+                <tr>
+                    <th id="intitule" colspan="3">Poule A - 8 Tireurs - G. DUTROU <a href="https://openclassrooms.com/forum/sujet/scroll-vertical-sur-balise-table"><img id="info" src="../static/images/istockphoto-1140611970-612x612-removebg-preview(1).png" alt=""></a></th>
+                </tr>
+                <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>DUPONT</td>
+                    <td>Xavier</td>
+                    <td>1780</td>
+                </tr>
+                <tr>
+                    <td>LOUIS</td>
+                    <td>Emile</td>
+                    <td>1610</td>
+                </tr>
+                <tr>
+                    <td>FOURNIRET</td>
+                    <td>Michel</td>
+                    <td>1520</td>
+                </tr>
+                <tr>
+                    <td>ALEGRE</td>
+                    <td>Patrice</td>
+                    <td>1365</td>
+                </tr>
+                <tr>
+                    <td>ALEGRE</td>
+                    <td>Patrice</td>
+                    <td>1365</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="deux">
+        <h1>Classements :</h1>
     </div>
 </div>
-<div class="scrollingtable">
-    <div>
-        <div>
-            <table>
-                <thead>
-                    <tr>
-                        <th><div label="Column 1"></div></th>
-                        <th><div label="Column 2"></div></th>
-                        <th><div label="Column 3"></div></th>
-                        <th>
-                            <!--more versatile way of doing column label; requires 2 identical copies of label-->
-                            <div><div>Column 4</div><div>Column 4</div></div>
-                        </th>
-                        <th class="scrollbarhead"/> <!--ALWAYS ADD THIS EXTRA CELL AT END OF HEADER ROW-->
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                    <tr><td>Lorem ipsum</td><td>Dolor</td><td>Sit</td><td>Amet consectetur</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+    
 {% endblock %}
