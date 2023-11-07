@@ -101,3 +101,9 @@ from .models import *
 def syncdb():
     """Creates the tables."""
     db.create_all()
+
+def newuser(username, password, prenom, nom, sexe, datedeNaissance = None):
+    m=sha256()
+    u=Escrimeur(username=username, password=password, prenom = prenom, nom = nom, sexe = sexe, )
+    db.session.add(u)
+    db.session.commit()

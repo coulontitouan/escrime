@@ -10,7 +10,7 @@ from wtforms import RadioField
 from flask_wtf import FlaskForm
 from hashlib import sha256
 from .models import Escrimeur
-
+from .commands import newuser
 
 
 @app.route("/")
@@ -61,23 +61,14 @@ class SignUpForm(FlaskForm):
 def connexion():
     f =LoginForm()
     f2 = SignUpForm()
-    if not f.is_submitted():
-        f.next.data = request.args.get("next")
-    elif f.validate_on_submit():
-        user = f.get_authenticated_user()
-        if user:
-            login_user(user)
-            next = f.next.data or url_for("home")
-            return redirect(next)
-        
-    if not f2.is_submitted():
-        f2.next.data = request.args.get("next")
-    elif f.validate_on_submit():
-        user = f2.get_authenticated_user()
-        if user:
-            login_user(user)
-            next = f2.next.data or url_for("home")
-            return redirect(next)
+    if f.password == None:
+        print("salut")
+    else:
+        print("ahhhhh")
+    if f2.num_licence != None:
+        newuser(f2.num_licence, f2.password, f2.prenom, f2.nom, f2.sexe)
+        next = url_for("home")
+        return redirect(next)
     return render_template(
         "connexion.html",formlogin=f, formsignup = f2)
 
