@@ -7,31 +7,60 @@
 	<section id="carre">
 		<input type="checkbox" id="chk" aria-hidden="true">
 			<div class="signup">
-				<form>
-					<label for="chk" aria-hidden="true">Inscription</label>
-					<input type="text" name="txt" placeholder="Numéro de licence" required="">
-					<input type="text" name="txt" placeholder="Nom" required="">
-					<input type="text" name="txt" placeholder="Prenom" required="">
-					<div id="select">
-						<div>
-							<label for="hommeradio">Homme</label>
-							<input type="radio" id="hommeradio" name="sexe" value="homme"/>
-						</div>
-						<div>
-							<label for="femmeradio">Femme</label>
-							<input type="radio" id="femmeradio" name="sexe" value="femme"/>
+				<form 
+				action="{{ url_for('connexion') }}" 
+					method="post" 
+					role="formsignup" >
+
+					<label class = "titre" for="chk" aria-hidden="true">Inscription</label>
+					{{ formsignup.hidden_tag() }}
+					<div class="form-group">
+						<div class="formconnexion">
+	  						{{ formsignup.num_licence(class = test ,class_="form-control1", placeholder ="Numero de licence")}}
 						</div>
 					</div>
-					<input type="password" name="pswd" placeholder="Mot de passe" required="">
+
+					<div class="form-group">
+						<div class="formconnexion">
+	  						{{ formsignup.prenom(class = test ,class_="form-control1", placeholder ="Prenom")}}
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="formconnexion">
+	  						{{ formsignup.nom(class = test ,class_="form-control1", placeholder ="Nom")}}
+						</div>
+					</div>
+					<div id = "select">
+					{{formsignup.sexe(class = radiolabel )}}
+					</div>
+					<div class="form-group">
+						<div class="formconnexion">
+	  						{{ formsignup.password(class_="form-control1", placeholder ="Mot de passe")}}
+						</div>
+					</div>
+
 					<button class="buttonSign" >S'inscrire</button>
 				</form>
 			</div>
 
 			<div class="login">
-				<form>
-					<label for="chk" aria-hidden="true">Connexion</label>
-					<input type="text" name="txt" placeholder="Numéro de licence" required="">
-					<input type="password" name="pswd" placeholder="Mot de passe" required="">
+				<form 
+				action="{{ url_for('connexion') }}" 
+					method="post" 
+					role="login" >
+					<label class = "titre" for="chk" aria-hidden="true">Connexion</label>
+					{{ formlogin.hidden_tag() }}
+					<div class="form-group">
+						<div class="formconnexion">
+	  						{{ formlogin.num_licence(class = test ,class_="form-control1", placeholder ="Numero de licence")}}
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="formconnexion">
+	  						{{ formlogin.password(class_="form-control1", placeholder ="Mot de passe")}}
+						</div>
+					</div>
 					<button class="buttonSign">Se connecter</button>
 				</form>
 			</div>
