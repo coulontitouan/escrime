@@ -66,12 +66,13 @@ class Escrimeur(db.Model, UserMixin):
     competitions = db.relationship('Competition', secondary = Inscription, back_populates = 'escrimeurs')
     mot_de_passe = db.Column(db.String(64), default = '')
     authenticated = db.Column(db.Boolean, default=False)
+    active = db.Column(db.Boolean, default=False)
 
     def is_authenticated(self):
         return self.authenticated
 
     def is_active(self):   
-        return True           
+        return self.active           
 
     def is_anonymous(self):
         return False          
@@ -109,6 +110,14 @@ class Competition(db.Model):
     id_lieu = db.Column(db.Integer, db.ForeignKey('lieu.id'))
     # Relation plusieurs-à-un : Une compétition se déroule dans un seul lieu
     lieu = db.relationship('Lieu', back_populates = 'competitions', lazy = 'dynamic')
+    # Clé étrangère vers l'arme
+    id_arme = db.Column(db.Integer, db.ForeignKey('arme.id'), primary_key = True)
+    # Relation plusieurs-à-un : Un classement est définis par une seule arme
+    arme = db.relationship('Arme', back_populates = 'competitions', lazy = 'dynamic')
+    # Clé étrangère vers la catégorie
+    id_categorie = db.Column(db.Integer, db.ForeignKey('categorie.id'), primary_key = True)
+    # Relation plusieurs-à-un : Un classement est définis par une seule catégorie
+    categorie = db.relationship('Categorie', back_populates = 'competitions', lazy = 'dynamic')
     # Relation un-à-plusieurs : Une compétition contient différentes phases
     phases = db.relationship('Phase', back_populates = 'competition', lazy = 'dynamic')
     # Relation plusieurs-à-plusieurs : Une compétition acceuille différents escrimeurs
