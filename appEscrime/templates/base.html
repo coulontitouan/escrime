@@ -36,6 +36,9 @@
                             <li>
                                 <a href="#">Les tireurs</a>
                             </li>
+                            <li>
+                                <a href ="{{ url_for('informations') }}"> informations generales</a>
+                            </li>
                         </ul>
                     </li>
                     <li id = "navbar2">
@@ -44,10 +47,10 @@
                                 aria-label="Search">
                                 <i class="fas fa-search" aria-hidden="true"></i>
                         </form>
-                        <a id="blocLogin" href="#">
+                        <a id="blocLogin" href ="{{ url_for('connexion') }}">
                             <button type="button" class="btn btn-light buttonLogin">Connexion</button>
-                            <div id="cercleLogin">
-                                <img id= "teteEscrime" src="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur">
+                            <div id="cercleLogin" >
+                                <img id= "teteEscrime"  src="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur">
                             </div>
                         </a>
                     </li>
