@@ -100,3 +100,27 @@ footer {
     text-align: center;
 }
 
+h1{
+    margin-top: 4vh;
+    margin-bottom: 4vh;
+}
+
+html, footer{
+    overflow-x: hidden;
+    margin-right: calc(-1 * (100vw - 100%));
+}
+#header.hidden {
+    top: -80px;
+}
+#header{
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 80px;    
+    transition: top 0.3s;
+    transition-delay: 0.2s;
+}
+main .container{
+    margin: 15vh;
+}

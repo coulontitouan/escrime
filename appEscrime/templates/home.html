@@ -4,5 +4,62 @@
 <link rel="stylesheet" href="{{url_for('static', filename='home.css')}}">
 {% endblock %}
 {% block content %}
-<h1>Pour voir</h1>
+<div id="body">
+    <h1>Les compétitions :</h1>
+    <table class = "scroll">
+        <thead>
+            <tr>
+                <th>Catégorie</th>
+                <th>Arme</th>
+                <th>Genre</th>
+                <th>Lieu</th>
+                <th>Date</th>
+                <th style="color: white; user-select: none;">Bouton</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>M15</td>
+                <td>Sabre</td>
+                <td>Homme</td>
+                <td>Beaugency</td>
+                <td>04/08/23</td>
+                <td><a href="https://google.com"><button class="favorite styled" type="button" >Voir plus</button></a></td>
+            </tr>
+            <tr>
+                <td>M17</td>
+                <td>Sabre</td>
+                <td>Homme</td>
+                <td>Toulon</td>
+                <td>05/08/23</td>
+                <td><a href="https://google.com"><button class="favorite styled" type="button" >Voir plus</button></a></td>
+            </tr>
+            <tr>
+                <td>M20</td>
+                <td>Sabre</td>
+                <td>Homme</td>
+                <td>Orléans</td>
+                <td>06/08/23</td>
+                <td><a href="https://google.com"><button class="favorite styled" type="button" >Voir plus</button></a></td>
+            </tr>
+            <tr>
+                <td>Sénior</td>
+                <td>Sabre</td>
+                <td>Homme</td>
+                <td>Ingré</td>
+                <td>07/08/23</td>
+                <td><a href="https://google.com"><button class="favorite styled" type="button" >Voir plus</button></a></td>
+            </tr>
+            <tr>
+                <td>Véterans 1</td>
+                <td>Sabre</td>
+                <td>Homme</td>
+                <td>Saran</td>
+                <td>08/08/23</td>
+                <td><a href="https://google.com"><button class="favorite styled" type="button" >Voir plus</button></a></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+ 
 {% endblock %}
