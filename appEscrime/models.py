@@ -1,4 +1,4 @@
-from .app import db
+from .app import db, login_manager
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin
@@ -47,7 +47,7 @@ class Arme(db.Model):
 
 class Escrimeur(db.Model, UserMixin):
     __tablename__ = 'escrimeur'
-    num_licence = db.Column(db.Integer, primary_key = True)
+    num_licence = db.Column(db.String(16), primary_key = True)
     prenom = db.Column(db.String(32))
     nom = db.Column(db.String(32))
     sexe = db.Column(db.String(5))
@@ -65,6 +65,19 @@ class Escrimeur(db.Model, UserMixin):
     # Relation plusieurs-à-plusieurs : Un escrimeur peut s'inscrire à différentes compétitions
     competitions = db.relationship('Competition', secondary = Inscription, back_populates = 'escrimeurs')
     mot_de_passe = db.Column(db.String(64), default = '')
+    authenticated = db.Column(db.Boolean, default=False)
+
+    def is_authenticated(self):
+        return self.authenticated
+
+    def is_active(self):   
+        return True           
+
+    def is_anonymous(self):
+        return False          
+
+    def get_id(self):
+        return self.num_licence
 
     def set_mdp(self, mdp):
         self.mot_de_passe = mdp
@@ -74,7 +87,7 @@ class Classement(db.Model):
     classement = db.Column(db.Integer)
     points = db.Column(db.Integer)
     # Clé étrangère vers le tireur
-    num_licence = db.Column(db.Integer, db.ForeignKey('escrimeur.num_licence'), primary_key = True)
+    num_licence = db.Column(db.String(16), db.ForeignKey('escrimeur.num_licence'), primary_key = True)
     # Relation plusieurs-à-un : Un classement est lié à un seul tireur
     tireur = db.relationship('Escrimeur', back_populates = 'classements', lazy = 'dynamic')
     # Clé étrangère vers l'arme
@@ -95,7 +108,7 @@ class Competition(db.Model):
     # Clé étrangère vers le lieu
     id_lieu = db.Column(db.Integer, db.ForeignKey('lieu.id'))
     # Relation plusieurs-à-un : Une compétition se déroule dans un seul lieu
-    lieu = db.relationship('Lieu', backref = db.backref('competition', lazy = 'dynamic'))
+    lieu = db.relationship('Lieu', back_populates = 'competitions', lazy = 'dynamic')
     # Relation un-à-plusieurs : Une compétition contient différentes phases
     phases = db.relationship('Phase', back_populates = 'competition', lazy = 'dynamic')
     # Relation plusieurs-à-plusieurs : Une compétition acceuille différents escrimeurs
@@ -116,7 +129,7 @@ class Phase(db.Model):
     # Relation plusieurs-à-un : Une phase est comprise dans une seule compétition
     competition = db.relationship('Competition', back_populates = 'phases', lazy = 'dynamic')
     # Clé étrangère vers le type de phase
-    libelle = db.Column(db.String(32), db.ForeignKey('type_phase.id'))
+    libelle = db.Column(db.String(32), db.ForeignKey('type_phase.libelle'))
     # Relation plusieurs-à-un : Une phase est décrite par un seul type de phase
     type = db.relationship('Type_phase', back_populates = 'phases', lazy = 'dynamic')
     # Relation un-à-plusieurs : Une compétition contient différentes phases
@@ -132,7 +145,7 @@ class Match(db.Model):
     piste = db.Column(db.Integer)
     etat = db.Column(db.String(16))
     # Clé étrangère vers l'arbitre escrimeur
-    num_arbitre = db.Column(db.Integer, db.ForeignKey('escrimeur.num_licence'))
+    num_arbitre = db.Column(db.String(16), db.ForeignKey('escrimeur.num_licence'))
     # Relation plusieurs-à-un : Un match est arbitré par un seul arbitre
     arbitre = db.relationship('Escrimeur', back_populates = 'arbitrages', lazy = 'dynamic')
     # Relation un-à-plusieurs : Un match est arbitré par un seul arbitre
@@ -141,12 +154,17 @@ class Match(db.Model):
 class Participation(db.Model):
     __tablename__ = 'participation'
     # Clé étrangère vers le match
-    id_match = db.Column(db.Integer, db.ForeignKey('match'), primary_key = True)
+    id_match = db.Column(db.Integer, db.ForeignKey('match.id'), primary_key = True)
     # Relation plusieurs-à-un : Une participation est liée à un seul match
     match = db.relationship('Match', back_populates = 'participations', lazy = 'dynamic')
     # Clé étrangère vers le tireur
-    id_escrimeur = db.Column(db.Integer, db.ForeignKey('escrimeur'), primary_key = True)
+    id_escrimeur = db.Column(db.String(16), db.ForeignKey('escrimeur.num_licence'), primary_key = True)
     # Relation plusieurs-à-un : Une participation est effectuée par un seul tireur
     tireur = db.relationship('Escrimeur', back_populates = 'participations', lazy = 'dynamic')
     statut = db.Column(db.String(16))
     touches = db.Column(db.Integer)
+
+
+@login_manager.user_loader
+def load_user(num_licence):
+    return Escrimeur.query.get(num_licence)
