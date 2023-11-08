@@ -1,5 +1,5 @@
 from .app import app
-from flask import render_template
+from flask import render_template, redirect, url_for
 from flask_login import login_user , current_user, logout_user
 from flask import request
 from flask_login import login_required
@@ -46,3 +46,8 @@ def competition(id):
     return render_template(
         "competition.html"
     )
+
+@app.route("/deconnexion/")
+def deconnexion():
+    logout_user()
+    return redirect(url_for("home"))
