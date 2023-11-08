@@ -1,7 +1,7 @@
-from .app import app
+from .app import app , db
 from flask import render_template
 from flask_login import login_user , current_user, logout_user
-from flask import request
+from flask import request,redirect, url_for
 from flask_login import login_required
 from wtforms import StringField , HiddenField
 from wtforms.validators import DataRequired
@@ -10,8 +10,6 @@ from wtforms import RadioField
 from flask_wtf import FlaskForm
 from hashlib import sha256
 from .models import Escrimeur
-from .commands import newuser
-
 
 @app.route("/")
 def home():
@@ -30,6 +28,7 @@ class LoginForm(FlaskForm):
     num_licence=StringField('num_licence',validators=[DataRequired()])
     password=PasswordField("Password",validators=[DataRequired()])
     next = HiddenField()
+
     def get_authenticated_user(self):
         user = Escrimeur.query.get(self.num_licence.data)
         if user is None:
@@ -57,18 +56,44 @@ class SignUpForm(FlaskForm):
         return user if passwd == user.password else None
     
 
-@app.route("/connexion/")
+@app.route("/connexion/", methods=("GET", "POST"))
 def connexion():
     f =LoginForm()
     f2 = SignUpForm()
-    if f.password == None:
-        print("salut")
-    else:
-        print("ahhhhh")
-    if f2.num_licence != None:
-        newuser(f2.num_licence, f2.password, f2.prenom, f2.nom, f2.sexe)
-        next = url_for("home")
-        return redirect(next)
+    print("Connexion")
+    if not f.is_submitted():
+        f.next.data = request.args.get("next")
+        print("pas encore inscrit")
+
+    elif f.validate_on_submit():
+        #user = f.get_authenticated_user()
+        print("num_licence = ",f.num_licence.data)
+        print("password = ",f.password.data)
+        #if user:
+        #    login_user(user)
+        #    prochaine_page = f.next.data or url_for("home")
+        #    return redirect(prochaine_page)
+
     return render_template(
         "connexion.html",formlogin=f, formsignup = f2)
 
+@app.route("/connexion/inscription", methods=("GET", "POST"))
+def inscription():
+    f =LoginForm()
+    f2 = SignUpForm()
+    print("Inscription")
+    if not f2.is_submitted():
+        f.next.data = request.args.get("next")
+        print("pas encore inscrit")
+
+    elif f.validate_on_submit():
+        print("num_licence = ",f2.num_licence.data)
+        print("password  = ",f2.password.data)
+        print("prenom  = ",f2.prenom.data)
+        print("nom  = ",f2.nom.data)
+        print("sexe  = ",f2.sexe.data)
+        #tireur = Escrimeur(f2.num_licence.data,f2.password.data,f2.prenom.data,f2.nom.data,f2.sexe.data)
+        #user = f.get_authenticated_user()
+
+    return render_template(
+        "connexion.html",formlogin=f, formsignup = f2)
