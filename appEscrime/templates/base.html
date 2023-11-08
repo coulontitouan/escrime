@@ -1,29 +1,30 @@
 <!doctype html>
 <html lang="fr">
-    <head>
-        {% block head %}
-        <!-- Required meta tags -->
-        <meta charset="utf-8">
-        <meta name="viewport"
-        content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        
-        {% block styles %}
-            <!-- Bootstrap CSS -->
-            {{ bootstrap.load_css() }}
-            <!-- Custom styles -->
-            <link rel="stylesheet" href="{{ url_for('static', filename='base.css')}}">
-            <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
-        {% endblock %}
-        
-        <title>Compétition ESCRIME</title>
-        {% endblock %}
-    </head>
-    
-    <body>
-        <header id="header">
-            <!-- Fixed navbar -->
-            <img src="{{ url_for('static', filename='images/escrimeurNav.png')}}" alt="un escrimeur qui pointe son épée">
-            <nav>
+
+<head>
+    {% block head %}
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    {% block styles %}
+    <!-- Bootstrap CSS -->
+    {{ bootstrap.load_css() }}
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css')}}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+        integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    {% endblock %}
+
+    <title>Compétition ESCRIME</title>
+    {% endblock %}
+</head>
+
+<body>
+    <header id="header">
+        <!-- Fixed navbar -->
+        <img src="{{ url_for('static', filename='images/escrimeurNav.png')}}" alt="un escrimeur qui pointe son épée">
+        <nav>
                 <ul>
                     <li>
                         <ul class="liens">
@@ -47,12 +48,18 @@
                                 aria-label="Search">
                                 <i class="fas fa-search" aria-hidden="true"></i>
                         </form>
-                        <a id="blocLogin" href ="{{ url_for('connexion') }}">
-                            <button type="button" class="btn btn-light buttonLogin">Connexion</button>
-                            <div id="cercleLogin" >
-                                <img id= "teteEscrime"  src="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur">
-                            </div>
-                        </a>
+                        <svg width="320" height="80" id="boutonConnexion">
+                            <a href="{{ url_for('connexion') }}">
+                                <g>
+                                    <rect x="15" y="20" width="120" height="40" rx="20" ry="20" fill="white"/>
+                                    <circle cx="135" cy="40" r="30" fill="white"/>
+                                </g>
+                                <text x="70" y="40" fill="black" text-anchor="middle" dominant-baseline="middle">
+                                    Connexion
+                                </text>
+                                <image x="115" y="20" href="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur" width="40" height="40"/>
+                            </a>
+                        </svg>
                     </li>
                 </ul>
             </nav>
@@ -61,62 +68,49 @@
         <!-- Your page content -->
     <main class="flex-shrink-0">
         <div class="container">
-        
-        {% block content %}
-        
-        {% endblock %}
+
+            {% block content %}
+
+            {% endblock %}
         </div>
+        <a href="#" id="backTop"><img src="{{url_for('static', filename='images/redArrow.png')}}" alt=""></a>
     </main>
 
     <footer id="footer" class="footer mt-auto py-3 bg-light">
         <div class="container">
-            <span class="text-muted">IUT'O - Titouan COULON, Noam DOUCET, Anthony GARDELLE, Arthur GOUDAL, Killian OUZET</span>
+            <span class="text-muted">IUT'O - Titouan COULON, Noam DOUCET, Anthony GARDELLE, Arthur GOUDAL, Killian
+                OUZET</span>
         </div>
     </footer>
     <script>
-        // oldScroll = 0
-        // difference = 0
-        // document.addEventListener("scroll", (event) => {
-        //     scrollPercentage = (window.pageYOffset * 100) / (document.body.scrollHeight - window.innerHeight)
-        //     if(scrollPercentage < oldScroll){
-        //         difference += oldScroll - scrollPercentage
-        //         console.log(difference)
-        //     }
-        //     else{
-        //         difference = 0
-        //     }
-        //     if(scrollPercentage <= 7){
-        //         document.getElementById("header").style.position = "unset"
-        //     }else{
-        //         document.getElementById("header").style.position = "fixed"
-        //     }
+        let btn = document.querySelector('#backTop');
 
-        //     if(difference >= 10){
-        //         document.getElementById("header").style.display = "flex"
-        //     }
-        //     else {
-        //         document.getElementById("header").style.display = "none"
-        //     }
-        //     this.oldScroll = scrollPercentage
-        //     });
-            let header = document.querySelector("#header");
-            console.log(header)
-            let lastScrollValue = 0;
+        let header = document.querySelector("#header");
 
-            document.addEventListener("scroll",(event) => {
-                let top  = document.documentElement.scrollTop;
-                if(lastScrollValue < top) {
-                    header.classList.add("hidden");
-                } else {
-                    header.classList.remove("hidden");
-                }
-                lastScrollValue = top;
-            });
-        </script>  
+        let lastScrollValue = 0;
+
+        document.addEventListener("scroll", (event) => {
+            let top = document.documentElement.scrollTop;
+            scrollPercentage = (window.pageYOffset * 100) / (document.body.scrollHeight - window.innerHeight)
+
+            if (lastScrollValue < top) {
+                header.classList.add("hidden");
+            } else {
+                header.classList.remove("hidden");
+            }
+            if (scrollPercentage > 10) {
+                btn.classList.remove("hidden");
+            } else {
+                btn.classList.add("hidden");
+            }
+            lastScrollValue = top;
+        });
+    </script>
     {% block scripts %}
-        <!-- Optional JavaScript -->
-        {{ bootstrap.load_js() }}
+    <!-- Optional JavaScript -->
+    {{ bootstrap.load_js() }}
 
     {% endblock %}
-    </body>
+</body>
+
 </html>
