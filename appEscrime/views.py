@@ -9,7 +9,7 @@ from wtforms import PasswordField
 from wtforms import RadioField
 from flask_wtf import FlaskForm
 from hashlib import sha256
-from .models import Escrimeur
+from .models import *
 from .commands import newuser,updateuser
 
 @app.route("/")
@@ -38,12 +38,13 @@ class LoginForm(FlaskForm):
         passwd= m.hexdigest()
         return user if passwd == user.mot_de_passe else None
     
+        
 class SignUpForm(FlaskForm):
     num_licence=StringField('num_licence',validators=[DataRequired()])
     mot_de_passe=PasswordField("Password",validators=[DataRequired()])
     prenom = StringField('prenom')
     nom = StringField('nom')
-    sexe = RadioField('sexe',choices = ['homme','femme'])
+    sexe = RadioField('sexe',choices = ['Homme','Femme'])
     next=HiddenField()
 
     def get_authenticated_user(self):
@@ -55,23 +56,30 @@ class SignUpForm(FlaskForm):
         passwd= m.hexdigest()
         return user if passwd == user.mot_de_passe else None
     
+    def est_deja_inscrit_sans_mdp(self):
+        user = Escrimeur.query.get(self.num_licence.data)
+        a= "Homme"
+        if user is not None:
+            if self.sexe.data == "Femme":
+                a = "Dames" 
+            if user.sexe == a and user.prenom.upper() == self.prenom.data.upper() and user.nom.upper() == self.nom.data.upper():
+                m=sha256()
+                m.update(self.mot_de_passe.data.encode())
+                passwd= m.hexdigest()
+                user.set_mdp(passwd)
+                db.session.commit()
 
 @app.route("/connexion/", methods=("GET", "POST"))
 def connexion():
     f =LoginForm()
     f2 = SignUpForm()
-    print("Connexion")
     if not f.is_submitted():
         f.next.data = request.args.get("next")
-        print("pas encore inscrit")
 
     elif f.validate_on_submit():
         user = f.get_authenticated_user()
-        print("num_licence = ",f.num_licence.data)
-        print("password = ",f.mot_de_passe.data)
         if user:
             login_user(user)
-            print("réussis")
             prochaine_page = f.next.data or url_for("home")
             return redirect(prochaine_page)
 
@@ -82,24 +90,26 @@ def connexion():
 def inscription():
     f =LoginForm()
     f2 = SignUpForm()
-    print("Inscription")
     if not f2.is_submitted():
         f2.next.data = request.args.get("next")
-        print("pas encore inscrit")
-
     elif f2.validate_on_submit():
-        print("num_licence = ",f2.num_licence.data)
-        print("password  = ",f2.mot_de_passe.data)
-        print("prenom  = ",f2.prenom.data)
-        print("nom  = ",f2.nom.data)
-        print("sexe  = ",f2.sexe.data)
-        user = newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,f2.sexe.data,)
+        f2.est_deja_inscrit_sans_mdp()
         user = f2.get_authenticated_user()
         if user:
-            login_user(user)
-            print("réussis")
-            prochaine_page = f2.next.data or url_for("home")
-            return redirect(prochaine_page)
+                login_user(user)
+                prochaine_page = f2.next.data or url_for("home")
+                return redirect(prochaine_page)
+    else:
+        if f2.sexe.data == "Femme":
+            newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Dames")
+        else:       
+            newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Homme")
+
+        user = f2.get_authenticated_user()
+        if user:
+                login_user(user)
+                prochaine_page = f2.next.data or url_for("home")
+                return redirect(prochaine_page)
 
     return render_template(
         "connexion.html",formlogin=f, formsignup = f2)
