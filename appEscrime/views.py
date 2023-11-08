@@ -120,6 +120,12 @@ def competition(id):
         "competition.html"
     )
 
+@app.route("/competition/<int:idC>/poule/<int:idP>")
+def poule(idC, idP):
+    return render_template(
+        "poule.html"
+    )
+  
 @app.route("/deconnexion/")
 def deconnexion():
     logout_user()
