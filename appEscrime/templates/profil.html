@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{url_for('static', filename='profil.css')}}">
+{% endblock %}
+{% block content %}
+<h1>Mon Profil</h1>
+<a href="{{ url_for('deconnexion')}}">deconnexion</a>
+
+<section id="fond">
+    <section id="info">
+        <ul class = "test">
+            <li id="infoP">
+                <h2>Informations personnelles</h2>
+                    <ul class = "informations">
+                        <li  >
+                            <h4>Nom</h4>
+                            <p>{{ current_user.nom }}</p>
+                        </li>
+                        <li>
+                            <h4>Prénom</h4>
+                            <p>{{ current_user.prenom }}</p>
+                        </li>
+                        <li >
+                            <h4>Sexe</h4>
+                            <p>{{ current_user.sexe }}</p>
+                        </li>
+                        <li>
+                            <h4>Naissance</h4>
+                            <p>{{ current_user.date_naissance }}</p>
+                        </li>
+                    </ul>
+            </li>
+        
+        <li id="infoE">
+            <h2>Informations d'escrimes</h2>
+            <div class="couple">
+                <div>
+                    <h4>Numéro de licence</h4>
+                    <p>{{ current_user.num_licence }}</p>
+                </div>
+                <div>
+                    <h4>Club</h4>
+                    <p>{{ current_user.get_club() }}</p>
+                </div>
+            </div>
+            <div class="couple">
+                <div>
+                    <h4>Classement national</h4>
+                    <p>{{ current_user.sexe }}</p>
+                </div>
+                <div>
+                    <h4>Arme(s)</h4>
+                    <p>{{ current_user.date_naissance }}</p>
+                </div>
+            </div>
+        </li>
+    </ul>
+    </section>
+    <div id="historique">
+        <h2>Historique des compétitions</h2>
+    </div>
+</section>
+{% endblock %}

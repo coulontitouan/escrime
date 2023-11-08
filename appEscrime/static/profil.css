@@ -1,0 +1,42 @@
+main {
+    text-align: center;
+}
+
+#fond {
+	background: radial-gradient(circle, rgba(255,125,125,1) 0%, rgba(255,192,192,1) 100%);
+    border-radius: 20px;
+    padding: 30px;
+}
+
+#info {
+    display: flex;
+    justify-content:space-evenly;
+    margin-bottom: 5vh;
+}
+
+#infoP,#infoE,#historique{
+    background-color: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+}
+
+
+.informations, #infoE > li{
+    display: flex;
+    justify-content: center;
+    color: black;
+    flex-basis: 50%;
+}
+
+#infoP > h2, #infoE > h2{
+    flex-basis: 100%;
+}
+#infoP #infoE {
+   display: flex;
+}
+.test{
+    display: flex;
+    flex-basis: 100%;
+    justify-content: space-evenly;
+}
