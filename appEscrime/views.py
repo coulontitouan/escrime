@@ -46,3 +46,9 @@ def competition(id):
     return render_template(
         "competition.html"
     )
+
+@app.route("/competition/<int:idC>/poule/<int:idP>")
+def poule(idC, idP):
+    return render_template(
+        "poule.html"
+    )
