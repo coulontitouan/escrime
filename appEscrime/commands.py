@@ -8,7 +8,7 @@ from .app import app , db
 from .models import *
 
 @app.cli.command()
-def load_bd():
+def loadbd():
     """Creates the tables and populates them with data."""
 
     # création de toutes les tables
@@ -42,6 +42,8 @@ def load_bd():
     # création de l'instance de club permettant d'identifier les administrateurs
     clubs = {'CEB Admin': Club(nom = 'CEB Admin'),
              'Aucun club': Club(nom = 'Aucun club')}
+    for club in clubs.values():
+        db.session.add(club)
 
     db.session.commit()
 
@@ -50,22 +52,26 @@ def load_bd():
     competitions = dict()
 
     # chargement de toutes les données
-    for nom_fichier in os.listdir('data'):
-        with open(nom_fichier, newline = '', encoding = 'utf-8') as fichier:
-            lecteur = csv.DictReader(fichier)
+    for nom_fichier in os.listdir('../data'): # Éxecution dans appEscrime
+        with open('../data/' + nom_fichier, newline = '', encoding = 'Latin-1') as fichier:
+            nom_fichier = nom_fichier[:-4]
+            print(nom_fichier)
+            lecteur = csv.DictReader(fichier, delimiter = ';')
             contenu = nom_fichier.split('_')
-            if '-' in contenu[3]:
-                split_cat = contenu[3].split('-')
-                contenu[3] = split_cat[1][:-1] + split_cat[-1]
             
-            if contenu[0] == 'classement':   
+            if contenu[0] == 'classement':
+                if '-' in contenu[3]:
+                    split_cat = contenu[3].split('-')
+                    contenu[3] = split_cat[0][:-1] + split_cat[-1]
                 for ligne in lecteur:
+                    print(ligne)
                     
                     nom_club = ligne['club']
                     if nom_club not in clubs:
                         club = Club(nom = nom_club)
                         clubs[nom_club] = club
                         db.session.add(club)
+                    db.session.commit()
                     
                     licence = ligne['adherent']
                     if licence not in escrimeurs:
@@ -79,6 +85,7 @@ def load_bd():
                                               id_club = club.id)
                         escrimeurs[licence] = escrimeur
                         db.session.add(escrimeur)
+                    db.session.commit()
 
                     arme = armes[contenu[1]]
                     categorie = categories[contenu[3]]
@@ -88,39 +95,46 @@ def load_bd():
                                               num_licence = escrimeur.num_licence,
                                               id_arme = arme.id,
                                               id_categorie = categorie.id))
+                    db.session.commit()
                     
             elif contenu[0] == 'connexion':
                 for ligne in lecteur:
                     mdp = ligne['mdp']
                     escrimeur = escrimeurs[ligne['adherent']]
-                    escrimeur.set_mdp(mdp)  
+                    escrimeur.set_mdp(mdp)
                 db.session.commit()
             
             elif contenu[0] == 'competitions':
-                    
-                nom_lieu = ligne['lieu']
-                if nom_lieu not in lieux:
-                    lieu = Lieu(nom = nom_lieu, adresse = ligne['adresse'])
-                    lieux[nom_lieu] = lieu
-                    db.session.add(lieu)
+                for ligne in lecteur:
+                    nom_lieu = ligne['lieu']
+                    if nom_lieu not in lieux:
+                        lieu = Lieu(nom = nom_lieu, adresse = ligne['adresse'])
+                        lieux[nom_lieu] = lieu
+                        db.session.add(lieu)
 
-                date_compet = ligne['date'].split('/')
-                arme = armes[ligne['arme']]
-                categorie = categories[ligne['categorie']]
-                lieu = lieux[ligne['lieu']]
-                competition = Competition(nom = ligne['nom'],
-                                          date = datetime(int(date_compet[2]), int(date_compet[1]), int(date_compet[0])),
-                                          coefficient = ligne['coefficient'],
-                                          id_arme = arme.id,
-                                          id_categorie = categorie.id,
-                                          id_lieu = lieu.id
-                                          )
-                competitions[ligne['nom']] = competition
-                db.session.add(competition)
+                    date_compet = ligne['date'].split('/')
+                    arme = armes[ligne['arme']]
+                    categorie = categories[ligne['categorie']]
+                    lieu = lieux[ligne['lieu']]
+                    competition = Competition(nom = ligne['nom'],
+                                              date = datetime(int(date_compet[2]), int(date_compet[1]), int(date_compet[0])),
+                                              coefficient = ligne['coefficient'],
+                                              id_arme = arme.id,
+                                              id_categorie = categorie.id,
+                                              id_lieu = lieu.id
+                                              )
+                    competitions[ligne['nom']] = competition
+                    db.session.add(competition)
+                db.session.commit()
 
 
 
 @app.cli.command()
-def syncdb():
-    """Creates the tables."""
+def syncbd():
+    """Crée les tables de la base de données"""
     db.create_all()
+
+@app.cli.command()
+def deletebd():
+    if os.path.exists('../CEB.db'):
+        os.remove('../CEB.db')
