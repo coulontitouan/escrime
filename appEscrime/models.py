@@ -78,7 +78,6 @@ class Escrimeur(db.Model, UserMixin):
 
 class Classement(db.Model):
     __tablename__ = 'classement'
-    classement = db.Column(db.Integer())
     rang = db.Column(db.Integer())
     points = db.Column(db.Integer())
     # Clé étrangère vers le tireur
