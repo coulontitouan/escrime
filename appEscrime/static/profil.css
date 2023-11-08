@@ -40,3 +40,26 @@ main {
     flex-basis: 100%;
     justify-content: space-evenly;
 }
+.informations>li{
+    flex-basis: 50%;
+    flex-wrap: wrap;
+}
+
+.test2{
+    width: 2rem;
+    margin-top: 0.5rem;
+    padding: 0%;
+}
+.informations{
+    height: 35vh;
+    flex-wrap: wrap;
+    margin-top: 0.75rem ;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    align-items: center;
+}
+.test2>p{
+    margin-top: 1rem;
+    font-weight: lighter;
+}
+

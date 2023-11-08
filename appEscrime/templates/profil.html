@@ -13,19 +13,19 @@
             <li id="infoP">
                 <h2>Informations personnelles</h2>
                     <ul class = "informations">
-                        <li  >
+                        <li class = "test2">
                             <h4>Nom</h4>
                             <p>{{ current_user.nom }}</p>
                         </li>
-                        <li>
+                        <li class = "test2">
                             <h4>Prénom</h4>
                             <p>{{ current_user.prenom }}</p>
                         </li>
-                        <li >
+                        <li class = "test2">
                             <h4>Sexe</h4>
                             <p>{{ current_user.sexe }}</p>
                         </li>
-                        <li>
+                        <li class = "test2">
                             <h4>Naissance</h4>
                             <p>{{ current_user.date_naissance }}</p>
                         </li>
@@ -34,26 +34,25 @@
         
         <li id="infoE">
             <h2>Informations d'escrimes</h2>
-            <div class="couple">
-                <div>
-                    <h4>Numéro de licence</h4>
-                    <p>{{ current_user.num_licence }}</p>
+            <ul class = "informations">
+                    <li class = "test2">
+                        <h4>Numéro de licence</h4>
+                        <p>{{ current_user.num_licence }}</p>
+                    </li>
+                    <li class = "test2">
+                        <h4>Club</h4>
+                        <p>{{ current_user.get_club() }}</p>
+                    </li>
+                    <li class ="test2">
+                        <h4>Classement national</h4>
+                        <p>{{ current_user.sexe }}</p>
+                    </li>
+                    <li class = "test2">
+                        <h4>Arme(s)</h4>
+                        <p>{{ current_user.date_naissance }}</p>
+                    </li>
                 </div>
-                <div>
-                    <h4>Club</h4>
-                    <p>{{ current_user.get_club() }}</p>
-                </div>
-            </div>
-            <div class="couple">
-                <div>
-                    <h4>Classement national</h4>
-                    <p>{{ current_user.sexe }}</p>
-                </div>
-                <div>
-                    <h4>Arme(s)</h4>
-                    <p>{{ current_user.date_naissance }}</p>
-                </div>
-            </div>
+            </ul>
         </li>
     </ul>
     </section>
