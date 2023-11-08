@@ -9,8 +9,6 @@ from wtforms import PasswordField
 from flask_wtf import FlaskForm
 from hashlib import sha256
 
-
-
 @app.route("/")
 def home():
     return render_template(
@@ -22,7 +20,6 @@ def informations():
     return render_template(
         "informations.html"
     )
-
 
 class LoginForm(FlaskForm):
     username=StringField('Username')
@@ -42,6 +39,12 @@ class LoginForm(FlaskForm):
 def connexion():
     return render_template(
         "connexion.html"
+    )
+
+@app.route("/competition/<int:id>")
+def competition(id):
+    return render_template(
+        "competition.html"
     )
 
 @app.route("/deconnexion/")
