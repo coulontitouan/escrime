@@ -64,7 +64,6 @@ def loadbd():
                     split_cat = contenu[3].split('-')
                     contenu[3] = split_cat[0][:-1] + split_cat[-1]
                 for ligne in lecteur:
-                    print(ligne)
                     
                     nom_club = ligne['club']
                     if nom_club not in clubs:
@@ -138,3 +137,14 @@ def syncbd():
 def deletebd():
     if os.path.exists('../CEB.db'):
         os.remove('../CEB.db')
+
+def newuser(num_licence, password, prenom, nom, sexe):
+    ddn= datetime(1000,1,1)
+    m=sha256()
+    m.update(password.encode())
+    tireur = Escrimeur(num_licence = num_licence, mot_de_passe = m.hexdigest(), prenom = prenom, nom = nom, sexe = sexe, date_naissance = ddn, id_club = 2 )
+    db.session.add(tireur)
+    db.session.commit()
+
+def updateuser(ddn = "01/01/1000",club = 2):
+    pass
