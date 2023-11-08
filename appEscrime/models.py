@@ -78,6 +78,7 @@ class Escrimeur(db.Model, UserMixin):
 
 class Classement(db.Model):
     __tablename__ = 'classement'
+    classement = db.Column(db.Integer())
     rang = db.Column(db.Integer())
     points = db.Column(db.Integer())
     # Clé étrangère vers le tireur
@@ -175,7 +176,7 @@ class Resultat(db.Model):
     # Clé étrangère vers la compétition
     id_competition = db.Column(db.Integer(), db.ForeignKey('competition.id'), primary_key = True)
     # Relation plusieurs-à-un : Un résultat est lié à une seule compétition
-    competition = db.relationship('Match', back_populates = 'resultats')#, lazy = 'dynamic')
+    competition = db.relationship('Competition', back_populates = 'resultats')#, lazy = 'dynamic')
     # Clé étrangère vers l'escrimeur
     id_escrimeur = db.Column(db.String(16), db.ForeignKey('escrimeur.num_licence'), primary_key = True)
     # Relation plusieurs-à-un : Une participation est effectuée par un seul tireur
