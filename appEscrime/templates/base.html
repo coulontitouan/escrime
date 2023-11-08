@@ -31,12 +31,6 @@
                                 <a href="{{ url_for('home') }}">Accueil</a>
                             </li>
                             <li>
-                                <a href="#">La compétition</a>
-                            </li>
-                            <li>
-                                <a href="#">Les tireurs</a>
-                            </li>
-                            <li>
                                 <a href ="{{ url_for('informations') }}"> informations generales</a>
                             </li>
                         </ul>
@@ -47,12 +41,21 @@
                                 aria-label="Search">
                                 <i class="fas fa-search" aria-hidden="true"></i>
                         </form>
+                        {% if current_user.is_authenticated %}
+                        <a id="blocLogin" href ="{{ url_for('connexion') }}">
+                            <button type="button" class="btn btn-light buttonLogin">Profile</button>
+                            <div id="cercleLogin" >
+                                <img id= "teteEscrime"  src="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur">
+                            </div>
+                        </a>
+                        {% else %}
                         <a id="blocLogin" href ="{{ url_for('connexion') }}">
                             <button type="button" class="btn btn-light buttonLogin">Connexion</button>
                             <div id="cercleLogin" >
                                 <img id= "teteEscrime"  src="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur">
                             </div>
                         </a>
+                        {% endif %}
                     </li>
                 </ul>
             </nav>
