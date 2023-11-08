@@ -137,9 +137,13 @@ class Phase(db.Model):
 class Match(db.Model):
     __tablename__ = 'match'
     id = db.Column(db.Integer(), primary_key = True)
+    # Clé étrangère vers la compétition comprenant le match
+    id_competition = db.Column(db.Integer(), db.ForeignKey('competition.id'), primary_key = True)
+    # Relation plusieurs-à-un unidirectionnel : Un match est compris dans une seule compétition
+    competition = db.relationship('Competition')
     # Clé étrangère vers la phase comprenant le match
     id_phase = db.Column(db.Integer(), db.ForeignKey('phase.id'), primary_key = True)
-    # Relation plusieurs-à-un : Un match est compris dans une seule phase d'une compétition
+    # Relation plusieurs-à-un : Un match est compris dans une seule phase de la compétition
     phase = db.relationship('Phase', back_populates = 'matchs')#, lazy = 'dynamic')
     piste = db.Column(db.Integer())
     etat = db.Column(db.String(16))
