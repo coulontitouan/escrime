@@ -43,6 +43,8 @@ h2 {
   overflow: hidden;
   text-overflow: clip;
   border-top: 0;
+  background-color: rgba(255, 0, 0, 0.9);
+  color: white;
 }
 
 #un {
@@ -87,5 +89,5 @@ table {
 }
 
 tbody tr:nth-child(even) {
-  background-color: #dddddd;
+  background-color: rgba(255, 0, 0, 0.2);
 }
