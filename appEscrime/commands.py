@@ -71,7 +71,6 @@ def loadbd():
                         club = Club(nom = nom_club)
                         clubs[nom_club] = club
                         db.session.add(club)
-                    db.session.commit()
                     
                     licence = ligne['adherent']
                     if licence not in escrimeurs:
@@ -85,7 +84,6 @@ def loadbd():
                                               id_club = club.id)
                         escrimeurs[licence] = escrimeur
                         db.session.add(escrimeur)
-                    db.session.commit()
 
                     arme = armes[contenu[1]]
                     categorie = categories[contenu[3]]
@@ -95,14 +93,12 @@ def loadbd():
                                               num_licence = escrimeur.num_licence,
                                               id_arme = arme.id,
                                               id_categorie = categorie.id))
-                    db.session.commit()
                     
             elif contenu[0] == 'connexion':
                 for ligne in lecteur:
                     mdp = ligne['mdp']
                     escrimeur = escrimeurs[ligne['adherent']]
                     escrimeur.set_mdp(mdp)
-                db.session.commit()
             
             elif contenu[0] == 'competitions':
                 for ligne in lecteur:
@@ -125,7 +121,8 @@ def loadbd():
                                               )
                     competitions[ligne['nom']] = competition
                     db.session.add(competition)
-                db.session.commit()
+                    
+            db.session.commit()
 
 
 
