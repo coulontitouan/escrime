@@ -78,7 +78,9 @@ class Escrimeur(db.Model, UserMixin):
 
     def get_club(self):
         return self.club.nom
-
+    
+    def is_admin(self):
+        return self.id_club == 1
 
 class Classement(db.Model):
     __tablename__ = 'classement'
