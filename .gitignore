@@ -1,6 +1,7 @@
 __pycache__
-escrime.bd
 venv
 .DS_Store
-CEB.bd
+*.db
 venv
+._*
+.vscode
