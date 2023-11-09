@@ -52,7 +52,9 @@ def loadbd():
     phases = {}
 
     # chargement de toutes les données
-    for nom_fichier in os.listdir('../data'): # Éxecution dans appEscrime
+    les_fichiers = os.listdir('../data')
+    les_fichiers.sort()
+    for nom_fichier in les_fichiers: # Éxecution dans appEscrime
         with open('../data/' + nom_fichier, newline = '', encoding = 'Latin-1') as fichier:
             nom_fichier = nom_fichier[:-4]
             print(nom_fichier)
@@ -94,7 +96,6 @@ def load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories):
         contenu[3] = split_cat[0][:-1] + split_cat[-1]
 
     for ligne in lecteur:
-        print(ligne)
         nom_club = ligne['club']
         if nom_club not in clubs:
             club = Club(nom = nom_club,
