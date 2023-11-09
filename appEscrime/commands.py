@@ -61,7 +61,7 @@ def loadbd():
 
             if contenu[0] == 'classement':
                 load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories)
-
+                
             elif contenu[0] == 'connexion':
                 load_connexion(lecteur, escrimeurs)
 
