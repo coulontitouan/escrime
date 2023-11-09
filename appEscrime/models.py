@@ -77,6 +77,7 @@ class Escrimeur(db.Model, UserMixin):
     def set_mdp(self, mdp):
         self.mot_de_passe = mdp
 
+
 class Classement(db.Model):
     __tablename__ = 'classement'
     rang = db.Column(db.Integer())

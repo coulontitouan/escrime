@@ -1,6 +1,7 @@
 """Module contenant les commandes de l'application."""
 from datetime import datetime
 import csv
+from hashlib import sha256
 import os
 from .app import app , db
 from .models import Type_phase, Arme, Categorie, Club, Escrimeur, Classement, Lieu, Competition, Phase, Match, Participation, Resultat
@@ -253,3 +254,14 @@ def deletebd():
     """Supprime la base de données"""
     if os.path.exists('../CEB.db'):
         os.remove('../CEB.db')
+
+def newuser(num_licence, password, prenom, nom, sexe):
+    ddn= datetime(1000,1,1)
+    m=sha256()
+    m.update(password.encode())
+    tireur = Escrimeur(num_licence = num_licence, mot_de_passe = m.hexdigest(), prenom = prenom, nom = nom, sexe = sexe, date_naissance = ddn, id_club = 2 )
+    db.session.add(tireur)
+    db.session.commit()
+
+def updateuser(ddn = "01/01/1000",club = 2):
+    pass
