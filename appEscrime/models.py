@@ -78,7 +78,7 @@ class Escrimeur(db.Model, UserMixin):
         self.mot_de_passe = mdp
 
     def get_club(self):
-        return Club.query.get(self.id_club).nom
+        return self.club.nom
 
 
 class Classement(db.Model):
