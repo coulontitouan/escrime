@@ -1,5 +1,5 @@
 from .app import app ,db
-from flask import render_template, redirect, url_for, session
+from flask import flash, render_template, redirect, url_for
 from flask_login import login_user , current_user, logout_user
 from flask import request,redirect, url_for
 from flask_login import login_required
@@ -12,10 +12,13 @@ from .commands import newuser,updateuser
 from wtforms import DateField
 
 class CreeCompetitionForm(FlaskForm):
+    """Classe qui permet de créer une compétition"""
     nom_lieu = StringField('Nom lieu',validators=[DataRequired()])
-    addresse_lieu = StringField('Addresse lieu',validators=[DataRequired()])
+    adresse_lieu = StringField('Adresse lieu',validators=[DataRequired()])
+    ville_lieu = StringField('Ville lieu',validators=[DataRequired()])
     nom_competition = StringField('Nom compétition',validators=[DataRequired()])
     date_competition = DateField('Date compétition', format='%Y-%m-%d', validators=[DataRequired()])
+    sexe_competition = RadioField('Sexe',choices = ['Homme','Femme'])
     coefficient_competition = StringField('Coefficient',validators=[DataRequired()])
     nom_arme = StringField('Nom arme',validators=[DataRequired()])
     nom_categorie = StringField('Nom catégorie',validators=[DataRequired()])
@@ -135,38 +138,41 @@ def inscription():
 
 @app.route("/competition/<int:id>")
 def competition(id):
+    """Fonction qui permet d'afficher une compétition"""
     return render_template(
         "competition.html"
     )
 
 @app.route("/competition/<int:idC>/poule/<int:idP>")
 def poule(idC, idP):
+    """Fonction qui permet d'afficher une poule"""
     return render_template(
         "poule.html"
     )
-  
+
 @app.route("/deconnexion/")
 def deconnexion():
     logout_user()
     return redirect(url_for("home"))
 
-
-@app.route('/Cree/Competition', methods=("GET", "POST"))
+@app.route('/cree/competition', methods=("GET", "POST"))
 def creationCompet():
+    """Fonction qui permet de créer une compétition"""
     f = CreeCompetitionForm()
     if not  f.is_submitted():
         f.next.data = request.args.get("next")
     else:
-        lieu = get_lieu(f.addresse_lieu.data)
+        lieu = get_lieu(f.nom_lieu.data, f.adresse_lieu.data, f.ville_lieu.data)
         arme = get_arme(f.nom_arme.data)
         categorie = get_categorie(f.nom_categorie.data)
         if lieu is None:
-            lieu = Lieu(nom =  f.nom_lieu.data,adresse =  f.addresse_lieu.data)
+            lieu = Lieu(nom =  f.nom_lieu.data, adresse =  f.adresse_lieu.data, ville =  f.ville_lieu.data)
             db.session.add(lieu)
             db.session.commit()
-        competition = Competition(id = (get_max_competition_id() + 1), nom = f.nom_competition.data, date = f.date_competition.data, coefficient = f.coefficient_competition.data, id_lieu = lieu.id, id_arme = arme.id, id_categorie = categorie.id)
+        competition = Competition(id = (get_max_competition_id() + 1), nom = f.nom_competition.data, date = f.date_competition.data, coefficient = f.coefficient_competition.data, sexe = f.sexe_competition.data, id_lieu = lieu.id, id_arme = arme.id, id_categorie = categorie.id)
         db.session.add(competition)
         db.session.commit()
+        flash('Compétition créée avec succès', 'success')  # Utilise Flash de Flask pour les messages
         return redirect(url_for('home'))
     return render_template('cree-competition.html', form=f)
 
