@@ -51,11 +51,11 @@ class LoginForm(FlaskForm):
 class SignUpForm(FlaskForm):
     num_licence=StringField('num_licence',validators=[DataRequired()])
     mot_de_passe=PasswordField("Password",validators=[DataRequired()])
-    prenom = StringField('prenom')
-    nom = StringField('nom')
-    sexe = RadioField('sexe',choices = ['Homme','Femme'])
-    date_naissance = DateField('date')
-    club = SelectField("club",coerce=str,default=2, choices = [(1,""),(2,""),(3,""),(4,""),(5,"")])
+    prenom = StringField('prenom',validators=[DataRequired()])
+    nom = StringField('nom',validators=[DataRequired()])
+    sexe = RadioField('sexe',choices = ['Homme','Femme'],validators=[DataRequired()])
+    date_naissance = DateField('date',validators=[DataRequired()])
+    club = SelectField("club",coerce=str,default=2,validators=[DataRequired()], choices = [(1,""),(2,""),(3,""),(4,""),(5,"")])
     next=HiddenField()
 
     def get_authenticated_user(self):
@@ -108,8 +108,12 @@ def connexion():
 def inscription():
     f =LoginForm()
     f2 = SignUpForm()
+    selection_club = []
+    for club in db.session.query(Club).all():
+        if club.id !=1:
+            selection_club.append((club.id,club.nom))
+    f2.club.choices = selection_club
     if not f2.is_submitted():
-
         f2.next.data = request.args.get("next")
     elif f2.validate_on_submit():
         f2.est_deja_inscrit_sans_mdp()
