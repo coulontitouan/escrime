@@ -77,6 +77,9 @@ class Escrimeur(db.Model, UserMixin):
     def set_mdp(self, mdp):
         self.mot_de_passe = mdp
 
+    def get_club(self):
+        return self.club.nom
+
 
 class Classement(db.Model):
     __tablename__ = 'classement'
