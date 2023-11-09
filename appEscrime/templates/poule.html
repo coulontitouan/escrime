@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{url_for('static', filename='poule.css')}}">
+{% endblock %}
+{% block content %}
+<h1>Poule A</h1>
+<div id="gros">
+    <div class="petit">
+        <div>
+            <p>14h30</p>
+            <p>Piste 1</p>
+        </div>
+        <p>JUNIOR N.</p>
+        <p>DUPONT X.</p>
+    </div>
+    <div class="petit">
+        <div>
+            <p>14h30</p>
+            <p>Piste 1</p>
+        </div>
+        <p>JUNIOR N.</p>
+        <p>DUPONT X.</p>
+    </div>
+    <div class="petit">
+        <div>
+            <p>14h30</p>
+            <p>Piste 1</p>
+        </div>
+        <p>JUNIOR N.</p>
+        <p>DUPONT X.</p>
+    </div>
+    <div class="petit">
+        <div>
+            <p>14h30</p>
+            <p>Piste 1</p>
+        </div>
+        <p>JUNIOR N.</p>
+        <p>DUPONT X.</p>
+    </div>
+</div>
+{% endblock %}

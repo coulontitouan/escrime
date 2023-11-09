@@ -1,8 +1,7 @@
 
 
 main{
-	height: 90vh;
-	padding-top: 10vh;
+	height: 110vh;
 	align-items: center;
 }
 
@@ -14,7 +13,7 @@ main{
 #carre{
 	background: radial-gradient(circle, rgba(255,125,125,1) 0%, rgba(255,192,192,1) 100%);
 	width: 30rem;
-	height: 35rem;
+	height: 42rem;
 	overflow: hidden;
 	border-radius: 10px;
 	box-shadow: 5px 20px 50px #000;
@@ -104,10 +103,10 @@ form > label{
 }
 
 .login{
-	height: 30rem;
+	height: 42rem;
 	background: #eee;
 	border-radius: 60% / 10%;
-	transform: translateY(-520px);
+	transform: translateY(-650px);
 	transition: .8s ease-in-out;
 }
 
@@ -130,4 +129,16 @@ form > label{
 }
 .form-group{
 	display: flex;
+}
+#club{
+	width: 60%;
+	font-size: 50;
+	background: #e0dede;
+	justify-content: center;
+	display: flex;
+	margin: 0.5em auto;
+	padding: 0.6em;
+	border: none;
+	outline: none;
+	border-radius: 5px;
 }
