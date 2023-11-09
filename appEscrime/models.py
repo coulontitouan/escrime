@@ -8,6 +8,7 @@ class Lieu(db.Model):
     id = db.Column(db.Integer(), primary_key = True)
     nom = db.Column(db.String(96))
     adresse = db.Column(db.String(96))
+    ville = db.Column(db.String(96))
     # Relation un-à-plusieurs : Un lieu peut acceuillir différentes compétitions
     competitions = db.relationship('Competition', back_populates = 'lieu')#, lazy = 'dynamic')
 
@@ -100,6 +101,7 @@ class Competition(db.Model):
     nom = db.Column(db.String(64))
     date = db.Column(db.Date)
     coefficient = db.Column(db.Integer())
+    sexe = db.Column(db.String(6))
     # Clé étrangère vers le lieu
     id_lieu = db.Column(db.Integer(), db.ForeignKey('lieu.id'))
     # Relation plusieurs-à-un : Une compétition se déroule dans un seul lieu
