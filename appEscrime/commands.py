@@ -12,39 +12,6 @@ def loadbd():
     # création de toutes les tables
     db.create_all()
 
-    db.session.commit()
-
-
-    # chargement de toutes les données
-    for nom_fichier in os.listdir('../data'): # Éxecution dans appEscrime
-        with open('../data/' + nom_fichier, newline = '', encoding = 'Latin-1') as fichier:
-            nom_fichier = nom_fichier[:-4]
-            print(nom_fichier)
-            lecteur = csv.DictReader(fichier, delimiter = ';')
-            contenu = nom_fichier.split('_')
-
-            if contenu[0] == 'classement':
-                escrimeurs, armes, categories = load_escrimeurs(contenu, lecteur)
-
-            elif contenu[0] == 'connexion':
-                load_connexion(lecteur, escrimeurs)
-
-            elif contenu[0] == 'competitions':
-                competitions = load_competitions(lecteur, armes, categories)
-
-            elif contenu[0] == 'matchs':
-                load_matchs(contenu, lecteur, escrimeurs, competitions)
-
-            elif contenu[0] == 'resultats':
-                load_resultats(contenu, lecteur)
-
-            db.session.commit()
-
-
-def load_escrimeurs(contenu, lecteur):
-    """Charge les escrimeurs, classements, armes, catégories et clubs dans la base de données"""
-    escrimeurs = {}
-
     # création des 3 armes possibles
     armes = {'Fleuret': Arme(libelle = 'Fleuret'),
              'Epée': Arme(libelle = 'Epée'),
@@ -71,9 +38,60 @@ def load_escrimeurs(contenu, lecteur):
     for club in clubs.values():
         db.session.add(club)
 
+    # création du type de phase de poule
+    types_phase = {'Poule': Type_phase(libelle = 'Poule', touches_victoire = 5)}
+    for type_phase in types_phase.values():
+        db.session.add(type_phase)
+
+    db.session.commit()
+
+    escrimeurs = {}
+    competitions = {}
+    lieux = {}
+    phases = {}
+
+    # chargement de toutes les données
+    for nom_fichier in os.listdir('../data'): # Éxecution dans appEscrime
+        with open('../data/' + nom_fichier, newline = '', encoding = 'Latin-1') as fichier:
+            nom_fichier = nom_fichier[:-4]
+            print(nom_fichier)
+            lecteur = csv.DictReader(fichier, delimiter = ';')
+            contenu = nom_fichier.split('_')
+
+            if contenu[0] == 'classement':
+                load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories)
+
+            elif contenu[0] == 'connexion':
+                load_connexion(lecteur, escrimeurs)
+
+            elif contenu[0] == 'competitions':
+                load_competitions(lecteur, armes, categories, competitions, lieux)
+
+            elif contenu[0] == 'matchs':
+                load_matchs(contenu, lecteur, escrimeurs, competitions, types_phase, phases)
+
+            elif contenu[0] == 'resultats':
+                load_resultats(contenu, lecteur)
+
+            db.session.commit()
+
+
+def load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories):
+    """Charge les escrimeurs, classements, armes, catégories et clubs dans la base de données
+
+    Args:
+        contenu (list[String]): le contenu du fichier csv courant
+        lecteur (DictReader): le lecteur du fichier csv courant
+        escrimeurs (dict): le dictionnaire des escrimeurs déjà présents dans la base
+        clubs (_type_): le dictionnaire des clubs déjà présents dans la base
+        armes (_type_): le dictionnaire des armes déjà présentes dans la base
+        categories (_type_): le dictionnaire des catégories déjà présentes dans la base
+    """
+
     if '-' in contenu[3]:
         split_cat = contenu[3].split('-')
         contenu[3] = split_cat[0][:-1] + split_cat[-1]
+
     for ligne in lecteur:
         print(ligne)
         nom_club = ligne['club']
@@ -85,7 +103,7 @@ def load_escrimeurs(contenu, lecteur):
         licence = ligne['adherent']
         if licence not in escrimeurs:
             naissance = ligne['date naissance'].split('/')
-            club = clubs[ligne['club']]
+            club = clubs[nom_club]
             escrimeur = Escrimeur(num_licence = licence,
                                   prenom = ligne['prenom'],
                                   nom = ligne['nom'],
@@ -93,7 +111,7 @@ def load_escrimeurs(contenu, lecteur):
                                   date_naissance = datetime(int(naissance[2]),
                                                             int(naissance[1]),
                                                             int(naissance[0])),
-                                  id_club = club.id)
+                                  club = club)
             escrimeurs[licence] = escrimeur
             db.session.add(escrimeur)
 
@@ -105,25 +123,36 @@ def load_escrimeurs(contenu, lecteur):
                                   num_licence = escrimeur.num_licence,
                                   id_arme = arme.id,
                                   id_categorie = categorie.id))
-    return escrimeurs, armes, categories
 
 
 def load_connexion(lecteur, escrimeurs):
-    """Charge les mot de passe des utilisateurs dans la base de données"""
+    """Charge les informations de connexion dans la base de données
+
+    Args:
+        lecteur (DictReader): le lecteur du fichier csv courant
+        escrimeurs (dict): le dictionnaire des escrimeurs déjà présents dans la base
+    """
     for ligne in lecteur:
         mdp = ligne['mdp']
         escrimeur = escrimeurs[ligne['adherent']]
         escrimeur.set_mdp(mdp)
 
 
-def load_competitions(lecteur, armes, categories):
-    """Charge les compétitions et les lieux dans la base de données"""
-    competitions = {}
-    lieux = {}
+def load_competitions(lecteur, armes, categories, competitions, lieux):
+    """Charge les compétitions dans la base de données
+
+    Args:
+        lecteur (DictReader): le lecteur du fichier csv courant
+        categories (dict): le dictionnaire des catégories déjà présentes dans la base
+        competitions (dict): le dictionnaire des compétitions déjà présentes dans la base
+        lieux (dict): le dictionnaire des lieux déjà présents dans la base
+    """
     for ligne in lecteur:
         nom_lieu = ligne['lieu']
         if nom_lieu not in lieux:
-            lieu = Lieu(nom = nom_lieu, adresse = ligne['adresse'])
+            lieu = Lieu(nom = nom_lieu,
+                        adresse = ligne['adresse'],
+                        ville = ligne['ville'])
             lieux[nom_lieu] = lieu
             db.session.add(lieu)
 
@@ -136,23 +165,26 @@ def load_competitions(lecteur, armes, categories):
                                                   int(date_compet[1]),
                                                   int(date_compet[0])),
                                   coefficient = ligne['coefficient'],
+                                  sexe = ligne['sexe'],
                                   id_arme = arme.id,
                                   id_categorie = categorie.id,
                                   id_lieu = lieu.id
                                   )
         competitions[ligne['nom']] = competition
         db.session.add(competition)
-    return competitions
 
 
-def load_matchs(contenu, lecteur, escrimeurs, competitions):
-    """Charge les matchs, phases et participations dans la base de données"""
-    # création du type de phase de poule
-    types_phase = {'Poule': Type_phase(libelle = 'Poule', touches_victoire = 5)}
-    for type_phase in types_phase.values():
-        db.session.add(type_phase)
-    phases = {}
+def load_matchs(contenu, lecteur, escrimeurs, competitions, phases, types_phase):
+    """Charge les matchs dans la base de données
 
+    Args:
+        contenu (list[String]): le contenu du fichier csv courant
+        lecteur (DictReader): le lecteur du fichier csv courant
+        escrimeurs (dict): le dictionnaire des escrimeurs déjà présents dans la base
+        competitions (dict): le dictionnaire des compétitions déjà présentes dans la base
+        phases (dict): le dictionnaire des phases de compétition déjà présentes dans la base
+        types_phase (dict): le dictionnaire des types de phase déjà présents dans la base
+    """
     for ligne in lecteur:
         nom_phase = ligne['libelle phase']
         if nom_phase not in types_phase:
@@ -197,7 +229,12 @@ def load_matchs(contenu, lecteur, escrimeurs, competitions):
 
 
 def load_resultats(contenu, lecteur):
-    """Charge les résultats dans la base de données"""
+    """Charge les résultats dans la base de données
+
+    Args:
+        contenu (list[String]): le contenu du fichier csv courant
+        lecteur (DictReader): le lecteur du fichier csv courant
+    """
     for ligne in lecteur:
         competition = contenu[3]
         db.session.add(Resultat(id_competition = competition,
