@@ -7,15 +7,43 @@ from .models import Type_phase, Arme, Categorie, Club, Escrimeur, Classement, Li
 
 @app.cli.command()
 def loadbd():
-    """Creates the tables and populates them with data."""
+    """Crée les tables et gère le peuplement de la base de données"""
 
     # création de toutes les tables
     db.create_all()
 
-    # création du type de phase de poule
-    types_phase = {'Poule': Type_phase(libelle = 'Poule', touches_victoire = 5)}
-    for type_phase in types_phase.values():
-        db.session.add(type_phase)
+    db.session.commit()
+
+
+    # chargement de toutes les données
+    for nom_fichier in os.listdir('../data'): # Éxecution dans appEscrime
+        with open('../data/' + nom_fichier, newline = '', encoding = 'Latin-1') as fichier:
+            nom_fichier = nom_fichier[:-4]
+            print(nom_fichier)
+            lecteur = csv.DictReader(fichier, delimiter = ';')
+            contenu = nom_fichier.split('_')
+
+            if contenu[0] == 'classement':
+                escrimeurs, armes, categories = load_escrimeurs(contenu, lecteur)
+
+            elif contenu[0] == 'connexion':
+                load_connexion(lecteur, escrimeurs)
+
+            elif contenu[0] == 'competitions':
+                competitions = load_competitions(lecteur, armes, categories)
+
+            elif contenu[0] == 'matchs':
+                load_matchs(contenu, lecteur, escrimeurs, competitions)
+
+            elif contenu[0] == 'resultats':
+                load_resultats(contenu, lecteur)
+
+            db.session.commit()
+
+
+def load_escrimeurs(contenu, lecteur):
+    """Charge les escrimeurs, classements, armes, catégories et clubs dans la base de données"""
+    escrimeurs = {}
 
     # création des 3 armes possibles
     armes = {'Fleuret': Arme(libelle = 'Fleuret'),
@@ -43,142 +71,140 @@ def loadbd():
     for club in clubs.values():
         db.session.add(club)
 
-    db.session.commit()
+    if '-' in contenu[3]:
+        split_cat = contenu[3].split('-')
+        contenu[3] = split_cat[0][:-1] + split_cat[-1]
+    for ligne in lecteur:
+        print(ligne)
+        nom_club = ligne['club']
+        if nom_club not in clubs:
+            club = Club(nom = nom_club)
+            clubs[nom_club] = club
+            db.session.add(club)
 
-    escrimeurs = {}
-    lieux = {}
+        licence = ligne['adherent']
+        if licence not in escrimeurs:
+            naissance = ligne['date naissance'].split('/')
+            club = clubs[ligne['club']]
+            escrimeur = Escrimeur(num_licence = licence,
+                                  prenom = ligne['prenom'],
+                                  nom = ligne['nom'],
+                                  sexe = contenu[2],
+                                  date_naissance = datetime(int(naissance[2]),
+                                                            int(naissance[1]),
+                                                            int(naissance[0])),
+                                  id_club = club.id)
+            escrimeurs[licence] = escrimeur
+            db.session.add(escrimeur)
+
+        arme = armes[contenu[1]]
+        categorie = categories[contenu[3]]
+        escrimeur = escrimeurs[ligne['adherent']]
+        db.session.add(Classement(rang = ligne['rang'],
+                                  points = ligne['points'],
+                                  num_licence = escrimeur.num_licence,
+                                  id_arme = arme.id,
+                                  id_categorie = categorie.id))
+    return escrimeurs, armes, categories
+
+
+def load_connexion(lecteur, escrimeurs):
+    """Charge les mot de passe des utilisateurs dans la base de données"""
+    for ligne in lecteur:
+        mdp = ligne['mdp']
+        escrimeur = escrimeurs[ligne['adherent']]
+        escrimeur.set_mdp(mdp)
+
+
+def load_competitions(lecteur, armes, categories):
+    """Charge les compétitions et les lieux dans la base de données"""
     competitions = {}
+    lieux = {}
+    for ligne in lecteur:
+        nom_lieu = ligne['lieu']
+        if nom_lieu not in lieux:
+            lieu = Lieu(nom = nom_lieu, adresse = ligne['adresse'])
+            lieux[nom_lieu] = lieu
+            db.session.add(lieu)
+
+        date_compet = ligne['date'].split('/')
+        arme = armes[ligne['arme']]
+        categorie = categories[ligne['categorie']]
+        lieu = lieux[ligne['lieu']]
+        competition = Competition(nom = ligne['nom'],
+                                  date = datetime(int(date_compet[2]),
+                                                  int(date_compet[1]),
+                                                  int(date_compet[0])),
+                                  coefficient = ligne['coefficient'],
+                                  id_arme = arme.id,
+                                  id_categorie = categorie.id,
+                                  id_lieu = lieu.id
+                                  )
+        competitions[ligne['nom']] = competition
+        db.session.add(competition)
+    return competitions
+
+
+def load_matchs(contenu, lecteur, escrimeurs, competitions):
+    """Charge les matchs, phases et participations dans la base de données"""
+    # création du type de phase de poule
+    types_phase = {'Poule': Type_phase(libelle = 'Poule', touches_victoire = 5)}
+    for type_phase in types_phase.values():
+        db.session.add(type_phase)
     phases = {}
 
-    # chargement de toutes les données
-    for nom_fichier in os.listdir('../data'): # Éxecution dans appEscrime
-        with open('../data/' + nom_fichier, newline = '', encoding = 'Latin-1') as fichier:
-            nom_fichier = nom_fichier[:-4]
-            print(nom_fichier)
-            lecteur = csv.DictReader(fichier, delimiter = ';')
-            contenu = nom_fichier.split('_')
+    for ligne in lecteur:
+        nom_phase = ligne['libelle phase']
+        if nom_phase not in types_phase:
+            type_phase = Type_phase(libelle = nom_phase, nb_touches = 15)
+            types_phase[nom_phase] = type_phase
+            db.session.add(type_phase)
 
-            if contenu[0] == 'classement':
-                if '-' in contenu[3]:
-                    split_cat = contenu[3].split('-')
-                    contenu[3] = split_cat[0][:-1] + split_cat[-1]
-                for ligne in lecteur:
-                    print(ligne)
+        concatenation_compet_phase = competitions[contenu[3]] + ligne['phase']
+        if concatenation_compet_phase not in phases:
+            phase = Phase(id = ligne['phase'],
+                          id_competition = competitions[contenu[4]],
+                          libelle = nom_phase)
+            phases[concatenation_compet_phase] = phase
+            db.session.add(phase)
 
-                    nom_club = ligne['club']
-                    if nom_club not in clubs:
-                        club = Club(nom = nom_club)
-                        clubs[nom_club] = club
-                        db.session.add(club)
+            mmatch = Match(id = ligne['numero'],
+                           id_competition = competitions[contenu[3]],
+                           id_phase = ligne['phase'],
+                           piste = ligne['piste'],
+                           etat = ligne['etat'],
+                           num_arbitre = escrimeurs[ligne['arbitre']].num_licence)
+            db.session.add(mmatch)
 
-                    licence = ligne['adherent']
-                    if licence not in escrimeurs:
-                        naissance = ligne['date naissance'].split('/')
-                        club = clubs[ligne['club']]
-                        escrimeur = Escrimeur(num_licence = licence,
-                                              prenom = ligne['prenom'],
-                                              nom = ligne['nom'],
-                                              sexe = contenu[2],
-                                              date_naissance = datetime(int(naissance[2]),
-                                                                        int(naissance[1]),
-                                                                        int(naissance[0])),
-                                              id_club = club.id)
-                        escrimeurs[licence] = escrimeur
-                        db.session.add(escrimeur)
+            for i in range(1,3):
+                escrimeur = escrimeurs[ligne['tireur' + i]]
+                nb_touches = int(ligne['touches' + i])
+                if ligne['etat'] == 'Termine':
+                    if nb_touches == types_phase[ligne['libelle phase']].touches_victoire:
+                        db.session.add(Participation(match = mmatch,
+                                                     tireur = escrimeur,
+                                                     touches = nb_touches,
+                                                     statut = "Vainqueur"))
+                    else:
+                        db.session.add(Participation(match = mmatch,
+                                                     tireur = escrimeur,
+                                                     touches = nb_touches,
+                                                     statut = "Perdant"))
+                else:
+                    db.session.add(Participation(match = mmatch,
+                                                 tireur = escrimeur,
+                                                 touches = nb_touches))
 
-                    arme = armes[contenu[1]]
-                    categorie = categories[contenu[3]]
-                    escrimeur = escrimeurs[ligne['adherent']]
-                    db.session.add(Classement(rang = ligne['rang'],
-                                              points = ligne['points'],
-                                              num_licence = escrimeur.num_licence,
-                                              id_arme = arme.id,
-                                              id_categorie = categorie.id))
 
-            elif contenu[0] == 'connexion':
-                for ligne in lecteur:
-                    mdp = ligne['mdp']
-                    escrimeur = escrimeurs[ligne['adherent']]
-                    escrimeur.set_mdp(mdp)
+def load_resultats(contenu, lecteur):
+    """Charge les résultats dans la base de données"""
+    for ligne in lecteur:
+        competition = contenu[3]
+        db.session.add(Resultat(id_competition = competition,
+                                id_escrimeur = ligne['adherent'],
+                                rang = ligne['rang'],
+                                points = ligne['points']))
 
-            elif contenu[0] == 'competitions':
-                for ligne in lecteur:
-                    nom_lieu = ligne['lieu']
-                    if nom_lieu not in lieux:
-                        lieu = Lieu(nom = nom_lieu, adresse = ligne['adresse'])
-                        lieux[nom_lieu] = lieu
-                        db.session.add(lieu)
-
-                    date_compet = ligne['date'].split('/')
-                    arme = armes[ligne['arme']]
-                    categorie = categories[ligne['categorie']]
-                    lieu = lieux[ligne['lieu']]
-                    competition = Competition(nom = ligne['nom'],
-                                              date = datetime(int(date_compet[2]),
-                                                              int(date_compet[1]),
-                                                              int(date_compet[0])),
-                                              coefficient = ligne['coefficient'],
-                                              id_arme = arme.id,
-                                              id_categorie = categorie.id,
-                                              id_lieu = lieu.id
-                                              )
-                    competitions[ligne['nom']] = competition
-                    db.session.add(competition)
-
-            elif contenu[0] == 'matchs':
-                for ligne in lecteur:
-                    nom_phase = ligne['libelle phase']
-                    if nom_phase not in types_phase:
-                        type_phase = Type_phase(libelle = nom_phase, nb_touches = 15)
-                        types_phase[nom_phase] = type_phase
-                        db.session.add(type_phase)
-
-                    concatenation_compet_phase = competitions[contenu[3]] + ligne['phase']
-                    if concatenation_compet_phase not in phases:
-                        phase = Phase(id = ligne['phase'],
-                                      id_competition = competitions[contenu[4]],
-                                      libelle = nom_phase)
-                        phases[concatenation_compet_phase] = phase
-                        db.session.add(phase)
-
-                    arbitre = escrimeurs[ligne['arbitre']]
-                    mmatch = Match(id = ligne['numero'],
-                              id_competition = competitions[contenu[3]],
-                              id_phase = ligne['phase'],
-                              piste = ligne['piste'],
-                              etat = ligne['etat'],
-                              num_arbitre = arbitre.num_licence)
-                    db.session.add(mmatch)
-
-                    for i in range(1,3):
-                        escrimeur = escrimeurs[ligne['tireur' + i]]
-                        nb_touches = int(ligne['touches' + i])
-                        res = None
-                        if ligne['etat'] == 'Termine':
-                            if nb_touches == types_phase[ligne['libelle phase']].touches_victoire:
-                                res = "Vainqueur"
-                            else:
-                                res = "Perdant"
-                        if res is None:
-                            participation = Participation(match = mmatch,
-                                                          tireur = escrimeur,
-                                                          touches = nb_touches)
-                        else:
-                            participation = Participation(match = mmatch,
-                                                          tireur = escrimeur,
-                                                          touches = nb_touches,
-                                                          statut = res)
-                        db.session.add(participation)
-
-            elif contenu[0] == 'resultats':
-                for ligne in lecteur:
-                    competition = contenu[3]
-                    db.session.add(Resultat(id_competition = competition,
-                                            id_escrimeur = ligne['adherent'],
-                                            rang = ligne['rang'],
-                                            points = ligne['points']))
-
-            db.session.commit()
 
 @app.cli.command()
 def syncbd():
