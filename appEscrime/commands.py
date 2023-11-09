@@ -1,11 +1,9 @@
 """Module contenant les commandes de l'application."""
 from datetime import datetime
-from hashlib import sha256
-import click
 import csv
 import os
 from .app import app , db
-from .models import *
+from .models import Type_phase, Arme, Categorie, Club, Escrimeur, Classement, Lieu, Competition, Phase, Match, Participation, Resultat
 
 @app.cli.command()
 def loadbd():
@@ -38,7 +36,7 @@ def loadbd():
                   'Vétérans4': Categorie(libelle = 'Vétérans4', age_maxi = -1)}
     for categorie in categories.values():
         db.session.add(categorie)
-    
+
     # création de l'instance de club permettant d'identifier les administrateurs
     clubs = {'CEB Admin': Club(nom = 'CEB Admin'),
              'Aucun club': Club(nom = 'Aucun club')}
@@ -47,10 +45,10 @@ def loadbd():
 
     db.session.commit()
 
-    escrimeurs = dict()
-    lieux = dict()
-    competitions = dict()
-    phases = dict()
+    escrimeurs = {}
+    lieux = {}
+    competitions = {}
+    phases = {}
 
     # chargement de toutes les données
     for nom_fichier in os.listdir('../data'): # Éxecution dans appEscrime
@@ -59,20 +57,20 @@ def loadbd():
             print(nom_fichier)
             lecteur = csv.DictReader(fichier, delimiter = ';')
             contenu = nom_fichier.split('_')
-            
+
             if contenu[0] == 'classement':
                 if '-' in contenu[3]:
                     split_cat = contenu[3].split('-')
                     contenu[3] = split_cat[0][:-1] + split_cat[-1]
                 for ligne in lecteur:
                     print(ligne)
-                    
+
                     nom_club = ligne['club']
                     if nom_club not in clubs:
                         club = Club(nom = nom_club)
                         clubs[nom_club] = club
                         db.session.add(club)
-                    
+
                     licence = ligne['adherent']
                     if licence not in escrimeurs:
                         naissance = ligne['date naissance'].split('/')
@@ -81,7 +79,9 @@ def loadbd():
                                               prenom = ligne['prenom'],
                                               nom = ligne['nom'],
                                               sexe = contenu[2],
-                                              date_naissance = datetime(int(naissance[2]), int(naissance[1]), int(naissance[0])),
+                                              date_naissance = datetime(int(naissance[2]),
+                                                                        int(naissance[1]),
+                                                                        int(naissance[0])),
                                               id_club = club.id)
                         escrimeurs[licence] = escrimeur
                         db.session.add(escrimeur)
@@ -94,13 +94,13 @@ def loadbd():
                                               num_licence = escrimeur.num_licence,
                                               id_arme = arme.id,
                                               id_categorie = categorie.id))
-                    
+
             elif contenu[0] == 'connexion':
                 for ligne in lecteur:
                     mdp = ligne['mdp']
                     escrimeur = escrimeurs[ligne['adherent']]
                     escrimeur.set_mdp(mdp)
-            
+
             elif contenu[0] == 'competitions':
                 for ligne in lecteur:
                     nom_lieu = ligne['lieu']
@@ -124,7 +124,7 @@ def loadbd():
                                               )
                     competitions[ligne['nom']] = competition
                     db.session.add(competition)
-            
+
             elif contenu[0] == 'matchs':
                 for ligne in lecteur:
                     nom_phase = ligne['libelle phase']
@@ -132,7 +132,7 @@ def loadbd():
                         type_phase = Type_phase(libelle = nom_phase, nb_touches = 15)
                         types_phase[nom_phase] = type_phase
                         db.session.add(type_phase)
-                    
+
                     concatenation_compet_phase = competitions[contenu[3]] + ligne['phase']
                     if concatenation_compet_phase not in phases:
                         phase = Phase(id = ligne['phase'],
@@ -140,15 +140,15 @@ def loadbd():
                                       libelle = nom_phase)
                         phases[concatenation_compet_phase] = phase
                         db.session.add(phase)
-                    
+
                     arbitre = escrimeurs[ligne['arbitre']]
-                    m = Match(id = ligne['numero'],
+                    mmatch = Match(id = ligne['numero'],
                               id_competition = competitions[contenu[3]],
                               id_phase = ligne['phase'],
                               piste = ligne['piste'],
                               etat = ligne['etat'],
                               num_arbitre = arbitre.num_licence)
-                    db.session.add(m)
+                    db.session.add(mmatch)
 
                     for i in range(1,3):
                         escrimeur = escrimeurs[ligne['tireur' + i]]
@@ -160,16 +160,16 @@ def loadbd():
                             else:
                                 res = "Perdant"
                         if res is None:
-                            participation = Participation(match = m,
+                            participation = Participation(match = mmatch,
                                                           tireur = escrimeur,
                                                           touches = nb_touches)
                         else:
-                            participation = Participation(match = m,
+                            participation = Participation(match = mmatch,
                                                           tireur = escrimeur,
                                                           touches = nb_touches,
                                                           statut = res)
                         db.session.add(participation)
-            
+
             elif contenu[0] == 'resultats':
                 for ligne in lecteur:
                     competition = contenu[3]
@@ -177,8 +177,7 @@ def loadbd():
                                             id_escrimeur = ligne['adherent'],
                                             rang = ligne['rang'],
                                             points = ligne['points']))
-                        
-                            
+
             db.session.commit()
 
 @app.cli.command()
