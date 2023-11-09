@@ -37,7 +37,6 @@ class Arme(db.Model):
     competitions = db.relationship('Competition', back_populates = 'arme')#, lazy = 'dynamic')
     # Relation un-à-plusieurs : Une arme peut définir plusieurs classements
     classements = db.relationship('Classement', back_populates = 'arme')#, lazy = 'dynamic')
-    
 
 class Escrimeur(db.Model, UserMixin):
     __tablename__ = 'escrimeur'
@@ -194,3 +193,17 @@ class Resultat(db.Model):
 @login_manager.user_loader
 def load_user(num_licence):
     return Escrimeur.query.get(num_licence)
+
+def get_lieu(adresse):
+    return Lieu.query.filter_by(adresse = adresse).first()
+
+def get_arme(libelle):
+    return Arme.query.filter_by(libelle = libelle).first()
+
+def get_categorie(libelle):
+    return Categorie.query.filter_by(libelle = libelle).first()
+
+def get_max_competition_id():
+    if Competition.query.count() == 0:
+        return 0
+    return Competition.query.order_by(desc(Competition.id)).first().id

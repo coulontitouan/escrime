@@ -1,0 +1,9 @@
+#form  {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+h1 {
+    flex-basis: 100%;
+    text-align: center;
+}
