@@ -97,7 +97,8 @@ def load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories):
         print(ligne)
         nom_club = ligne['club']
         if nom_club not in clubs:
-            club = Club(nom = nom_club)
+            club = Club(nom = nom_club,
+                        region = ligne['comite regional'])
             clubs[nom_club] = club
             db.session.add(club)
 
@@ -167,6 +168,7 @@ def load_competitions(lecteur, armes, categories, competitions, lieux):
                                                   int(date_compet[0])),
                                   coefficient = ligne['coefficient'],
                                   sexe = ligne['sexe'],
+                                  nationalite = ligne['nation'],
                                   id_arme = arme.id,
                                   id_categorie = categorie.id,
                                   id_lieu = lieu.id
