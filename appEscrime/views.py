@@ -1,5 +1,5 @@
 from .app import app ,db
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, session
 from flask_login import login_user , current_user, logout_user
 from flask import request,redirect, url_for
 from flask_login import login_required
@@ -9,7 +9,18 @@ from flask_wtf import FlaskForm
 from hashlib import sha256
 from .models import *
 from .commands import newuser,updateuser
+from wtforms import DateField
 
+class CreeCompetitionForm(FlaskForm):
+    nom_lieu = StringField('Nom lieu',validators=[DataRequired()])
+    addresse_lieu = StringField('Addresse lieu',validators=[DataRequired()])
+    nom_competition = StringField('Nom compétition',validators=[DataRequired()])
+    date_competition = DateField('Date compétition', format='%Y-%m-%d', validators=[DataRequired()])
+    coefficient_competition = StringField('Coefficient',validators=[DataRequired()])
+    nom_arme = StringField('Nom arme',validators=[DataRequired()])
+    nom_categorie = StringField('Nom catégorie',validators=[DataRequired()])
+    next = HiddenField()
+    
 @app.route("/")
 def home():
     return render_template(
@@ -90,7 +101,6 @@ def connexion():
             login_user(user)
             prochaine_page = f.next.data or url_for("home")
             return redirect(prochaine_page)
-
     return render_template(
         "connexion.html",formlogin=f, formsignup = f2)
 
@@ -140,12 +150,31 @@ def deconnexion():
     logout_user()
     return redirect(url_for("home"))
 
+
+@app.route('/Cree/Competition', methods=("GET", "POST"))
+def creationCompet():
+    f = CreeCompetitionForm()
+    if not  f.is_submitted():
+        f.next.data = request.args.get("next")
+    else:
+        lieu = get_lieu(f.addresse_lieu.data)
+        arme = get_arme(f.nom_arme.data)
+        categorie = get_categorie(f.nom_categorie.data)
+        if lieu is None:
+            lieu = Lieu(nom =  f.nom_lieu.data,adresse =  f.addresse_lieu.data)
+            db.session.add(lieu)
+            db.session.commit()
+        competition = Competition(id = (get_max_competition_id() + 1), nom = f.nom_competition.data, date = f.date_competition.data, coefficient = f.coefficient_competition.data, id_lieu = lieu.id, id_arme = arme.id, id_categorie = categorie.id)
+        db.session.add(competition)
+        db.session.commit()
+        return redirect(url_for('home'))
+    return render_template('cree-competition.html', form=f)
+
 @app.route("/profil")
 def profil():
     return render_template(
         "profil.html"
     )
-
 
 # class Changer_mdpForm(FlaskForm):
 #     new_mdp=PasswordField("Password",validators=[DataRequired()])
