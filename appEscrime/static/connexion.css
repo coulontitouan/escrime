@@ -45,31 +45,46 @@ form > label{
 	justify-content: center;
 }
 
-#select > div {
+#select > ul {
 	display: flex;
 	margin-right: 3em;
 	margin-left: 3em;
+	justify-content: space-around;
+	width: 60%;
+	padding: 0%;
 }
 
-div > label {
+.radiolabel {
 	color: #fff;
 	font-size: 1em;
 	margin-right: 0.5em;
 	font-weight: bold;
 }
 
-div > form > input{
+
+.form-control1{
 	width: 60%;
 	height: 1em;
 	background: #e0dede;
 	justify-content: center;
 	display: flex;
-	margin: 1em auto;
+	margin: 0.5em auto;
 	padding: 1.3em;
 	border: none;
 	outline: none;
 	border-radius: 5px;
 }
+
+.form-control:focus{
+	box-shadow: none;
+}
+
+.formconnexion{
+	width: 100%;
+	justify-content: center;
+	display: flex;
+}
+
 
 .buttonSign{
 	width: 60%;
@@ -95,7 +110,7 @@ div > form > input{
 	transition: .8s ease-in-out;
 }
 
-.login label{
+.login .titre{
 	color: #ff4b4b;
 }
 
@@ -109,6 +124,9 @@ div > form > input{
 #chk:checked ~ .signup form > label{
 	transform: scale(1);
 }
-#chk:checked ~ .login label{
+#chk:checked ~ .login .titre{
 	transform: scale(.6);	
+}
+.form-group{
+	display: flex;
 }

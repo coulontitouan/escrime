@@ -1,0 +1,36 @@
+main {
+    margin-top: 2.5vh;
+}
+
+h1 {
+    margin-bottom: 2.5vh;
+}
+
+.petit {
+    border: 1px solid black;
+    flex-basis: 45%;
+    margin: 2%;
+    background-color: #dddddd;
+}
+
+.petit > p {
+    margin-left: 1vw;
+}
+
+.petit > div {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid gray;
+    margin-left: 1vw;
+    margin-right: 1vw;
+}
+
+p {
+    margin-top: 1rem;
+}
+
+#gros {
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid black;
+}

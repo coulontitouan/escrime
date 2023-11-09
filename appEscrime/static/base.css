@@ -46,7 +46,7 @@ nav > ul > li {
 .liens {
     padding: 0;
     display: flex;
-    justify-content: space-between;
+    justify-content:space-around;
 }
 
 #navbar2{

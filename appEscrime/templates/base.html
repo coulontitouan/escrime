@@ -32,12 +32,6 @@
                                 <a href="{{ url_for('home') }}">Accueil</a>
                             </li>
                             <li>
-                                <a href="#">La compétition</a>
-                            </li>
-                            <li>
-                                <a href="#">Les tireurs</a>
-                            </li>
-                            <li>
                                 <a href ="{{ url_for('informations') }}"> informations generales</a>
                             </li>
                         </ul>
@@ -48,6 +42,20 @@
                                 aria-label="Search">
                                 <i class="fas fa-search" aria-hidden="true"></i>
                         </form>
+                        {% if current_user.is_authenticated %}
+                        <svg width="320" height="80" id="boutonConnexion">
+                            <a href="{{ url_for('profil') }}">
+                                <g>
+                                    <rect x="15" y="20" width="120" height="40" rx="20" ry="20" fill="white"/>
+                                    <circle cx="135" cy="40" r="30" fill="white"/>
+                                </g>
+                                <text x="70" y="40" fill="black" text-anchor="middle" dominant-baseline="middle">
+                                    Profil
+                                </text>
+                                <image x="115" y="20" href="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur" width="40" height="40"/>
+                            </a>
+                        </svg>
+                        {% else %}
                         <svg width="320" height="80" id="boutonConnexion">
                             <a href="{{ url_for('connexion') }}">
                                 <g>
@@ -60,6 +68,7 @@
                                 <image x="115" y="20" href="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur" width="40" height="40"/>
                             </a>
                         </svg>
+                        {% endif %}
                     </li>
                 </ul>
             </nav>
@@ -82,34 +91,33 @@
                 OUZET</span>
         </div>
     </footer>
-    <script>
-        let btn = document.querySelector('#backTop');
-
-        let header = document.querySelector("#header");
-
-        let lastScrollValue = 0;
-
-        document.addEventListener("scroll", (event) => {
-            let top = document.documentElement.scrollTop;
-            scrollPercentage = (window.pageYOffset * 100) / (document.body.scrollHeight - window.innerHeight)
-
-            if (lastScrollValue < top) {
-                header.classList.add("hidden");
-            } else {
-                header.classList.remove("hidden");
-            }
-            if (scrollPercentage > 10) {
-                btn.classList.remove("hidden");
-            } else {
-                btn.classList.add("hidden");
-            }
-            lastScrollValue = top;
-        });
-    </script>
     {% block scripts %}
     <!-- Optional JavaScript -->
     {{ bootstrap.load_js() }}
+      <script>
+      let btn = document.querySelector('#backTop');
 
+      let header = document.querySelector("#header");
+
+      let lastScrollValue = 0;
+
+      document.addEventListener("scroll", (event) => {
+          let top = document.documentElement.scrollTop;
+          scrollPercentage = (window.pageYOffset * 100) / (document.body.scrollHeight - window.innerHeight)
+
+          if (lastScrollValue < top) {
+              header.classList.add("hidden");
+          } else {
+              header.classList.remove("hidden");
+          }
+          if (scrollPercentage > 10) {
+              btn.classList.remove("hidden");
+          } else {
+              btn.classList.add("hidden");
+          }
+          lastScrollValue = top;
+      });
+    </script>
     {% endblock %}
 </body>
 
