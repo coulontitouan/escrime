@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{url_for('static', filename='cree-competition.css')}}">
+{% endblock %}
+{% block content %}
+<div id="form" class="shadow p-3 mb-5 bg-body rounded">
+    <h1>Crée une compétition</h1>
+    <form action="{{ url_for('creationCompet') }}"  method="post",role="form">
+        {{ form.nom_lieu.label }} <br> {{form.nom_lieu()}}
+        <br>
+        {{ form.addresse_lieu.label }} <br> {{form.addresse_lieu()}}
+        <br>
+        {{ form.nom_competition.label }} <br> {{form.nom_competition()}}
+        <br>
+        {{ form.date_competition.label }} <br> {{form.date_competition()}}
+        <br>
+        {{ form.coefficient_competition.label }} <br> {{ form.coefficient_competition() }}
+        <br>
+        {{ form.nom_arme.label }} <br> {{ form.nom_arme() }}
+        <br>
+        {{ form.nom_categorie.label }} <br> {{ form.nom_categorie() }}
+        <p>
+        </p>
+        <button>test</button>
+    </form>
+</div>
+{% endblock %}
