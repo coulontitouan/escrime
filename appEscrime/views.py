@@ -3,10 +3,8 @@ from flask import render_template, redirect, url_for
 from flask_login import login_user , current_user, logout_user
 from flask import request,redirect, url_for
 from flask_login import login_required
-from wtforms import StringField , HiddenField
+from wtforms import StringField , HiddenField, DateField , RadioField, PasswordField,SelectField
 from wtforms.validators import DataRequired
-from wtforms import PasswordField
-from wtforms import RadioField
 from flask_wtf import FlaskForm
 from hashlib import sha256
 from .models import *
@@ -45,6 +43,8 @@ class SignUpForm(FlaskForm):
     prenom = StringField('prenom')
     nom = StringField('nom')
     sexe = RadioField('sexe',choices = ['Homme','Femme'])
+    date_naissance = DateField('date')
+    club = SelectField("club",coerce=str,default=2, choices = [(1,""),(2,""),(3,""),(4,""),(5,"")])
     next=HiddenField()
 
     def get_authenticated_user(self):
@@ -55,6 +55,7 @@ class SignUpForm(FlaskForm):
         m.update(self.mot_de_passe.data.encode())
         passwd= m.hexdigest()
         return user if passwd == user.mot_de_passe else None
+    
     
     def est_deja_inscrit_sans_mdp(self):
         user = Escrimeur.query.get(self.num_licence.data)
@@ -75,6 +76,11 @@ class SignUpForm(FlaskForm):
 def connexion():
     f =LoginForm()
     f2 = SignUpForm()
+    selection_club = []
+    for club in db.session.query(Club).all():
+        if club.id != 1:
+            selection_club.append((club.id, club.nom))
+    f2.club.choices = selection_club
     if not f.is_submitted():
         f.next.data = request.args.get("next")
 
@@ -93,20 +99,20 @@ def inscription():
     f =LoginForm()
     f2 = SignUpForm()
     if not f2.is_submitted():
+
         f2.next.data = request.args.get("next")
     elif f2.validate_on_submit():
-        deja_inscrit = f2.est_deja_inscrit_sans_mdp()
-        if deja_inscrit != None:
-            user = f2.get_authenticated_user()
-            if user:
-                    login_user(user)
-                    prochaine_page = f2.next.data or url_for("home")
-                    return redirect(prochaine_page)
-        else:
-            if f2.sexe.data == "Femme":
-                newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Dames")
-            else:
-                newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Homme")
+        f2.est_deja_inscrit_sans_mdp()
+        user = f2.get_authenticated_user()
+        if user:
+                login_user(user)
+                prochaine_page = f2.next.data or url_for("home")
+                return redirect(prochaine_page)
+    else:
+        if f2.sexe.data == "Femme":
+            newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Dames",f2.date_naissance.data,f2.club.data)
+        else:       
+            newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Homme",f2.date_naissance.data,f2.club.data)
 
             user = f2.get_authenticated_user()
             if user:

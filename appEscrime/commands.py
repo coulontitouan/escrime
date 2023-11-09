@@ -255,11 +255,10 @@ def deletebd():
     if os.path.exists('../CEB.db'):
         os.remove('../CEB.db')
 
-def newuser(num_licence, password, prenom, nom, sexe):
-    ddn= datetime(1000,1,1)
+def newuser(num_licence, password, prenom, nom, sexe,ddn,club):
     m=sha256()
     m.update(password.encode())
-    tireur = Escrimeur(num_licence = num_licence, mot_de_passe = m.hexdigest(), prenom = prenom, nom = nom, sexe = sexe, date_naissance = ddn, id_club = 2 )
+    tireur = Escrimeur(num_licence = num_licence, mot_de_passe = m.hexdigest(), prenom = prenom, nom = nom, sexe = sexe, date_naissance = ddn, id_club = club )
     db.session.add(tireur)
     db.session.commit()
 
