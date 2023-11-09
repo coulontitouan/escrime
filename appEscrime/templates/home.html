@@ -6,7 +6,7 @@
 {% block content %}
 <div id="body">
     <h1>Les compétitions :</h1>
-    <table class = "scroll">
+    <table>
         <thead>
             <tr>
                 <th>Catégorie</th>
@@ -18,44 +18,22 @@
             </tr>
         </thead>
         <tbody>
+            {% for c in competitions %}
+            <tr>
+                <td>{{ url_for('get_categorie', id=c.id_categorie ).libelle }}</td>
+                <td>{{ url_for('get_arme', id=c.id_arme ).libelle }}</td>
+                <td>{{ c.sexe }}</td>
+                <td>{{ url_for('get_lieu', id=c.id_lieu ).nom }}</td>
+                <td>{{ c.date }}</td>
+                <td><a href="{{url_for('competition', id=c.id)}}"><button class="favorite styled" type="button" >Voir plus</button></a></td>
+            </tr>
+            {% endfor %}
             <tr>
                 <td>M15</td>
                 <td>Sabre</td>
                 <td>Homme</td>
                 <td>Beaugency</td>
                 <td>04/08/23</td>
-                <td><a href="https://google.com"><button class="favorite styled" type="button" >Voir plus</button></a></td>
-            </tr>
-            <tr>
-                <td>M17</td>
-                <td>Sabre</td>
-                <td>Homme</td>
-                <td>Toulon</td>
-                <td>05/08/23</td>
-                <td><a href="https://google.com"><button class="favorite styled" type="button" >Voir plus</button></a></td>
-            </tr>
-            <tr>
-                <td>M20</td>
-                <td>Sabre</td>
-                <td>Homme</td>
-                <td>Orléans</td>
-                <td>06/08/23</td>
-                <td><a href="https://google.com"><button class="favorite styled" type="button" >Voir plus</button></a></td>
-            </tr>
-            <tr>
-                <td>Sénior</td>
-                <td>Sabre</td>
-                <td>Homme</td>
-                <td>Ingré</td>
-                <td>07/08/23</td>
-                <td><a href="https://google.com"><button class="favorite styled" type="button" >Voir plus</button></a></td>
-            </tr>
-            <tr>
-                <td>Véterans 1</td>
-                <td>Sabre</td>
-                <td>Homme</td>
-                <td>Saran</td>
-                <td>08/08/23</td>
                 <td><a href="https://google.com"><button class="favorite styled" type="button" >Voir plus</button></a></td>
             </tr>
         </tbody>

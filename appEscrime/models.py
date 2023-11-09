@@ -121,6 +121,21 @@ class Competition(db.Model):
     # Relation un-à-plusieurs : Une compétition comprend plusieurs escrimeurs
     resultats = db.relationship('Resultat', back_populates = 'competition')#, lazy = 'dynamic')
 
+    def get_tireurs_phase(self, id_phase):
+        joueurs = set()
+        matchs = Match.query.filter_by(id_phase = (self.id,id_phase))
+        for m in matchs:
+            participations = Participation.query.filter_by(id_match = m.id)
+            for p in participations:
+                joueurs.add(Escrimeur.query.get(p.id_escrimeur))
+        return joueurs
+    
+    def get_arbitre_phase(self, id_phase):
+        return Escrimeur.query.get(Match.query.filter_by(id_phase = (self.id,id_phase)).first().num_arbitre)
+    
+    def get_points(self, id_tireur):
+        return Resultat.query.get((self.id,id_tireur)).points
+
 class Type_phase(db.Model):
     __tablename__ = 'type_phase'
     libelle = db.Column(db.String(32), primary_key = True)
@@ -207,3 +222,34 @@ def get_max_competition_id():
     if Competition.query.count() == 0:
         return 0
     return Competition.query.order_by(desc(Competition.id)).first().id
+
+@login_manager.user_loader
+def load_user(num_licence):
+    return Escrimeur.query.get(num_licence)
+
+def get_compet_accueil():
+    return Competition.query.all()
+
+def get_club(id):
+    return Club.query.get(id)
+
+def get_escrimeur(id):
+    return Escrimeur.query.get(id)
+
+def get_classement(id):
+    return Classement.query.get(id)
+
+def get_competition(id):
+    return Competition.query.get(id)
+
+def get_typephase(id):
+    return Type_phase.query.get(id)
+
+def get_match(id):
+    return Match.query.get(id)
+
+def get_participation(id):
+    return Participation.query.get(id)
+
+# def get_nb_tireurs_poule(id_poule):
+#     poule = get_phase(id_poule)
