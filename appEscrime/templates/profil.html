@@ -5,7 +5,9 @@
 {% endblock %}
 {% block content %}
 <h1>Mon Profil</h1>
-<a href="{{ url_for('deconnexion')}}">deconnexion</a>
+<a href="{{ url_for('deconnexion')}}">
+    <button class="button-Logout" role="button">Se déconnecter</button>
+</a>
 
 <section id="fond">
     <section id="info">
@@ -44,19 +46,22 @@
                             <p>{{ current_user.get_club() }}</p>
                         </li>
                         <li class ="test2">
-                            <h4>Classement national</h4>
-                            <p>{{ current_user.sexe }}</p>
+                            <h4>Meilleur classement</h4>
+                            <p>1</p>
                         </li>
                         <li class = "test2">
-                            <h4>Arme(s)</h4>
-                            <p>{{ current_user.date_naissance }}</p>
+                            <h4>Arme</h4>
+                            <p>Fleuret</p>
                         </li>
                 </ul>
             </li>
         </ul>
     </section>
-        <div id="historique">
-            <h2>Historique des compétitions</h2>
-        </div>
+    <a href="#">
+        <button class="button-mdp" role="button">Changer le mot de passe</button>
+    </a>
+    <div id="historique">
+        <h2>Historique des compétitions</h2>
+    </div>
 </section>
 {% endblock %}
