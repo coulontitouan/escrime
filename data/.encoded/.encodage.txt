@@ -1,0 +1,1 @@
+Dans ce répertoire, encodage uniquement en utf-8 car les fichiers de la fédération sont en Latin-1.
