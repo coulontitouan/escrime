@@ -23,8 +23,10 @@ class CreeCompetitionForm(FlaskForm):
     
 @app.route("/")
 def home():
+    competitions = get_all_competitions()
     return render_template(
-        "home.html"
+        "home.html",
+        competitions = competitions
     )
 
 @app.route("/informations/")
@@ -139,8 +141,10 @@ def inscription():
 
 @app.route("/competition/<int:id>")
 def competition(id):
+    competition = get_competition(id)
     return render_template(
-        "competition.html"
+        "competition.html",
+        competition = competition
     )
 
 @app.route("/competition/<int:idC>/poule/<int:idP>")
