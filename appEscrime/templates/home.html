@@ -9,6 +9,7 @@
     <table>
         <thead>
             <tr>
+                <th>Nom</th>
                 <th>Catégorie</th>
                 <th>Arme</th>
                 <th>Genre</th>
@@ -20,6 +21,7 @@
         <tbody>
             {% for c in competitions %}
             <tr>
+                <td>{{ c.nom }}</td>
                 <td>{{ c.get_categorie().libelle }}</td>
                 <td>{{ c.get_arme().libelle }}</td>
                 <td>{{ c.sexe }}</td>
@@ -29,6 +31,7 @@
             </tr>
             {% endfor %}
             <tr>
+                <td>Tournoi de pré-rentrée</td>
                 <td>M15</td>
                 <td>Sabre</td>
                 <td>Homme</td>

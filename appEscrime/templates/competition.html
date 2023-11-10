@@ -11,7 +11,7 @@
         <table class = "scroll">
             <thead>
                 <tr>
-                    <th id="intitule" colspan="3">{{ p.id }} - {{ len(url_for('competition.get_tireurs_phase', id=p.id)) }} Tireurs - {{ url_for('competition.get_arbitre_phase', id=p.id).nom }} <a href="{{url_for('poule', id=p.id)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
+                    <th id="intitule" colspan="3">{{ p.id }} - {{ len(competition.get_tireurs_phase(p.id)) }} Tireurs - {{ competition.get_arbitre_phase(id=p.id).nom }} <a href="{{url_for('poule', id=p.id)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
                 </tr>
                 <tr>
                     <th>Nom</th>
@@ -20,11 +20,11 @@
                 </tr>
             </thead>
             <tbody>
-                {% for tireur in competition.get_tireurs_phase %}
+                {% for tireur in competition.get_tireurs_phase() %}
                 <tr>
                     <td>{{ tireur.nom }}</td>
                     <td>{{ tireur.prenom }}</td>
-                    <td>{{ url_for('competition.get_points', id_tireur=t.num_licence) }}</td>
+                    <td>{{ competition.get_points(t.num_licence) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
