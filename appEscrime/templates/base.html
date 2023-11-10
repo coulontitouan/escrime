@@ -34,6 +34,15 @@
                             <li>
                                 <a href ="{{ url_for('informations') }}"> informations generales</a>
                             </li>
+                            {% if current_user.is_authenticated %}
+                            {% if current_user.is_admin() %}
+                            <li>
+                                <a href="{{ url_for('shutdown')}}">
+                                    <button class="button-shutdown" role="button">fermer l'application</button>
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% endif %}
                         </ul>
                     </li>
                     <li id = "navbar2">
