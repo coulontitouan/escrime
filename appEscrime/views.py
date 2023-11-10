@@ -87,6 +87,8 @@ class SignUpForm(FlaskForm):
                 user.set_mdp(passwd)
                 db.session.commit()
                 return True
+            else:
+                return False
         else:
             return None
 
@@ -98,15 +100,21 @@ def connexion():
     for club in db.session.query(Club).all():
         if club.id != 1:
             selection_club.append((club.id, club.nom))
+    selection_club.sort(key=lambda x: x[1])
     f2.club.choices = selection_club
+   
     if not f.is_submitted():
+        print("pas submitted")
         f.next.data = request.args.get("next")
+        print(f.next.data)
 
     elif f.validate_on_submit():
         user = f.get_authenticated_user()
         if user:
             login_user(user)
             prochaine_page = f.next.data or url_for("home")
+            print(f.next.data)
+            back = request.referrer
             return redirect(prochaine_page)
     return render_template(
         "connexion.html",formlogin=f, formsignup = f2)
@@ -123,13 +131,13 @@ def inscription():
     if not f2.is_submitted():
         f2.next.data = request.args.get("next")
     elif f2.validate_on_submit():
-        if f2.est_deja_inscrit_sans_mdp() is not None:
+        if f2.est_deja_inscrit_sans_mdp():
             user = f2.get_authenticated_user()
             if user:
                     login_user(user)
                     prochaine_page = f2.next.data or url_for("home")
                     return redirect(prochaine_page)
-        else:
+        elif f2.est_deja_inscrit_sans_mdp() == None:
             if f2.sexe.data == "Femme":
                 newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Dames",f2.date_naissance.data,f2.club.data)
             else:       
