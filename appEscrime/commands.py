@@ -8,7 +8,7 @@ from sqlalchemy import desc
 from .app import app , db
 from .models import Type_phase, Arme, Categorie, Club, Escrimeur
 from .populates import load_competitions, load_connexion, load_escrimeurs, load_matchs, load_resultats
-from .populates import save_competitions, save_classements
+from .populates import save_competitions, save_classements, save_connexions
 
 @app.cli.command()
 def loadbd():
@@ -93,6 +93,13 @@ def deletebd():
     """Supprime la base de données"""
     if os.path.exists('../CEB.db'):
         os.remove('../CEB.db')
+
+@app.cli.command()
+def savebd():
+    """Sauvegarde la base de données dans des fichiers csv"""
+    save_classements()
+    save_connexions()
+    save_competitions()
 
 def newuser(num_licence, password, prenom, nom, sexe,ddn,club):
     m=sha256()
