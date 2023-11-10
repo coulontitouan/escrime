@@ -8,6 +8,12 @@
     margin: auto;
 }
 
+#formulaire2 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
 .form-group {
     margin-bottom: 20px;
 }
@@ -43,9 +49,15 @@
 
 #test > ul {
 	display: flex;
-	margin-right: 3em;
-	margin-left: 3em;
-	justify-content: space-between;
-	width: 60%;
+    justify-content: space-between;
+	width: 100%;
 	padding: 0%;
+}
+
+#categorie {
+    flex-basis: 100%;
+}
+
+#button {
+    width: 100%;
 }

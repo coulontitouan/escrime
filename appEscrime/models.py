@@ -194,13 +194,37 @@ def get_lieu(nom, adresse, ville):
     """Fonction qui permet de récupérer un lieu dans la base de données"""
     return Lieu.query.filter_by(nom = nom, adresse = adresse, ville = ville).first()
 
-def get_arme(libelle):
+def get_arme(id):
     """Fonction qui permet de récupérer une arme dans la base de données"""
-    return Arme.query.filter_by(libelle = libelle).first()
+    return Arme.query.get(id)
 
-def get_categorie(libelle):
+def get_armes():
+    """Fonction qui permet de récupérer toutes les armes dans la base de données"""
+    return Arme.query.all()
+
+def cree_liste(liste) :
+    cpt = 1
+    liste2 = []
+    for arme in liste :
+        liste2.append((cpt, arme.libelle))
+        cpt += 1
+    return liste2
+
+def get_categorie(id):
     """Fonction qui permet de récupérer une catégorie dans la base de données"""
-    return Categorie.query.filter_by(libelle = libelle).first()
+    return Categorie.query.get(id)
+
+def get_categories():
+    """Fonction qui permet de récupérer toutes les catégories dans la base de données"""
+    return Categorie.query.all()
+
+def cree_liste2(liste) :
+    cpt = 1
+    liste2 = []
+    for categorie in liste :
+        liste2.append((cpt, categorie.libelle))
+        cpt += 1
+    return liste2
 
 def get_max_competition_id():
     """Fonction qui permet de récupérer l'id de la dernière compétition créée"""

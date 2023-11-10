@@ -11,18 +11,19 @@ from .models import *
 from .commands import newuser,updateuser
 from wtforms import DateField
 
-class CreeCompetitionForm(FlaskForm):
-    """Classe qui permet de créer une compétition"""
-    nom_lieu = StringField('Nom lieu',validators=[DataRequired()])
-    adresse_lieu = StringField('Adresse lieu',validators=[DataRequired()])
-    ville_lieu = StringField('Ville lieu',validators=[DataRequired()])
-    nom_competition = StringField('Nom compétition',validators=[DataRequired()])
-    date_competition = DateField('Date compétition', format='%Y-%m-%d', validators=[DataRequired()])
-    sexe_competition = RadioField('Sexe',choices = ['Homme','Femme'])
-    coefficient_competition = StringField('Coefficient',validators=[DataRequired()])
-    nom_arme = StringField('Nom arme',validators=[DataRequired()])
-    nom_categorie = StringField('Nom catégorie',validators=[DataRequired()])
-    next = HiddenField()
+with app.app_context():
+    class CreeCompetitionForm(FlaskForm):
+        """Classe qui permet de créer une compétition"""
+        nom_lieu = StringField('Nom lieu',validators=[DataRequired()])
+        adresse_lieu = StringField('Adresse lieu',validators=[DataRequired()])
+        ville_lieu = StringField('Ville lieu',validators=[DataRequired()])
+        nom_competition = StringField('Nom compétition',validators=[DataRequired()])
+        date_competition = DateField('Date compétition', format='%Y-%m-%d', validators=[DataRequired()])
+        sexe_competition = RadioField('Sexe',choices = ['Hommes','Femmes'])
+        coefficient_competition = StringField('Coefficient',validators=[DataRequired()])
+        nom_arme = SelectField("Arme",coerce=str,default=1, choices = cree_liste(get_armes()))
+        nom_categorie = SelectField("Catégorie",coerce=str,default=1, choices = cree_liste(get_categories()))
+        next = HiddenField()
     
 @app.route("/")
 def home():

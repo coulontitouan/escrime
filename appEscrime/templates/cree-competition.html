@@ -6,36 +6,40 @@
 {% block content %}
 <div id="formulaire" class="shadow p-3 mb-5 bg-body rounded">
     <h1 class="text-center mb-4">Créer une compétition</h1>
-    <form class="center-form" action="{{ url_for('creationCompet') }}" method="post" role="form">
-        <div class = "form-group">
-            {{ form.nom_lieu.label }} {{ form.nom_lieu }}
+    <form id="formulaire2" action="{{ url_for('creationCompet') }}" method="post" role="form">
+        <div id="gauche">
+            <div class = "form-group">
+                {{ form.nom_lieu.label }} {{ form.nom_lieu }}
+            </div>
+            <div class = "form-group">
+                {{ form.ville_lieu.label }} {{ form.ville_lieu }}
+            </div>
+            <div class = "form-group">
+                {{ form.date_competition.label }} {{ form.date_competition }}
+            </div>
+            <div class = "form-group">
+                {{ form.coefficient_competition.label }} {{ form.coefficient_competition }}
+            </div>
         </div>
-        <div class = "form-group">
-            {{ form.adresse_lieu.label }} {{ form.adresse_lieu }}
+        <div id="droite">
+            <div class = "form-group">
+                {{ form.adresse_lieu.label }} {{ form.adresse_lieu }}
+            </div>
+            <div class = "form-group">
+                {{ form.nom_competition.label }} {{ form.nom_competition }}
+            </div>
+            {{ form.sexe_competition.label }}
+            <div id = "test">
+                {{ form.sexe_competition }}
+            </div>
+            <div class = "form-group">
+                {{ form.nom_arme.label }} {{ form.nom_arme(class = "form-select") }}
+            </div>
         </div>
-        <div class = "form-group">
-            {{ form.ville_lieu.label }} {{ form.ville_lieu }}
+        <div id="categorie" class = "form-group">
+            {{ form.nom_categorie.label }} {{ form.nom_categorie(class = "form-select") }}
         </div>
-        <div class = "form-group">
-            {{ form.nom_competition.label }} {{ form.nom_competition }}
-        </div>
-        <div class = "form-group">
-            {{ form.date_competition.label }} {{ form.date_competition }}
-        </div>
-        {{ form.sexe_competition.label }}
-        <div id = "test">
-            {{ form.sexe_competition }}
-        </div>
-        <div class = "form-group">
-            {{ form.coefficient_competition.label }} {{ form.coefficient_competition }}
-        </div>
-        <div class = "form-group">
-            {{ form.nom_arme.label }} {{ form.nom_arme }}
-        </div>
-        <div class = "form-group">
-            {{ form.nom_categorie.label }} {{ form.nom_categorie }}
-        </div>
-        <button type="submit" class="btn btn-primary">Créer la compétition</button>
+        <button id="button" type="submit" class="btn btn-primary">Créer la compétition</button>
     </form>
 </div>
 {% endblock %}
