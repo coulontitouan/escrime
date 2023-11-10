@@ -90,7 +90,7 @@
             </form>
             <button id = "openbtn" type="button" class="btn btn-success">S'inscrire</button>
             <dialog id = "dialog" class="shadow p-3 mb-5 bg-body rounded">
-                <form action="{{ url_for('inscription_competition', idC = idC) }}" method="post" role="form">
+                <form action="{{ url_for('inscription_competition', id = competition.id) }}" method="post" role="form">
                 <div id="haut">
                     <h2>Inscription</h2>
                     <a id = "closebtn"><img id="uneimage" src="{{ url_for('static', filename = 'images/croix.png') }}" alt=""></a>
@@ -100,7 +100,7 @@
                 </div>
                 <button id = "openbtn" type="submit" class="btn btn-success">Confirmer</button>
                 </form>
-            </dialog>
+            </dialog>         
         </div>
         <table class = "scroll">
             <thead>

@@ -104,16 +104,13 @@ def connexion():
     f2.club.choices = selection_club
 
     if not f.is_submitted():
-        print("pas submitted")
         f.next.data = request.args.get("next")
-        print(f.next.data)
 
     elif f.validate_on_submit():
         user = f.get_authenticated_user()
         if user:
             login_user(user)
             prochaine_page = f.next.data or url_for("home")
-            print(f.next.data)
             back = request.referrer
             return redirect(prochaine_page)
     return render_template(
@@ -155,10 +152,11 @@ def inscription():
 @app.route("/competition/<int:id>")
 def competition(id):
     """Fonction qui permet d'afficher une compétition"""
+    form = InscriptionForm()
     competition = get_competition(id)
     return render_template(
         "competition.html",
-        competition = competition
+        competition = competition, form = form
     )
 
 @app.route("/competition/<int:idC>/poule/<int:idP>")
@@ -225,19 +223,20 @@ class InscriptionForm(FlaskForm):
         next = HiddenField()
 
 
-@app.route("/competition/<int:idC>/inscription", methods=("GET", "POST"))
-def inscription_competition(idC) :
+@app.route("/competition/<int:id>/inscription", methods=("GET", "POST"))
+def inscription_competition(id) :
     form = InscriptionForm()
-    print(idC)
-    if not  form.is_submitted():
+    if not form.is_submitted():
         form.next.data = request.args.get("next")
     else:
-        if form.role.data == "Arbitre" and get_est_inscrit(current_user.num_licence,idC) == None:
-            print(form.role.data == "Arbitre")
-            competition = get_competition(idC)
+        if form.role.data == "Arbitre" and get_est_inscrit(current_user.num_licence,id) == False:
+            competition = get_competition(id)
             competition.inscription(current_user.num_licence,True)
-        elif get_est_inscrit(current_user.num_licence,idC) == None:
-            competition = get_competition(idC)
+            return redirect(url_for('competition',id = id))
+        elif form.role.data == "Tireur" and get_est_inscrit(current_user.num_licence,id) == False:
+            competition = get_competition(id)
             competition.inscription(current_user.num_licence)
-        
-    return render_template('competition.html',idC = idC, form=form)
+            return redirect(url_for('competition', id = id))
+        else:
+            return redirect(url_for('home'))
+    return render_template('competition.html',form=form, competition = get_competition(id), id = id )

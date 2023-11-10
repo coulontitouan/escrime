@@ -287,4 +287,8 @@ def get_all_competitions():
 #     poule = get_phase(id_poule)
 
 def get_est_inscrit(num_licence, id_competition):
-    return Resultat.query.filter_by(id_competition = id_competition, id_escrimeur = num_licence).first()
+    a= Resultat.query.filter_by(id_competition = id_competition, id_escrimeur = num_licence).first()
+    if a == None :
+        return False
+    else:
+        return True
