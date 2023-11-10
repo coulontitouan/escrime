@@ -276,5 +276,10 @@ def get_all_competitions():
 #     poule = get_phase(id_poule)
 
 def delete_competition(id):
+    matchs_comp = Match.query.filter(Match.id_competition == id).all()
+    Participation.query.filter(Participation.id_match in matchs_comp).delete()
+    Match.query.filter(Match.id_competition == id).delete()
+    Phase.query.filter(Phase.id_competition == id).delete()
+    Resultat.query.filter(Resultat.id_competition == id).delete()
     Competition.query.filter(Competition.id == id).delete()
     db.session.commit()

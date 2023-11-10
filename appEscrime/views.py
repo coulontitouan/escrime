@@ -226,4 +226,5 @@ def shutdown():
 @app.route("/home/suppr-competition/<int:id>")
 def suppr_competition(id):
     delete_competition(id)
+    flash('Compétition supprimée avec succès', 'warning')
     return redirect(url_for('home'))
