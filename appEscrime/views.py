@@ -86,6 +86,7 @@ class SignUpForm(FlaskForm):
                 passwd= m.hexdigest()
                 user.set_mdp(passwd)
                 db.session.commit()
+                return True
         else:
             return None
 
