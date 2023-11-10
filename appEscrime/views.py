@@ -186,3 +186,10 @@ def profil():
 #     return render_template(
 #         "changer-mdp.html", f
 #     )
+
+from flask import request, jsonify
+import os, signal
+@app.route("/shutdown", methods=['GET'])
+def shutdown():
+    os.kill(os.getpid(), signal.SIGINT)
+    return jsonify({ "success": True, "message": "Server is shutting down..." })
