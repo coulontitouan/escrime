@@ -3,12 +3,12 @@ from datetime import datetime
 import csv
 from hashlib import sha256
 import os
-import shutil
 import click
 from sqlalchemy import desc
 from .app import app , db
 from .models import Type_phase, Arme, Categorie, Club, Escrimeur
-from .populates import load_competitions, load_connexion, load_escrimeurs, load_matchs, load_resultats, save_competitions, conversion_csv_utf8
+from .populates import load_competitions, load_connexion, load_escrimeurs, load_matchs, load_resultats
+from .populates import save_competitions, save_classements
 
 @app.cli.command()
 def loadbd():
@@ -57,20 +57,9 @@ def loadbd():
 
     # chargement de toutes les données
     les_fichiers = os.listdir('../data') # Éxecution dans appEscrime
-    print('ENCODAGE')
+    les_fichiers.sort()
     for nom_fichier in les_fichiers:
-        print(nom_fichier)
-        if nom_fichier == '.encoded':
-            pass
-        elif nom_fichier.split('_')[0] == 'classement':
-            conversion_csv_utf8(nom_fichier)
-        else:
-            shutil.copy('../data/' + nom_fichier, '../data/.encoded/' + nom_fichier)
-    les_fichiers_encodes = os.listdir('../data/.encoded')
-    les_fichiers_encodes.sort()
-    print('PEUPLEMENT')
-    for nom_fichier in les_fichiers_encodes:
-        with open('../data/.encoded/' + nom_fichier, 'r', newline = '', encoding = 'utf-8') as fichier:
+        with open('../data/' + nom_fichier, 'r', newline = '', encoding = 'utf-8') as fichier:
             nom_fichier = nom_fichier[:-4]
             print(nom_fichier)
             lecteur = csv.DictReader(fichier, delimiter = ';')
@@ -90,6 +79,7 @@ def loadbd():
 
             elif contenu[0] == 'resultats':
                 load_resultats(contenu, lecteur)
+        fichier.close()
         db.session.commit()
 
  
@@ -133,4 +123,4 @@ def newadmin(prenom, nom, sexe, mot_de_passe ):
 
 @app.cli.command()
 def test():
-    save_competitions()
+    save_classements()
