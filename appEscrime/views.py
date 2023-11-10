@@ -27,8 +27,10 @@ with app.app_context():
     
 @app.route("/")
 def home():
+    competitions = get_all_competitions()
     return render_template(
-        "home.html"
+        "home.html",
+        competitions = competitions
     )
 
 @app.route("/informations/")
@@ -55,11 +57,11 @@ class LoginForm(FlaskForm):
 class SignUpForm(FlaskForm):
     num_licence=StringField('num_licence',validators=[DataRequired()])
     mot_de_passe=PasswordField("Password",validators=[DataRequired()])
-    prenom = StringField('prenom')
-    nom = StringField('nom')
-    sexe = RadioField('sexe',choices = ['Homme','Femme'])
-    date_naissance = DateField('date')
-    club = SelectField("club",coerce=str,default=2, choices = [(1,""),(2,""),(3,""),(4,""),(5,"")])
+    prenom = StringField('prenom',validators=[DataRequired()])
+    nom = StringField('nom',validators=[DataRequired()])
+    sexe = RadioField('sexe',choices = ['Homme','Femme'],validators=[DataRequired()])
+    date_naissance = DateField('date',validators=[DataRequired()])
+    club = SelectField("club",coerce=str,default=2,validators=[DataRequired()], choices = [(1,""),(2,""),(3,""),(4,""),(5,"")])
     next=HiddenField()
 
     def get_authenticated_user(self):
@@ -112,27 +114,31 @@ def connexion():
 def inscription():
     f =LoginForm()
     f2 = SignUpForm()
+    selection_club = []
+    for club in db.session.query(Club).all():
+        if club.id !=1:
+            selection_club.append((club.id,club.nom))
+    f2.club.choices = selection_club
     if not f2.is_submitted():
-
         f2.next.data = request.args.get("next")
     elif f2.validate_on_submit():
-        f2.est_deja_inscrit_sans_mdp()
-        user = f2.get_authenticated_user()
-        if user:
-                login_user(user)
-                prochaine_page = f2.next.data or url_for("home")
-                return redirect(prochaine_page)
-    else:
-        if f2.sexe.data == "Femme":
-            newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Dames",f2.date_naissance.data,f2.club.data)
-        else:       
-            newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Homme",f2.date_naissance.data,f2.club.data)
-
+        if f2.est_deja_inscrit_sans_mdp() is not None:
             user = f2.get_authenticated_user()
             if user:
                     login_user(user)
                     prochaine_page = f2.next.data or url_for("home")
                     return redirect(prochaine_page)
+        else:
+            if f2.sexe.data == "Femme":
+                newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Dames",f2.date_naissance.data,f2.club.data)
+            else:       
+                newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Homme",f2.date_naissance.data,f2.club.data)
+
+                user = f2.get_authenticated_user()
+                if user:
+                        login_user(user)
+                        prochaine_page = f2.next.data or url_for("home")
+                        return redirect(prochaine_page)
 
     return render_template(
         "connexion.html",formlogin=f, formsignup = f2)
@@ -140,8 +146,10 @@ def inscription():
 @app.route("/competition/<int:id>")
 def competition(id):
     """Fonction qui permet d'afficher une compétition"""
+    competition = get_competition(id)
     return render_template(
-        "competition.html"
+        "competition.html",
+        competition = competition
     )
 
 @app.route("/competition/<int:idC>/poule/<int:idP>")
@@ -193,3 +201,10 @@ def profil():
 #     return render_template(
 #         "changer-mdp.html", f
 #     )
+
+from flask import request, jsonify
+import os, signal
+@app.route("/shutdown", methods=['GET'])
+def shutdown():
+    os.kill(os.getpid(), signal.SIGINT)
+    return jsonify({ "success": True, "message": "Server is shutting down..." })

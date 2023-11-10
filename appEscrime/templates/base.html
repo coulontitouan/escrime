@@ -6,7 +6,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png')}}"/>
     {% block styles %}
     <!-- Bootstrap CSS -->
     {{ bootstrap.load_css() }}
@@ -34,6 +34,15 @@
                             <li>
                                 <a href ="{{ url_for('informations') }}"> informations generales</a>
                             </li>
+                            {% if current_user.is_authenticated %}
+                            {% if current_user.is_admin() %}
+                            <li>
+                                <a href="{{ url_for('shutdown')}}">
+                                    <button class="button-shutdown" role="button">fermer l'application</button>
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% endif %}
                         </ul>
                     </li>
                     <li id = "navbar2">
@@ -82,7 +91,7 @@
 
             {% endblock %}
         </div>
-        <a href="#" id="backTop"><img src="{{url_for('static', filename='images/redArrow.png')}}" alt=""></a>
+        <a href="#" id="backTop" class="hidden"><img src="{{url_for('static', filename='images/redArrow.png')}}" alt=""></a>
     </main>
 
     <footer id="footer" class="footer mt-auto py-3 bg-light">
