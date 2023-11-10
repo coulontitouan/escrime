@@ -146,80 +146,80 @@ class Competition(db.Model):
     # Relation un-à-plusieurs : Une compétition comprend plusieurs escrimeurs
     resultats = db.relationship('Resultat', back_populates = 'competition')
 
+    def get_tireurs_phase(self, id_phase):
+        joueurs = set()
+        matchs = Match.query.filter_by(id_phase = (self.id,id_phase))
+        for m in matchs:
+            participations = Participation.query.filter_by(id_match = m.id)
+            for p in participations:
+                joueurs.add(Escrimeur.query.get(p.id_escrimeur))
+        return joueurs
+    
+    def get_arbitre_phase(self, id_phase):
+        return Escrimeur.query.get(Match.query.filter_by(id_phase = (self.id,id_phase)).first().num_arbitre)
+    
+    def get_points(self, id_tireur):
+        return Resultat.query.get((self.id,id_tireur)).points
+    
+    def get_categorie(self):
+        return self.categorie
+    
+    def get_arme(self):
+        return self.arme
+    
+    def get_lieu(self):
+        return self.lieu
+
+    def get_tireurs_phase(self, id_phase):
+        joueurs = set()
+        matchs = Match.query.filter_by(id_phase = (self.id,id_phase))
+        for m in matchs:
+            participations = Participation.query.filter_by(id_match = m.id)
+            for p in participations:
+                joueurs.add(Escrimeur.query.get(p.id_escrimeur))
+        return joueurs
+    
+    def get_arbitre_phase(self, id_phase):
+        return Escrimeur.query.get(Match.query.filter_by(id_phase = (self.id,id_phase)).first().num_arbitre)
+    
+    def get_points(self, id_tireur):
+        return Resultat.query.get((self.id,id_tireur)).points
+    
+    def get_categorie(self):
+        return self.categorie
+    
+    def get_arme(self):
+        return self.arme
+    
+    def get_lieu(self):
+        return self.lieu
+
+    def get_tireurs_phase(self, id_phase):
+        joueurs = set()
+        matchs = Match.query.filter_by(id_phase = (self.id,id_phase))
+        for m in matchs:
+            participations = Participation.query.filter_by(id_match = m.id)
+            for p in participations:
+                joueurs.add(Escrimeur.query.get(p.id_escrimeur))
+        return joueurs
+    
+    def get_arbitre_phase(self, id_phase):
+        return Escrimeur.query.get(Match.query.filter_by(id_phase = (self.id,id_phase)).first().num_arbitre)
+    
+    def get_points(self, id_tireur):
+        return Resultat.query.get((self.id,id_tireur)).points
+    
+    def get_categorie(self):
+        return self.categorie
+    
+    def get_arme(self):
+        return self.arme
+    
+    def get_lieu(self):
+        return self.lieu
+
     def toCsv(self):
         return f'{self.nom};{self.date};{self.sexe};{self.categorie.toCsv()}{self.arme.toCsv()}{self.coefficient};{self.lieu.toCsv()}'
-
-    def get_tireurs_phase(self, id_phase):
-        joueurs = set()
-        matchs = Match.query.filter_by(id_phase = (self.id,id_phase))
-        for m in matchs:
-            participations = Participation.query.filter_by(id_match = m.id)
-            for p in participations:
-                joueurs.add(Escrimeur.query.get(p.id_escrimeur))
-        return joueurs
-    
-    def get_arbitre_phase(self, id_phase):
-        return Escrimeur.query.get(Match.query.filter_by(id_phase = (self.id,id_phase)).first().num_arbitre)
-    
-    def get_points(self, id_tireur):
-        return Resultat.query.get((self.id,id_tireur)).points
-    
-    def get_categorie(self):
-        return self.categorie
-    
-    def get_arme(self):
-        return self.arme
-    
-    def get_lieu(self):
-        return self.lieu
-
-    def get_tireurs_phase(self, id_phase):
-        joueurs = set()
-        matchs = Match.query.filter_by(id_phase = (self.id,id_phase))
-        for m in matchs:
-            participations = Participation.query.filter_by(id_match = m.id)
-            for p in participations:
-                joueurs.add(Escrimeur.query.get(p.id_escrimeur))
-        return joueurs
-    
-    def get_arbitre_phase(self, id_phase):
-        return Escrimeur.query.get(Match.query.filter_by(id_phase = (self.id,id_phase)).first().num_arbitre)
-    
-    def get_points(self, id_tireur):
-        return Resultat.query.get((self.id,id_tireur)).points
-    
-    def get_categorie(self):
-        return self.categorie
-    
-    def get_arme(self):
-        return self.arme
-    
-    def get_lieu(self):
-        return self.lieu
-
-    def get_tireurs_phase(self, id_phase):
-        joueurs = set()
-        matchs = Match.query.filter_by(id_phase = (self.id,id_phase))
-        for m in matchs:
-            participations = Participation.query.filter_by(id_match = m.id)
-            for p in participations:
-                joueurs.add(Escrimeur.query.get(p.id_escrimeur))
-        return joueurs
-    
-    def get_arbitre_phase(self, id_phase):
-        return Escrimeur.query.get(Match.query.filter_by(id_phase = (self.id,id_phase)).first().num_arbitre)
-    
-    def get_points(self, id_tireur):
-        return Resultat.query.get((self.id,id_tireur)).points
-    
-    def get_categorie(self):
-        return self.categorie
-    
-    def get_arme(self):
-        return self.arme
-    
-    def get_lieu(self):
-        return self.lieu
 
 class Type_phase(db.Model):
     __tablename__ = 'type_phase'
@@ -299,6 +299,10 @@ class Resultat(db.Model):
 
     def toCsv(self):
         return f'{self.rang};{self.id_escrimeur};{self.points}'
+
+
+
+
 def get_lieu(nom, adresse, ville):
     """Fonction qui permet de récupérer un lieu dans la base de données"""
     return Lieu.query.filter_by(nom = nom, adresse = adresse, ville = ville).first()

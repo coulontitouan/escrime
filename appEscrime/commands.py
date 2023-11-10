@@ -7,7 +7,7 @@ import click
 from sqlalchemy import desc
 from .app import app , db
 from .models import Type_phase, Arme, Categorie, Club, Escrimeur
-from .populates import load_competitions, load_connexion, load_escrimeurs, load_matchs, load_resultats
+from .populates import load_competitions, load_connexion, load_escrimeurs, load_matchs, load_resultats, save_competitions, conversion_csv_utf8
 
 @app.cli.command()
 def loadbd():
@@ -55,10 +55,17 @@ def loadbd():
     phases = {}
 
     # chargement de toutes les données
-    les_fichiers = os.listdir('../data')
-    les_fichiers.sort()
-    for nom_fichier in les_fichiers: # Éxecution dans appEscrime
-        with open('../data/' + nom_fichier, newline = '', encoding = 'Latin-1') as fichier:
+    les_fichiers = os.listdir('../data') # Éxecution dans appEscrime
+    print('ENCODAGE')
+    for nom_fichier in les_fichiers:
+        if nom_fichier != '.encoded':
+            print(nom_fichier)
+            conversion_csv_utf8(nom_fichier)
+    les_fichiers_encodes = os.listdir('../data/.encoded')
+    les_fichiers_encodes.sort()
+    print('PEUPLEMENT')
+    for nom_fichier in les_fichiers_encodes:
+        with open('../data/.encoded/' + nom_fichier, 'r', newline = '', encoding = 'utf-8') as fichier:
             nom_fichier = nom_fichier[:-4]
             print(nom_fichier)
             lecteur = csv.DictReader(fichier, delimiter = ';')
@@ -66,10 +73,10 @@ def loadbd():
 
             if contenu[0] == 'classement':
                 load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories)
-                
+
             elif contenu[0] == 'connexion':
                 load_connexion(lecteur, escrimeurs)
-
+ 
             elif contenu[0] == 'competitions':
                 load_competitions(lecteur, armes, categories, competitions, lieux)
 
@@ -78,8 +85,7 @@ def loadbd():
 
             elif contenu[0] == 'resultats':
                 load_resultats(contenu, lecteur)
-
-            db.session.commit()
+        db.session.commit()
 
  
 @app.cli.command()
@@ -118,3 +124,8 @@ def newadmin(prenom, nom, sexe, mot_de_passe ):
     u = Escrimeur(num_licence=str(int(num)+1) , prenom=prenom, nom=nom, sexe=sexe, date_naissance=date_convert, id_club=1, mot_de_passe=m.hexdigest())
     db.session.add(u)
     db.session.commit()
+
+
+@app.cli.command()
+def test():
+    save_competitions()
