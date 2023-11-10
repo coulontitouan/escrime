@@ -272,7 +272,7 @@ def updateuser(ddn = "01/01/1000",club = 2):
 @click.argument('nom')
 @click.argument('sexe')
 @click.argument('mot_de_passe')
-def new_adm(prenom, nom, sexe, mot_de_passe ):
+def newadmin(prenom, nom, sexe, mot_de_passe ):
     """Ajoute un admin"""
     m = sha256()
     m.update(mot_de_passe.encode())
