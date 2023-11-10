@@ -40,12 +40,7 @@ def loadbd():
         db.session.add(club)
 
     # création du type de phase de poule
-    types_phase = {
-        'Poule': Type_phase(libelle = 'Poule', touches_victoire = 5),
-        'Quart': Type_phase(libelle = 'Quart', touches_victoire = 50),
-        'Demi': Type_phase(libelle = 'Demi', touches_victoire = 500),
-        'Finale': Type_phase(libelle = 'Finale', touches_victoire = 5000)
-        }
+    types_phase = {'Poule': Type_phase(libelle = 'Poule', touches_victoire = 5)}
     for type_phase in types_phase.values():
         db.session.add(type_phase)
 
