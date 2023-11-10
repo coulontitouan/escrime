@@ -274,3 +274,7 @@ def get_all_competitions():
 
 # def get_nb_tireurs_poule(id_poule):
 #     poule = get_phase(id_poule)
+
+def delete_competition(id):
+    Competition.query.filter(Competition.id == id).delete()
+    db.session.commit()

@@ -222,3 +222,8 @@ import os, signal
 def shutdown():
     os.kill(os.getpid(), signal.SIGINT)
     return jsonify({ "success": True, "message": "Server is shutting down..." })
+
+@app.route("/home/suppr-competition/<int:id>")
+def suppr_competition(id):
+    delete_competition(id)
+    return redirect(url_for('home'))
