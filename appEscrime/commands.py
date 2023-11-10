@@ -3,6 +3,8 @@ from datetime import datetime
 import csv
 from hashlib import sha256
 import os
+import click
+from sqlalchemy import desc
 from .app import app , db
 from .models import Type_phase, Arme, Categorie, Club, Escrimeur, Classement, Lieu, Competition, Phase, Match, Participation, Resultat
 
@@ -258,13 +260,31 @@ def deletebd():
     if os.path.exists('../CEB.db'):
         os.remove('../CEB.db')
 
-def newuser(num_licence, password, prenom, nom, sexe):
-    ddn= datetime(1000,1,1)
+def newuser(num_licence, password, prenom, nom, sexe,ddn,club):
     m=sha256()
     m.update(password.encode())
-    tireur = Escrimeur(num_licence = num_licence, mot_de_passe = m.hexdigest(), prenom = prenom, nom = nom, sexe = sexe, date_naissance = ddn, id_club = 2 )
+    tireur = Escrimeur(num_licence = num_licence, mot_de_passe = m.hexdigest(), prenom = prenom, nom = nom, sexe = sexe, date_naissance = ddn, id_club = club )
     db.session.add(tireur)
     db.session.commit()
 
 def updateuser(ddn = "01/01/1000",club = 2):
     pass
+
+@app.cli.command()
+@click.argument('prenom')
+@click.argument('nom')
+@click.argument('sexe')
+@click.argument('mot_de_passe')
+def newadmin(prenom, nom, sexe, mot_de_passe ):
+    """Ajoute un admin"""
+    m = sha256()
+    m.update(mot_de_passe.encode())
+    num = Escrimeur.query.order_by(desc(Escrimeur.num_licence)).filter_by(id_club=1).first()
+    if num is None:
+        num = '0'
+    else:
+        num = num.num_licence
+    date_convert = datetime.strptime('01-01-0001', '%d-%m-%Y').date()
+    u = Escrimeur(num_licence=str(int(num)+1) , prenom=prenom, nom=nom, sexe=sexe, date_naissance=date_convert, id_club=1, mot_de_passe=m.hexdigest())
+    db.session.add(u)
+    db.session.commit()

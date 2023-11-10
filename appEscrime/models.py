@@ -90,6 +90,11 @@ class Escrimeur(db.Model, UserMixin):
     def set_mdp(self, mdp):
         self.mot_de_passe = mdp
     
+    def get_club(self):
+        return self.club.nom
+    
+    def is_admin(self):
+        return self.id_club == 1
     def toCsv(self):
         naissance = self.date_naissance.strftime('%d/%m/%Y')
         return (f'{self.nom};{self.prenom};{naissance};{self.num_licence};{self.nationalite};',
@@ -225,3 +230,17 @@ class Resultat(db.Model):
 @login_manager.user_loader
 def load_user(num_licence):
     return Escrimeur.query.get(num_licence)
+
+def get_lieu(adresse):
+    return Lieu.query.filter_by(adresse = adresse).first()
+
+def get_arme(libelle):
+    return Arme.query.filter_by(libelle = libelle).first()
+
+def get_categorie(libelle):
+    return Categorie.query.filter_by(libelle = libelle).first()
+
+def get_max_competition_id():
+    if Competition.query.count() == 0:
+        return 0
+    return Competition.query.order_by(desc(Competition.id)).first().id
