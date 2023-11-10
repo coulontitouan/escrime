@@ -33,7 +33,7 @@ def home():
         competitions = competitions
     )
 
-@app.route("/informations/")
+@app.route("/informations")
 def informations():
     return render_template(
         "informations.html"
@@ -165,7 +165,7 @@ def deconnexion():
     logout_user()
     return redirect(url_for("home"))
 
-@app.route('/cree/competition', methods=("GET", "POST"))
+@app.route('/cree/competition/', methods=("GET", "POST"))
 def creationCompet():
     """Fonction qui permet de créer une compétition"""
     f = CreeCompetitionForm()

@@ -16,28 +16,28 @@
         integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
     {% endblock %}
 
-    <title>Compétition ESCRIME</title>
+    <title>Compétition ESCRIME | {{request.path}}</title>
     {% endblock %}
 </head>
 
 <body>
     <header id="header">
         <!-- Fixed navbar -->
-        <img src="{{ url_for('static', filename='images/escrimeurNav.png')}}" alt="un escrimeur qui pointe son épée">
+        <a href="{{ url_for('home') }}"><img src="{{ url_for('static', filename='images/escrimeurNav.png')}}" alt="un escrimeur qui pointe son épée" href="https://google.com"></a>
         <nav>
                 <ul>
                     <li>
                         <ul class="liens">
                             <li>
-                                <a href="{{ url_for('home') }}">Accueil</a>
+                                <a href="{{ url_for('home') }}" {% if request.path == url_for('home') %} class="active" {% endif %}>Accueil</a>
                             </li>
                             <li>
-                                <a href ="{{ url_for('informations') }}"> informations generales</a>
+                                <a href ="{{ url_for('informations') }}" {% if request.path == url_for('informations') %} class="active" {% endif %}>Informations générales</a>
                             </li>
                             {% if current_user.is_authenticated %}
                             {% if current_user.is_admin() %}
                             <li>
-                                <a href="{{ url_for('creationCompet')}}"> Créer une compétition</a>
+                                <a href="{{ url_for('creationCompet') }}" {% if request.path == url_for('creationCompet') %} class="active" {% endif %}> Créer une compétition</a>
                             </li>
                             {% endif %}
                             {% endif %}
@@ -50,36 +50,38 @@
                                 <i class="fas fa-search" aria-hidden="true"></i>
                         </form>
                         {% if current_user.is_authenticated %}
-                        <svg width="200" height="80" id="boutonConnexion">
+                        <svg id="boutonConnexion" width="160" height="70">
                             <a href="{{ url_for('profil') }}">
                                 <g>
-                                    <rect x="15" y="20" width="120" height="40" rx="20" ry="20" fill="white"/>
-                                    <circle cx="135" cy="40" r="30" fill="white"/>
+                                    <rect width="120" height="40" x="5" y="15" rx="20" ry="20" fill="white"></rect>
+                                    <circle cx="125" cy="35" r="30" fill="white"></circle>
                                 </g>
-                                <text x="70" y="40" fill="black" text-anchor="middle" dominant-baseline="middle">
+                                <text x="60" y="35" text-anchor="middle" dominant-baseline="central" fill="black">
                                     Profil
                                 </text>
-                                <image x="115" y="20" href="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur" width="40" height="40"/>
+                                <image href="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur" width="40" height="40" x="105" y="15"></image>
                             </a>
                         </svg>
                         {% else %}
-                        <svg width="200" height="80" id="boutonConnexion">
+                        <svg id="boutonConnexion" width="160" height="70">
                             <a href="{{ url_for('connexion') }}">
                                 <g>
-                                    <rect x="15" y="20" width="120" height="40" rx="20" ry="20" fill="white"/>
-                                    <circle cx="135" cy="40" r="30" fill="white"/>
+                                    <rect width="120" height="40" x="5" y="15" rx="20" ry="20" fill="white"></rect>
+                                    <circle cx="125" cy="35" r="30" fill="white"></circle>
                                 </g>
-                                <text x="70" y="40" fill="black" text-anchor="middle" dominant-baseline="middle">
+                                <text x="60" y="35" text-anchor="middle" dominant-baseline="central" fill="black">
                                     Connexion
                                 </text>
-                                <image x="115" y="20" href="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur" width="40" height="40"/>
+                                <image href="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur" width="40" height="40" x="105" y="15"></image>
                             </a>
                         </svg>
                         {% endif %}
                         {% if current_user.is_authenticated %}
                         {% if current_user.is_admin() %}
-                        <a href="{{ url_for('shutdown')}}">
-                            <button class="button-shutdown" role="button">fermer l'application</button>
+                        <a onclick="shutdown()" style="position: absolute; top: 0%;left: 50%;">
+                            <button class="button-shutdown btn btn-warning" role="button">
+                                fermer l'application
+                            </button>
                         </a>
                         {% endif %}
                         {% endif %}
@@ -108,7 +110,18 @@
     {% block scripts %}
     <!-- Optional JavaScript -->
     {{ bootstrap.load_js() }}
-      <script>
+    <script>
+    
+    function shutdown() {
+        let texte =  "Vous êtes sur le point de fermer l'application.\r\n" +
+                    "La compétition et les résultats seront sauvegardées.\r\n" +
+                    "Êtes-vous sûr(e) ?"
+        if(confirm(texte) == true){
+            alert("Fermeture de l'application.")
+            location.href = "/shutdown/"
+        }
+    }
+    
       let btn = document.querySelector('#backTop');
 
       let header = document.querySelector("#header");
