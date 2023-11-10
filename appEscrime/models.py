@@ -2,7 +2,6 @@ from .app import db, login_manager
 from sqlalchemy import *
 from flask_login import UserMixin
 
-
 class Lieu(db.Model):
     __tablename__ = 'lieu'
     id = db.Column(db.Integer(), primary_key = True)
@@ -214,19 +213,48 @@ class Resultat(db.Model):
     rang = db.Column(db.Integer())
     points = db.Column(db.Integer())
 
-
-
 @login_manager.user_loader
 def load_user(num_licence):
     return Escrimeur.query.get(num_licence)
 
-def get_lieu(adresse):
-    return Lieu.query.filter_by(adresse = adresse).first()
+def get_lieu(nom, adresse, ville):
+    """Fonction qui permet de récupérer un lieu dans la base de données"""
+    return Lieu.query.filter_by(nom = nom, adresse = adresse, ville = ville).first()
 
-def get_arme(libelle):
-    return Arme.query.filter_by(libelle = libelle).first()
+def get_arme(id):
+    """Fonction qui permet de récupérer une arme dans la base de données"""
+    return Arme.query.get(id)
+
+def get_armes():
+    """Fonction qui permet de récupérer toutes les armes dans la base de données"""
+    return Arme.query.all()
+
+def cree_liste(liste) :
+    cpt = 1
+    liste2 = []
+    for arme in liste :
+        liste2.append((cpt, arme.libelle))
+        cpt += 1
+    return liste2
+
+def get_categorie(id):
+    """Fonction qui permet de récupérer une catégorie dans la base de données"""
+    return Categorie.query.get(id)
+
+def get_categories():
+    """Fonction qui permet de récupérer toutes les catégories dans la base de données"""
+    return Categorie.query.all()
+
+def cree_liste2(liste) :
+    cpt = 1
+    liste2 = []
+    for categorie in liste :
+        liste2.append((cpt, categorie.libelle))
+        cpt += 1
+    return liste2
 
 def get_max_competition_id():
+    """Fonction qui permet de récupérer l'id de la dernière compétition créée"""
     if Competition.query.count() == 0:
         return 0
     return Competition.query.order_by(desc(Competition.id)).first().id
