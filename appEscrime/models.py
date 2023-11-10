@@ -145,6 +145,17 @@ class Competition(db.Model):
     
     def get_lieu(self):
         return self.lieu
+    
+    def inscription(self, num_licence, arbitre = False):
+        points = -1
+        if arbitre:
+            points = -2
+        
+        db.session.add(Resultat(id_competition = self.id,
+                                id_escrimeur = num_licence,
+                                rang = None,
+                                points = points))
+        db.session.commit()
 
 class Type_phase(db.Model):
     __tablename__ = 'type_phase'
@@ -274,3 +285,6 @@ def get_all_competitions():
 
 # def get_nb_tireurs_poule(id_poule):
 #     poule = get_phase(id_poule)
+
+def get_est_inscrit(num_licence, id_competition):
+    return Resultat.query.filter_by(id_competition = id_competition, id_escrimeur = num_licence).first()

@@ -102,7 +102,7 @@ def connexion():
             selection_club.append((club.id, club.nom))
     selection_club.sort(key=lambda x: x[1])
     f2.club.choices = selection_club
-   
+
     if not f.is_submitted():
         print("pas submitted")
         f.next.data = request.args.get("next")
@@ -219,3 +219,25 @@ import os, signal
 def shutdown():
     os.kill(os.getpid(), signal.SIGINT)
     return jsonify({ "success": True, "message": "Server is shutting down..." })
+
+class InscriptionForm(FlaskForm):
+        role = RadioField('Role',choices = ['Arbitre','Tireur'])
+        next = HiddenField()
+
+
+@app.route("/competition/<int:idC>/inscription", methods=("GET", "POST"))
+def inscription_competition(idC) :
+    form = InscriptionForm()
+    print(idC)
+    if not  form.is_submitted():
+        form.next.data = request.args.get("next")
+    else:
+        if form.role.data == "Arbitre" and get_est_inscrit(current_user.num_licence,idC) == None:
+            print(form.role.data == "Arbitre")
+            competition = get_competition(idC)
+            competition.inscription(current_user.num_licence,True)
+        elif get_est_inscrit(current_user.num_licence,idC) == None:
+            competition = get_competition(idC)
+            competition.inscription(current_user.num_licence)
+        
+    return render_template('competition.html',idC = idC, form=form)
