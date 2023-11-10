@@ -49,9 +49,14 @@ nav > ul > li {
     justify-content:space-around;
 }
 
+.liens a {
+    font-weight: bold;
+}
+
 #navbar2{
     display: flex;
     justify-content: flex-end;
+    align-items: center;
 }
 
 li {
