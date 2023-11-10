@@ -8,7 +8,7 @@ from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 from hashlib import sha256
 from .models import *
-from .commands import newuser,updateuser
+from .commands import newuser
 from wtforms import DateField
 
 with app.app_context():
@@ -21,8 +21,8 @@ with app.app_context():
         date_competition = DateField('Date compétition', format='%Y-%m-%d', validators=[DataRequired()])
         sexe_competition = RadioField('Sexe',choices = ['Hommes','Femmes'])
         coefficient_competition = StringField('Coefficient',validators=[DataRequired()])
-        nom_arme = SelectField("Arme",coerce=str,default=1, choices = cree_liste(get_armes()))
-        nom_categorie = SelectField("Catégorie",coerce=str,default=1, choices = cree_liste(get_categories()))
+        nom_arme = SelectField("Arme",coerce=str,default=1)
+        nom_categorie = SelectField("Catégorie",coerce=str,default=1)
         next = HiddenField()
     
 @app.route("/")
@@ -168,6 +168,8 @@ def deconnexion():
 def creationCompet():
     """Fonction qui permet de créer une compétition"""
     f = CreeCompetitionForm()
+    f.nom_arme.choices = cree_liste(get_all_armes())
+    f.nom_categorie.choices = cree_liste(get_all_categories())
     if not  f.is_submitted():
         f.next.data = request.args.get("next")
     else:
