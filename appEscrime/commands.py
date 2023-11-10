@@ -3,6 +3,7 @@ from datetime import datetime
 import csv
 from hashlib import sha256
 import os
+import shutil
 import click
 from sqlalchemy import desc
 from .app import app , db
@@ -58,9 +59,13 @@ def loadbd():
     les_fichiers = os.listdir('../data') # Éxecution dans appEscrime
     print('ENCODAGE')
     for nom_fichier in les_fichiers:
-        if nom_fichier != '.encoded':
-            print(nom_fichier)
+        print(nom_fichier)
+        if nom_fichier == '.encoded':
+            pass
+        elif nom_fichier.split('_')[0] == 'classement':
             conversion_csv_utf8(nom_fichier)
+        else:
+            shutil.copy('../data/' + nom_fichier, '../data/.encoded/' + nom_fichier)
     les_fichiers_encodes = os.listdir('../data/.encoded')
     les_fichiers_encodes.sort()
     print('PEUPLEMENT')
