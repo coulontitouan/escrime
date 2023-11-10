@@ -20,10 +20,10 @@
         <tbody>
             {% for c in competitions %}
             <tr>
-                <td>{{ url_for('get_categorie', id=c.id_categorie ).libelle }}</td>
-                <td>{{ url_for('get_arme', id=c.id_arme ).libelle }}</td>
+                <td>{{ c.get_categorie().libelle }}</td>
+                <td>{{ c.get_arme().libelle }}</td>
                 <td>{{ c.sexe }}</td>
-                <td>{{ url_for('get_lieu', id=c.id_lieu ).nom }}</td>
+                <td>{{ c.get_lieu().nom }}</td>
                 <td>{{ c.date }}</td>
                 <td><a href="{{url_for('competition', id=c.id)}}"><button class="favorite styled" type="button" >Voir plus</button></a></td>
             </tr>
