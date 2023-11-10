@@ -2,7 +2,6 @@ from .app import db, login_manager
 from sqlalchemy import *
 from flask_login import UserMixin
 
-
 class Lieu(db.Model):
     __tablename__ = 'lieu'
     id = db.Column(db.Integer(), primary_key = True)
@@ -133,11 +132,11 @@ class Competition(db.Model):
     # Relation plusieurs-à-un : Une compétition se déroule dans un seul lieu
     lieu = db.relationship('Lieu', back_populates = 'competitions')
     # Clé étrangère vers l'arme
-    id_arme = db.Column(db.Integer(), db.ForeignKey('arme.id'), primary_key = True)
+    id_arme = db.Column(db.Integer(), db.ForeignKey('arme.id'))
     # Relation plusieurs-à-un : Un classement est définis par une seule arme
     arme = db.relationship('Arme', back_populates = 'competitions')
     # Clé étrangère vers la catégorie
-    id_categorie = db.Column(db.Integer(), db.ForeignKey('categorie.id'), primary_key = True)
+    id_categorie = db.Column(db.Integer(), db.ForeignKey('categorie.id'))
     # Relation plusieurs-à-un : Un classement est définis par une seule catégorie
     categorie = db.relationship('Categorie', back_populates = 'competitions')
     # Relation un-à-plusieurs : Une compétition contient différentes phases
@@ -147,6 +146,54 @@ class Competition(db.Model):
 
     def toCsv(self):
         return f'{self.nom};{self.date};{self.sexe};{self.categorie.toCsv()}{self.arme.toCsv()}{self.coefficient};{self.lieu.toCsv()}'
+
+    def get_tireurs_phase(self, id_phase):
+        joueurs = set()
+        matchs = Match.query.filter_by(id_phase = (self.id,id_phase))
+        for m in matchs:
+            participations = Participation.query.filter_by(id_match = m.id)
+            for p in participations:
+                joueurs.add(Escrimeur.query.get(p.id_escrimeur))
+        return joueurs
+    
+    def get_arbitre_phase(self, id_phase):
+        return Escrimeur.query.get(Match.query.filter_by(id_phase = (self.id,id_phase)).first().num_arbitre)
+    
+    def get_points(self, id_tireur):
+        return Resultat.query.get((self.id,id_tireur)).points
+    
+    def get_categorie(self):
+        return self.categorie
+    
+    def get_arme(self):
+        return self.arme
+    
+    def get_lieu(self):
+        return self.lieu
+
+    def get_tireurs_phase(self, id_phase):
+        joueurs = set()
+        matchs = Match.query.filter_by(id_phase = (self.id,id_phase))
+        for m in matchs:
+            participations = Participation.query.filter_by(id_match = m.id)
+            for p in participations:
+                joueurs.add(Escrimeur.query.get(p.id_escrimeur))
+        return joueurs
+    
+    def get_arbitre_phase(self, id_phase):
+        return Escrimeur.query.get(Match.query.filter_by(id_phase = (self.id,id_phase)).first().num_arbitre)
+    
+    def get_points(self, id_tireur):
+        return Resultat.query.get((self.id,id_tireur)).points
+    
+    def get_categorie(self):
+        return self.categorie
+    
+    def get_arme(self):
+        return self.arme
+    
+    def get_lieu(self):
+        return self.lieu
 
 class Type_phase(db.Model):
     __tablename__ = 'type_phase'
@@ -226,22 +273,64 @@ class Resultat(db.Model):
 
     def toCsv(self):
         return f'{self.rang};{self.id_escrimeur};{self.points}'
+def get_lieu(nom, adresse, ville):
+    """Fonction qui permet de récupérer un lieu dans la base de données"""
+    return Lieu.query.filter_by(nom = nom, adresse = adresse, ville = ville).first()
 
+def get_arme(id):
+    """Fonction qui permet de récupérer une arme dans la base de données"""
+    return Arme.query.get(id)
+
+def get_all_armes():
+    """Fonction qui permet de récupérer toutes les armes dans la base de données"""
+    return Arme.query.all()
+
+def cree_liste(liste) :
+    cpt = 1
+    liste2 = []
+    for x in liste :
+        liste2.append((cpt, x.libelle))
+        cpt += 1
+    return liste2
+
+def get_categorie(id):
+    """Fonction qui permet de récupérer une catégorie dans la base de données"""
+    return Categorie.query.get(id)
+
+def get_all_categories():
+    """Fonction qui permet de récupérer toutes les catégories dans la base de données"""
+    return Categorie.query.all()
+
+def get_max_competition_id():
+    """Fonction qui permet de récupérer l'id de la dernière compétition créée"""
+    if Competition.query.count() == 0:
+        return 0
+    return Competition.query.order_by(desc(Competition.id)).first().id
 
 @login_manager.user_loader
 def load_user(num_licence):
     return Escrimeur.query.get(num_licence)
 
-def get_lieu(adresse):
-    return Lieu.query.filter_by(adresse = adresse).first()
+def get_compet_accueil():
+    return Competition.query.all()
 
-def get_arme(libelle):
-    return Arme.query.filter_by(libelle = libelle).first()
+def get_club(id):
+    return Club.query.get(id)
 
-def get_categorie(libelle):
-    return Categorie.query.filter_by(libelle = libelle).first()
+def get_typephase(id):
+    return Type_phase.query.get(id)
 
-def get_max_competition_id():
-    if Competition.query.count() == 0:
-        return 0
-    return Competition.query.order_by(desc(Competition.id)).first().id
+def get_match(id):
+    return Match.query.get(id)
+
+def get_competition(id):
+    return Competition.query.get(id)
+
+def get_participation(id):
+    return Participation.query.get(id)
+
+def get_all_competitions():
+    return Competition.query.all()
+
+# def get_nb_tireurs_poule(id_poule):
+#     poule = get_phase(id_poule)

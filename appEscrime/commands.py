@@ -100,9 +100,6 @@ def newuser(num_licence, password, prenom, nom, sexe,ddn,club):
     db.session.add(tireur)
     db.session.commit()
 
-def updateuser(ddn = "01/01/1000",club = 2):
-    pass
-
 @app.cli.command()
 @click.argument('prenom')
 @click.argument('nom')
