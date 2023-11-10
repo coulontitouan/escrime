@@ -11,7 +11,7 @@ class Lieu(db.Model):
     # Relation un-à-plusieurs : Un lieu peut acceuillir différentes compétitions
     competitions = db.relationship('Competition', back_populates = 'lieu')
 
-    def toCsv(self):
+    def to_csv(self):
         return [self.nom, self.ville, self.adresse]
 
 class Club(db.Model):
@@ -22,7 +22,7 @@ class Club(db.Model):
     # Relation un-à-plusieurs : Un club peut avoir plusieurs adhérents
     adherents = db.relationship('Escrimeur', back_populates = 'club')
 
-    def toCsv(self):
+    def to_csv(self):
         return [self.region, self.nom]
 
 class Categorie(db.Model):
@@ -35,7 +35,7 @@ class Categorie(db.Model):
     # Relation un-à-plusieurs : Une catégorie peut définir plusieurs classements
     classements = db.relationship('Classement', back_populates = 'categorie')
 
-    def toCsv(self):
+    def to_csv(self):
         return [self.libelle]
 
 class Arme(db.Model):
@@ -47,7 +47,7 @@ class Arme(db.Model):
     # Relation un-à-plusieurs : Une arme peut définir plusieurs classements
     classements = db.relationship('Classement', back_populates = 'arme')
 
-    def toCsv(self):
+    def to_csv(self):
         return [self.libelle]
 
 class Escrimeur(db.Model, UserMixin):
@@ -92,10 +92,13 @@ class Escrimeur(db.Model, UserMixin):
     def get_club(self):
         return self.club.nom
     
+    def get_sexe(self):
+        return self.sexe
+    
     def is_admin(self):
         return self.id_club == 1
     
-    def toCsv(self):
+    def to_csv(self):
         naissance = self.date_naissance.strftime('%d/%m/%Y')
         return ([self.nom, self.prenom, naissance, self.num_licence, self.nationalite],
                 [self.num_licence, self.mot_de_passe])
@@ -105,20 +108,24 @@ class Classement(db.Model):
     rang = db.Column(db.Integer())
     points = db.Column(db.Integer())
     # Clé étrangère vers le tireur
-    num_licence = db.Column(db.String(16), db.ForeignKey('escrimeur.num_licence'), primary_key = True)
+    num_licence = db.Column(db.String(16), db.ForeignKey('escrimeur.num_licence'))
     # Relation plusieurs-à-un : Un classement est lié à un seul tireur
     tireur = db.relationship('Escrimeur', back_populates = 'classements')
     # Clé étrangère vers l'arme
-    id_arme = db.Column(db.Integer(), db.ForeignKey('arme.id'), primary_key = True)
+    id_arme = db.Column(db.Integer(), db.ForeignKey('arme.id'))
     # Relation plusieurs-à-un : Un classement est définis par une seule arme
     arme = db.relationship('Arme', back_populates = 'classements')
     # Clé étrangère vers la catégorie
-    id_categorie = db.Column(db.Integer(), db.ForeignKey('categorie.id'), primary_key = True)
+    id_categorie = db.Column(db.Integer(), db.ForeignKey('categorie.id'))
     # Relation plusieurs-à-un : Un classement est définis par une seule catégorie
     categorie = db.relationship('Categorie', back_populates = 'classements')
+    __table_args__ = (
+        PrimaryKeyConstraint(num_licence, id_arme, id_categorie),
+        {},
+    )
 
-    def toCsv(self):
-        return [self.points, self.rang]
+    def to_csv(self):
+        return self.tireur.to_csv()[0] + self.tireur.club.to_csv() + [self.points, self.rang]
 
 class Competition(db.Model):
     __tablename__ = 'competition'
@@ -133,11 +140,9 @@ class Competition(db.Model):
     lieu = db.relationship('Lieu', back_populates = 'competitions')
     # Clé étrangère vers l'arme
     id_arme = db.Column(db.Integer(), db.ForeignKey('arme.id'))
-    id_arme = db.Column(db.Integer(), db.ForeignKey('arme.id'))
     # Relation plusieurs-à-un : Un classement est définis par une seule arme
     arme = db.relationship('Arme', back_populates = 'competitions')
     # Clé étrangère vers la catégorie
-    id_categorie = db.Column(db.Integer(), db.ForeignKey('categorie.id'))
     id_categorie = db.Column(db.Integer(), db.ForeignKey('categorie.id'))
     # Relation plusieurs-à-un : Un classement est définis par une seule catégorie
     categorie = db.relationship('Categorie', back_populates = 'competitions')
@@ -217,10 +222,24 @@ class Competition(db.Model):
     
     def get_lieu(self):
         return self.lieu
-
-    def toCsv(self):
+    
+    def to_titre_csv(self):
+        res = ''
+        split = self.nom.split(' ')
+        for mot in split:
+            res += mot[0].upper() + mot[1:]
+        res += '_'
         date_csv = self.date.strftime('%d/%m/%Y')
-        return [self.nom, date_csv, self.sexe] + self.categorie.toCsv() + self.arme.toCsv() + [self.coefficient] + self.lieu.toCsv()
+        for carac in date_csv:
+            if carac == '/':
+                res += '-'
+            else:
+                res += carac
+        return res + '_' + str(self.id)
+
+    def to_csv(self):
+        date_csv = self.date.strftime('%d/%m/%Y')
+        return [self.nom, date_csv, self.sexe] + self.categorie.to_csv() + self.arme.to_csv() + [self.coefficient] + self.lieu.to_csv()
 
 class Type_phase(db.Model):
     __tablename__ = 'type_phase'
@@ -231,9 +250,9 @@ class Type_phase(db.Model):
 
 class Phase(db.Model):
     __tablename__ = 'phase'
-    id = db.Column(db.Integer(), primary_key = True)
+    id = db.Column(db.Integer())
     # Clé étrangère vers la compétition comprenant la phase
-    id_competition = db.Column(db.Integer(), db.ForeignKey('competition.id'), primary_key = True)
+    id_competition = db.Column(db.Integer(), db.ForeignKey('competition.id'))
     # Relation plusieurs-à-un : Une phase est comprise dans une seule compétition
     competition = db.relationship('Competition', back_populates = 'phases')
     # Clé étrangère vers le type de phase
@@ -242,8 +261,13 @@ class Phase(db.Model):
     type = db.relationship('Type_phase', back_populates = 'phases')
     # Relation un-à-plusieurs : Une compétition contient différentes phases
     matchs = db.relationship('Match', back_populates = 'phase')
+    __table_args__ = (
+        PrimaryKeyConstraint(id, id_competition),
+        {},
+    )
 
-    def toCsv(self):
+
+    def to_csv(self):
         return [self.id, self.libelle]
 
 class Match(db.Model):
@@ -265,40 +289,54 @@ class Match(db.Model):
     arbitre = db.relationship('Escrimeur', back_populates = 'arbitrages')
     # Relation un-à-plusieurs : Un match est arbitré par un seul arbitre
     participations = db.relationship('Participation', back_populates = 'match')
+    __table_args__ = (
+        PrimaryKeyConstraint(id, id_phase, id_competition),
+        {},
+    )
 
-    def toCsv(self):
-        return [self.id, self.participations[0], self.participations[1], self.num_arbitre, self.piste, self.etat] + self.phase.toCsv()
+
+    def to_csv(self):
+        return [self.id, self.participations[0], self.participations[1], self.num_arbitre, self.piste, self.etat] + self.phase.to_csv()
 
 class Participation(db.Model):
     __tablename__ = 'participation'
     # Clé étrangère vers le match
-    id_match = db.Column(db.Integer(), db.ForeignKey('match.id'), primary_key = True)
+    id_match = db.Column(db.Integer(), db.ForeignKey('match.id'))
     # Relation plusieurs-à-un : Une participation est liée à un seul match
     match = db.relationship('Match', back_populates = 'participations')
     # Clé étrangère vers le tireur
-    id_escrimeur = db.Column(db.String(16), db.ForeignKey('escrimeur.num_licence'), primary_key = True)
+    id_escrimeur = db.Column(db.String(16), db.ForeignKey('escrimeur.num_licence'))
     # Relation plusieurs-à-un : Une participation est effectuée par un seul tireur
     tireur = db.relationship('Escrimeur', back_populates = 'participations')
     statut = db.Column(db.String(16))
     touches = db.Column(db.Integer())
+    __table_args__ = (
+        PrimaryKeyConstraint(id_match, id_escrimeur),
+        {},
+    )
 
-    def toCsv(self):
+
+    def to_csv(self):
         return [self.tireur, self.touches]
 
 class Resultat(db.Model):
     __tablename__ = 'resultat'
     # Clé étrangère vers la compétition
-    id_competition = db.Column(db.Integer(), db.ForeignKey('competition.id'), primary_key = True)
+    id_competition = db.Column(db.Integer(), db.ForeignKey('competition.id'))
     # Relation plusieurs-à-un : Un résultat est lié à une seule compétition
     competition = db.relationship('Competition', back_populates = 'resultats')
     # Clé étrangère vers l'escrimeur
-    id_escrimeur = db.Column(db.String(16), db.ForeignKey('escrimeur.num_licence'), primary_key = True)
+    id_escrimeur = db.Column(db.String(16), db.ForeignKey('escrimeur.num_licence'))
     # Relation plusieurs-à-un : Une participation est effectuée par un seul tireur
     escrimeur = db.relationship('Escrimeur', back_populates = 'resultats')
     rang = db.Column(db.Integer())
     points = db.Column(db.Integer())
+    __table_args__ = (
+        PrimaryKeyConstraint(id_competition, id_escrimeur),
+        {},
+    )
 
-    def toCsv(self):
+    def to_csv(self):
         return [self.rang, self.id_escrimeur, self.points]
 
 
