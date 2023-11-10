@@ -12,7 +12,7 @@ class Lieu(db.Model):
     competitions = db.relationship('Competition', back_populates = 'lieu')
 
     def toCsv(self):
-        return f'{self.nom};{self.ville};{self.adresse}'
+        return [self.nom, self.ville, self.adresse]
 
 class Club(db.Model):
     __tablename__ = 'club'
@@ -23,7 +23,7 @@ class Club(db.Model):
     adherents = db.relationship('Escrimeur', back_populates = 'club')
 
     def toCsv(self):
-        return f'{self.region};{self.nom};'
+        return [self.region, self.nom]
 
 class Categorie(db.Model):
     __tablename__ = 'categorie'
@@ -36,7 +36,7 @@ class Categorie(db.Model):
     classements = db.relationship('Classement', back_populates = 'categorie')
 
     def toCsv(self):
-        return f'{self.libelle};'
+        return [self.libelle]
 
 class Arme(db.Model):
     __tablename__ = 'arme'
@@ -48,7 +48,7 @@ class Arme(db.Model):
     classements = db.relationship('Classement', back_populates = 'arme')
 
     def toCsv(self):
-        return f'{self.libelle};'
+        return [self.libelle]
 
 class Escrimeur(db.Model, UserMixin):
     __tablename__ = 'escrimeur'
@@ -97,8 +97,8 @@ class Escrimeur(db.Model, UserMixin):
     
     def toCsv(self):
         naissance = self.date_naissance.strftime('%d/%m/%Y')
-        return (f'{self.nom};{self.prenom};{naissance};{self.num_licence};{self.nationalite};',
-                f'{self.num_licence};{self.mot_de_passe}')
+        return ([self.nom, self.prenom, naissance, self.num_licence, self.nationalite],
+                [self.num_licence, self.mot_de_passe])
 
 class Classement(db.Model):
     __tablename__ = 'classement'
@@ -118,7 +118,7 @@ class Classement(db.Model):
     categorie = db.relationship('Categorie', back_populates = 'classements')
 
     def toCsv(self):
-        return f'{self.points};{self.rang}'
+        return [self.points, self.rang]
 
 class Competition(db.Model):
     __tablename__ = 'competition'
@@ -219,7 +219,8 @@ class Competition(db.Model):
         return self.lieu
 
     def toCsv(self):
-        return f'{self.nom};{self.date};{self.sexe};{self.categorie.toCsv()}{self.arme.toCsv()}{self.coefficient};{self.lieu.toCsv()}'
+        date_csv = self.date.strftime('%d/%m/%Y')
+        return [self.nom, date_csv, self.sexe] + self.categorie.toCsv() + self.arme.toCsv() + [self.coefficient] + self.lieu.toCsv()
 
 class Type_phase(db.Model):
     __tablename__ = 'type_phase'
@@ -243,7 +244,7 @@ class Phase(db.Model):
     matchs = db.relationship('Match', back_populates = 'phase')
 
     def toCsv(self):
-        return f'{self.id};{self.libelle}'
+        return [self.id, self.libelle]
 
 class Match(db.Model):
     __tablename__ = 'match'
@@ -266,7 +267,7 @@ class Match(db.Model):
     participations = db.relationship('Participation', back_populates = 'match')
 
     def toCsv(self):
-        return f'{self.id};{self.participations[0]}{self.participations[1]}{self.num_arbitre};{self.piste};{self.etat};{self.phase.toCsv()}'
+        return [self.id, self.participations[0], self.participations[1], self.num_arbitre, self.piste, self.etat] + self.phase.toCsv()
 
 class Participation(db.Model):
     __tablename__ = 'participation'
@@ -282,7 +283,7 @@ class Participation(db.Model):
     touches = db.Column(db.Integer())
 
     def toCsv(self):
-        return f'{self.tireur};{self.touches};'
+        return [self.tireur, self.touches]
 
 class Resultat(db.Model):
     __tablename__ = 'resultat'
@@ -298,7 +299,7 @@ class Resultat(db.Model):
     points = db.Column(db.Integer())
 
     def toCsv(self):
-        return f'{self.rang};{self.id_escrimeur};{self.points}'
+        return [self.rang, self.id_escrimeur, self.points]
 
 
 
