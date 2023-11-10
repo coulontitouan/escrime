@@ -95,6 +95,7 @@ class Escrimeur(db.Model, UserMixin):
     
     def is_admin(self):
         return self.id_club == 1
+    
     def toCsv(self):
         naissance = self.date_naissance.strftime('%d/%m/%Y')
         return (f'{self.nom};{self.prenom};{naissance};{self.num_licence};{self.nationalite};',
