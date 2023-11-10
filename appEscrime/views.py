@@ -116,23 +116,23 @@ def inscription():
     if not f2.is_submitted():
         f2.next.data = request.args.get("next")
     elif f2.validate_on_submit():
-        f2.est_deja_inscrit_sans_mdp()
-        user = f2.get_authenticated_user()
-        if user:
-                login_user(user)
-                prochaine_page = f2.next.data or url_for("home")
-                return redirect(prochaine_page)
-    else:
-        if f2.sexe.data == "Femme":
-            newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Dames",f2.date_naissance.data,f2.club.data)
-        else:       
-            newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Homme",f2.date_naissance.data,f2.club.data)
-
+        if f2.est_deja_inscrit_sans_mdp() is not None:
             user = f2.get_authenticated_user()
             if user:
                     login_user(user)
                     prochaine_page = f2.next.data or url_for("home")
                     return redirect(prochaine_page)
+        else:
+            if f2.sexe.data == "Femme":
+                newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Dames",f2.date_naissance.data,f2.club.data)
+            else:       
+                newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Homme",f2.date_naissance.data,f2.club.data)
+
+                user = f2.get_authenticated_user()
+                if user:
+                        login_user(user)
+                        prochaine_page = f2.next.data or url_for("home")
+                        return redirect(prochaine_page)
 
     return render_template(
         "connexion.html",formlogin=f, formsignup = f2)
