@@ -1,16 +1,27 @@
 main {
     margin-top: 2.5vh;
+    margin-bottom: 15vh;
 }
 
 h1 {
     margin-bottom: 2.5vh;
 }
 
+.termine{
+    border: 5px solid cornflowerblue;
+    background-color: rgba(100, 148, 237, 0.238494462);
+}
+.encours{
+    border: 5px solid green;
+    background-color: rgba(0, 128, 0, 0.238494462);
+}
+.avenir{
+    border: 5px solid orange;
+    background-color: rgba(265, 165, 0, 0.238494462);
+}
 .petit {
-    border: 1px solid black;
     flex-basis: 45%;
     margin: 2%;
-    background-color: #dddddd;
 }
 
 .petit > p {
@@ -20,9 +31,16 @@ h1 {
 .petit > div {
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid gray;
     margin-left: 1vw;
     margin-right: 1vw;
+}
+
+.foot {
+    justify-content: center !important;
+}
+
+.head {
+    border-bottom: 1px solid gray;
 }
 
 p {
@@ -33,4 +51,9 @@ p {
     display: flex;
     flex-wrap: wrap;
     border: 1px solid black;
+}
+
+.status {
+    display: flex;
+    margin-bottom: 2.5vh;
 }
