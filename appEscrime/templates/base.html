@@ -29,15 +29,15 @@
                     <li>
                         <ul class="liens">
                             <li>
-                                <a href="{{ url_for('home') }}" {% if request.path == url_for('home') %} class="active" {% endif %}>Accueil</a>
+                                <a href="{{ url_for('home') }}" {% if request.path == url_for('home') %} id="active" {% endif %}>Accueil</a>
                             </li>
                             <li>
-                                <a href ="{{ url_for('informations') }}" {% if request.path == url_for('informations') %} class="active" {% endif %}>Informations générales</a>
+                                <a href ="{{ url_for('informations') }}" {% if request.path == url_for('informations') %} id="active" {% endif %}>Informations générales</a>
                             </li>
                             {% if current_user.is_authenticated %}
                             {% if current_user.is_admin() %}
                             <li>
-                                <a href="{{ url_for('creationCompet') }}" {% if request.path == url_for('creationCompet') %} class="active" {% endif %}> Créer une compétition</a>
+                                <a href="{{ url_for('creationCompet') }}" {% if request.path == url_for('creationCompet') %} id="active" {% endif %}> Créer une compétition</a>
                             </li>
                             {% endif %}
                             {% endif %}
@@ -144,6 +144,9 @@
           }
           lastScrollValue = top;
       });
+      document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('active').classList.add("loaded");
+        }, false);
     </script>
     {% endblock %}
 </body>
