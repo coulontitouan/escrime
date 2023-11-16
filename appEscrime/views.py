@@ -232,11 +232,14 @@ def inscription_competition(id) :
         if form.role.data == "Arbitre" and get_est_inscrit(current_user.num_licence,id) == False:
             competition = get_competition(id)
             competition.inscription(current_user.num_licence,True)
+            flash('Vous êtes inscrit comme arbitre', 'success')
             return redirect(url_for('competition',id = id))
         elif form.role.data == "Tireur" and get_est_inscrit(current_user.num_licence,id) == False:
             competition = get_competition(id)
             competition.inscription(current_user.num_licence)
+            flash('Vous êtes inscrit comme tireur', 'success')
             return redirect(url_for('competition', id = id))
         else:
-            return redirect(url_for('home'))
+            flash('Vous êtes déja inscrit', 'error')
+            return redirect(url_for('competition', id = id))
     return render_template('competition.html',form=form, competition = get_competition(id), id = id )

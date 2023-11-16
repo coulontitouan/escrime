@@ -4,6 +4,13 @@
 <link rel="stylesheet" href="{{url_for('static', filename='competition.css')}}">
 {% endblock %}
 {% block content %}
+<!-- Ajoutez ceci à l'endroit où vous souhaitez afficher les messages flash -->
+{% for message in get_flashed_messages()  %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
 <div id="body">
     <div id="un">
         <h2>Poules :</h2>
