@@ -129,7 +129,9 @@ a {
 }
 
 #header .menu-btn:checked~.liens {
-    max-height: 240px;
+    overflow-y: hidden;
+	max-height: 300px; /* approximate max height */
+	transition-duration: .2s;
 }
 
 #header .menu-btn:checked~.menu-icon .navicon {
