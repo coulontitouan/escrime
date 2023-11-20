@@ -16,79 +16,79 @@
         integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
     {% endblock %}
 
-    <title>Compétition ESCRIME | {{request.path}}</title>
+    <title>Compétition ESCRIME</title>
     {% endblock %}
 </head>
 
 <body>
     <header id="header">
         <!-- Fixed navbar -->
-        <a href="{{ url_for('home') }}"><img src="{{ url_for('static', filename='images/escrimeurNav.png')}}" alt="un escrimeur qui pointe son épée" href="https://google.com"></a>
-        <nav>
-                <ul>
-                    <li>
-                        <ul class="liens">
-                            <li>
-                                <a href="{{ url_for('home') }}" {% if request.path == url_for('home') %} id="active" {% endif %}>Accueil</a>
-                            </li>
-                            <li>
-                                <a href ="{{ url_for('informations') }}" {% if request.path == url_for('informations') %} id="active" {% endif %}>Informations générales</a>
-                            </li>
-                            {% if current_user.is_authenticated %}
-                            {% if current_user.is_admin() %}
-                            <li>
-                                <a href="{{ url_for('creationCompet') }}" {% if request.path == url_for('creationCompet') %} id="active" {% endif %}> Créer une compétition</a>
-                            </li>
-                            {% endif %}
-                            {% endif %}
-                        </ul>
-                    </li>
-                    <li id = "navbar2">
-                        <form class="form-inline ">
-                            <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Search"
-                                aria-label="Search">
-                                <i class="fas fa-search" aria-hidden="true"></i>
-                        </form>
-                        {% if current_user.is_authenticated %}
-                        <svg id="boutonConnexion" width="160" height="70">
-                            <a href="{{ url_for('profil') }}">
-                                <g>
-                                    <rect width="120" height="40" x="5" y="15" rx="20" ry="20" fill="white"></rect>
-                                    <circle cx="125" cy="35" r="30" fill="white"></circle>
-                                </g>
-                                <text x="60" y="35" text-anchor="middle" dominant-baseline="central" fill="black">
-                                    Profil
-                                </text>
-                                <image href="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur" width="40" height="40" x="105" y="15"></image>
-                            </a>
-                        </svg>
-                        {% else %}
-                        <svg id="boutonConnexion" width="160" height="70">
-                            <a href="{{ url_for('connexion') }}">
-                                <g>
-                                    <rect width="120" height="40" x="5" y="15" rx="20" ry="20" fill="white"></rect>
-                                    <circle cx="125" cy="35" r="30" fill="white"></circle>
-                                </g>
-                                <text x="60" y="35" text-anchor="middle" dominant-baseline="central" fill="black">
-                                    Connexion
-                                </text>
-                                <image href="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur" width="40" height="40" x="105" y="15"></image>
-                            </a>
-                        </svg>
-                        {% endif %}
-                        {% if current_user.is_authenticated %}
-                        {% if current_user.is_admin() %}
-                        <a onclick="shutdown()" style="position: absolute; top: 0%;left: 50%;">
-                            <button class="button-shutdown btn btn-warning" role="button">
-                                fermer l'application
-                            </button>
-                        </a>
-                        {% endif %}
-                        {% endif %}
-                    </li>
-                </ul>
-            </nav>
-        </header>
+        <a href="{{ url_for('home') }}" class="logo"><img src="{{ url_for('static', filename='images/escrimeurNav.png')}}" alt="un escrimeur qui pointe son épée"></a>
+        <input class="menu-btn" type="checkbox" id="menu-btn" />
+        <label class="menu-icon" for="menu-btn"><span class="navicon"></span></label>
+        {% if current_user.is_authenticated %}
+        {% if current_user.is_admin() %}
+        <a onclick="shutdown()" id="shutdownbutton">
+            <button class="button-shutdown btn btn-warning" role="button">
+                fermer l'application
+            </button>
+        </a>
+        {% endif %}
+        {% endif %}
+        <h2 id="titre">{{ request.path }}</h2>
+        <ul class="liens">
+            <li id="pageaccueil">
+                <a href="{{ url_for('home') }}" {% if request.path == url_for('home') %} id="active" {% endif %}>Accueil</a>
+            </li>
+            <li id="pageinfos">
+                <a href ="{{ url_for('informations') }}" {% if request.path == url_for('informations') %} id="active" {% endif %}>Informations générales</a>
+            </li>
+            {% if current_user.is_authenticated %}
+            {% if current_user.is_admin() %}
+            <li id="pagecreecompet">
+                <a href="{{ url_for('creationCompet') }}" {% if request.path == url_for('creationCompet') %} id="active" {% endif %}> Créer une compétition</a>
+            </li>
+            {% endif %}
+            {% endif %}
+            <li id="search">
+                <form class="form-inline ">
+                    <input class="form-control form-control-sm mr-3" type="text" placeholder="Rechercher"aria-label="Rechercher">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                </form>
+            </li>
+            {% if current_user.is_authenticated %}
+            <li id="connexion">
+                <svg id="boutonConnexion" width="160" height="70">
+                    <a href="{{ url_for('profil') }}">
+                        <g>
+                            <rect width="120" height="40" x="5" y="15" rx="20" ry="20" fill="white"></rect>
+                            <circle cx="125" cy="35" r="30" fill="white"></circle>
+                        </g>
+                        <text x="60" y="35" text-anchor="middle" dominant-baseline="central" fill="black">
+                            {{ current_user.prenom }}
+                        </text>
+                        <image href="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur" width="40" height="40" x="105" y="15"></image>
+                    </a>
+                </svg>
+            </li>
+            {% else %}
+            <li id="connexion">
+                <svg id="boutonConnexion" width="160" height="70">
+                    <a href="{{ url_for('connexion') }}">
+                        <g>
+                            <rect width="120" height="40" x="5" y="15" rx="20" ry="20" fill="white"></rect>
+                            <circle cx="125" cy="35" r="30" fill="white"></circle>
+                        </g>
+                        <text x="60" y="35" text-anchor="middle" dominant-baseline="central" fill="black">
+                            Connexion
+                        </text>
+                        <image href="{{ url_for('static', filename='images/escrimeur.png')}}" alt="logo escrimeur" width="40" height="40" x="105" y="15"></image>
+                    </a>
+                </svg>
+            </li>
+            {% endif %}
+        </ul>
+    </header>
     
         <!-- Your page content -->
     <main class="flex-shrink-0">
@@ -98,7 +98,7 @@
 
             {% endblock %}
         </div>
-        <a href="#" id="backTop" class="hidden"><img src="{{url_for('static', filename='images/redArrow.png')}}" alt=""></a>
+        <a href="#" id="backTop" class="hidden"><img src="{{url_for('static', filename='images/redArrow.png')}}" alt="upArrow"></a>
     </main>
 
     <footer id="footer" class="footer mt-auto py-3 bg-light">
@@ -116,36 +116,55 @@
         let texte =  "Vous êtes sur le point de fermer l'application.\r\n" +
                     "La compétition et les résultats seront sauvegardées.\r\n" +
                     "Êtes-vous sûr(e) ?"
-        if(confirm(texte) == true){
+        let reponse = confirm(texte)
+        if(reponse){
             alert("Fermeture de l'application.")
-            location.href = "/shutdown/"
+            location.href = "/shutdown"
         }
     }
     
-      let btn = document.querySelector('#backTop');
+      let upArrow = document.querySelector('#backTop');
 
       let header = document.querySelector("#header");
+
+      let title = document.querySelector('#titre');
 
       let lastScrollValue = 0;
 
       document.addEventListener("scroll", (event) => {
           let top = document.documentElement.scrollTop;
-          scrollPercentage = (window.pageYOffset * 100) / (document.body.scrollHeight - window.innerHeight)
+          let scrollPercentage = (window.pageYOffset * 100) / (document.body.scrollHeight - window.innerHeight)
 
           if (lastScrollValue < top) {
               header.classList.add("hidden");
+              document.getElementById("menu-btn").checked = false;
           } else {
               header.classList.remove("hidden");
           }
           if (scrollPercentage > 10) {
-              btn.classList.remove("hidden");
+            upArrow.classList.remove("hidden");
           } else {
-              btn.classList.add("hidden");
+            upArrow.classList.add("hidden");
           }
           lastScrollValue = top;
       });
+      function titlePage(path) {
+        if (path == "/"){
+            return "Accueil"
+        }else{
+            path = path.slice(1)
+        }
+        let words = path.split('-');
+        words = words.map(function (word) {
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        });
+        let res = words.join(' ');
+        return res;
+    }
       document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('active').classList.add("loaded");
+        let currentPage = document.getElementById('active')
+        title.textContent = titlePage(title.textContent)
+        currentPage.classList.add("loaded");
         }, false);
     </script>
     {% endblock %}
