@@ -20,6 +20,10 @@ a {
     color: inherit;
 }
 
+ul {
+    list-style: none;
+}
+
 #header {
     position: fixed;
     left: 0;
@@ -48,7 +52,6 @@ a {
     align-items: center;
     margin: 0;
     padding: 0;
-    list-style: none;
     overflow: hidden;
 }
 
@@ -61,7 +64,6 @@ a {
     justify-content: center;
     flex-basis: 50%;
     font-size: 1rem;
-    list-style: none;
 }
 
 #header .liens a {
@@ -214,13 +216,12 @@ a {
     right: 20px;
 }
 #shutdownbutton {
-    position: absolute;
-    top: 0%;
-    left: 50%;
+    position: fixed;
+    bottom: 0%;
+    left: 0%;
     width: fit-content;
     height: fit-content;
-    -ms-transform: translate(-50%, 0%);
-    transform: translate(-50%, 0%);
+    margin: 1%;
 }
 
 
@@ -242,7 +243,6 @@ main .container {
     height: auto;
     z-index: 10;
     background-color: white;
-    border: 2px solid black;
     border-radius: 50%;
 }
 
@@ -329,4 +329,8 @@ main {
     #titre{
         visibility: hidden;
     }
+  }
+
+  #shutdownbutton svg{
+    vertical-align: sub;
   }
