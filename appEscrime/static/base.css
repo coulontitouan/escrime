@@ -15,6 +15,11 @@ body {
     flex-direction: column;
 }
 
+h1 {
+    margin-top: 4vh;
+    margin-bottom: 4vh;
+}
+
 a {
     text-decoration: none;
     color: inherit;
@@ -132,8 +137,9 @@ ul {
 
 #header .menu-btn:checked~.liens {
     overflow-y: hidden;
-	max-height: 300px; /* approximate max height */
-	transition-duration: .2s;
+    max-height: 300px;
+    /* approximate max height */
+    transition-duration: .2s;
 }
 
 #header .menu-btn:checked~.menu-icon .navicon {
@@ -161,6 +167,15 @@ ul {
     width: 100%;
     text-align: center;
 }
+
+#githublogo {
+    float: right;
+}
+
+#logoiut{
+    height: 3em;
+}
+
 #search {
     display: flex;
     align-items: center;
@@ -200,10 +215,12 @@ ul {
     height: auto;
     width: 3vh;
 }
-.form-control{
+
+.form-control {
     width: 100% !important;
     flex-shrink: 0;
 }
+
 .form-inline {
     display: flex;
     align-items: center;
@@ -215,19 +232,16 @@ ul {
     position: relative;
     right: 20px;
 }
+
 #shutdownbutton {
     position: fixed;
-    bottom: 0%;
-    left: 0%;
     width: fit-content;
     height: fit-content;
     margin: 1%;
 }
 
-
-h1 {
-    margin-top: 4vh;
-    margin-bottom: 4vh;
+#shutdownbutton svg {
+    vertical-align: sub;
 }
 
 main .container {
@@ -235,24 +249,65 @@ main .container {
 }
 
 #backTop {
-    display: block;
+    display: flex;
     position: fixed;
     bottom: 5%;
     right: 5%;
-    width: 50px;
-    height: auto;
+    height: 50px;
+    width: 150px;
     z-index: 10;
-    background-color: white;
-    border-radius: 50%;
+    text-decoration: none;
+    color: inherit;
+    justify-content: center;
+    align-items: center;
 }
 
 #backTop.hidden {
     visibility: hidden;
 }
 
-#backTop img {
-    width: 100%;
-    height: 100%;
+#backTop * {
+    margin: 0;
+    padding: 2;
+    flex-shrink: 1;
+}
+
+#backTop p {
+    flex-basis: calc(100%/1.5);
+    font-size: 0.8em;
+    font-weight: bold;
+    height: fit-content;
+}
+
+#backTop svg {
+    flex-basis: calc(100%/3);
+}
+
+#backTop:hover svg {
+    animation: gotop 1s linear;
+}
+
+@keyframes gotop {
+
+    0% {
+        transform: translateY(0%);
+    }
+
+    25% {
+        transform: translateY(-20%);
+    }
+
+    50% {
+        transform: translateY(0%);
+    }
+
+    75% {
+        transform: translateY(-20%);
+    }
+
+    100% {
+        transform: translateY(0%);
+    }
 }
 
 #active.loaded {
@@ -271,53 +326,58 @@ main {
     flex-basis: content;
     display: flex;
 }
-  
-.logo img{
+
+.logo img {
     height: 100%;
     width: auto;
     align-self: stretch;
 }
 
-#titre{
+#titre {
     position: absolute;
     top: 20px;
-    left: 0; 
-    right: 0; 
-    margin: auto; 
+    left: 0;
+    right: 0;
+    margin: auto;
     width: fit-content;
     height: fit-content;
 }
 
-.menu-btn:checked ~ #titre {
+.menu-btn:checked~#titre {
     top: 20px;
     bottom: unset;
 }
 
 @media (min-width: 48em) {
-    #header{
+    #header {
         height: 80px;
     }
-    #header .liens li, .form-inline {
-      margin-top: auto;
-      justify-content: center;
-      display: flex;
-      flex-shrink: 1;
+
+    #header .liens li,
+    .form-inline {
+        margin-top: auto;
+        justify-content: center;
+        display: flex;
+        flex-shrink: 1;
 
     }
+
     #header .liens {
-      clear: none;
-      max-height: none;
-      margin: auto;
-      display: flex;
-      flex-direction: row;
-      padding: 5px 10px;
-      justify-content: center;
-      align-self: flex-end;
-      width: unset;
+        clear: none;
+        max-height: none;
+        margin: auto;
+        display: flex;
+        flex-direction: row;
+        padding: 5px 10px;
+        justify-content: center;
+        align-self: flex-end;
+        width: unset;
     }
+
     #header .menu-icon {
-      display: none;
+        display: none;
     }
+
     #active.loaded {
         font-size: larger;
         text-decoration-line: underline;
@@ -326,11 +386,8 @@ main {
         text-underline-offset: 8px;
         transition: all 0.5s ease;
     }
-    #titre{
+
+    #titre {
         visibility: hidden;
     }
-  }
-
-  #shutdownbutton svg{
-    vertical-align: sub;
-  }
+}
