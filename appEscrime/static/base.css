@@ -268,7 +268,6 @@ main .container {
 
 #backTop * {
     margin: 0;
-    padding: 2;
     flex-shrink: 1;
 }
 
@@ -289,24 +288,12 @@ main .container {
 
 @keyframes gotop {
 
-    0% {
+    0%,50%,100% {
         transform: translateY(0%);
     }
 
-    25% {
+    25%,75% {
         transform: translateY(-20%);
-    }
-
-    50% {
-        transform: translateY(0%);
-    }
-
-    75% {
-        transform: translateY(-20%);
-    }
-
-    100% {
-        transform: translateY(0%);
     }
 }
 
