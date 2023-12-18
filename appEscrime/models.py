@@ -176,6 +176,17 @@ class Competition(db.Model):
     
     def get_lieu(self):
         return self.lieu
+    
+    def inscription(self, num_licence, arbitre = False):
+        points = -1
+        if arbitre:
+            points = -2
+        
+        db.session.add(Resultat(id_competition = self.id,
+                                id_escrimeur = num_licence,
+                                rang = None,
+                                points = points))
+        db.session.commit()
 
     def to_csv(self):
         date_csv = self.date.strftime(TO_DATE)
@@ -254,7 +265,6 @@ class Participation(db.Model):
         {},
     )
 
-
     def to_csv(self):
         return [self.tireur, self.touches]
 
@@ -277,8 +287,6 @@ class Resultat(db.Model):
 
     def to_csv(self):
         return [self.rang, self.id_escrimeur, self.points]
-
-
 
 def get_lieu(nom, adresse, ville):
     """Fonction qui permet de récupérer un lieu dans la base de données"""
@@ -328,6 +336,16 @@ def get_typephase(id):
     return TypePhase.query.get(id)
 
 
+# def get_nb_tireurs_poule(id_poule):
+#     poule = get_phase(id_poule)
+
+def get_est_inscrit(num_licence, id_competition):
+    a= Resultat.query.filter_by(id_competition = id_competition, id_escrimeur = num_licence).first()
+    if a == None :
+        return False
+    else:
+        return True
+
 def delete_competition(id):
     """Supprime une compétion dans la BD à partir de son id
 
@@ -342,7 +360,6 @@ def delete_competition(id):
     Competition.query.filter(Competition.id == id).delete()
     db.session.commit()
 
-
 def cree_liste(liste) :
     cpt = 1
     liste2 = []
@@ -350,7 +367,6 @@ def cree_liste(liste) :
         liste2.append((cpt, x.libelle))
         cpt += 1
     return liste2
-
 
 @login_manager.user_loader
 def load_user(num_licence):

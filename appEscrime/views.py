@@ -102,18 +102,15 @@ def connexion():
             selection_club.append((club.id, club.nom))
     selection_club.sort(key=lambda x: x[1])
     f2.club.choices = selection_club
-   
+
     if not f.is_submitted():
-        print("pas submitted")
         f.next.data = request.args.get("next")
-        print(f.next.data)
 
     elif f.validate_on_submit():
         user = f.get_authenticated_user()
         if user:
             login_user(user)
             prochaine_page = f.next.data or url_for("home")
-            print(f.next.data)
             back = request.referrer
             return redirect(prochaine_page)
     return render_template(
@@ -155,10 +152,11 @@ def inscription():
 @app.route("/competition/<int:id>")
 def competition(id):
     """Fonction qui permet d'afficher une compétition"""
+    form = InscriptionForm()
     competition = get_competition(id)
     return render_template(
         "competition.html",
-        competition = competition
+        competition = competition, form = form, user = get_est_inscrit(current_user.num_licence,id)
     )
 
 @app.route("/competition/<int:idC>/poule/<int:idP>")
@@ -222,6 +220,31 @@ import os, signal
 def shutdown():
     os.kill(os.getpid(), signal.SIGINT)
     return jsonify({ "success": True, "message": "Server is shutting down..." })
+
+class InscriptionForm(FlaskForm):
+        role = RadioField('Role',choices = ['Arbitre','Tireur'])
+        next = HiddenField()
+
+@app.route("/competition/<int:id>/inscription", methods=("GET", "POST"))
+def inscription_competition(id) :
+    form = InscriptionForm()
+    if not form.is_submitted():
+        form.next.data = request.args.get("next")
+    else:
+        if form.role.data == "Arbitre" and get_est_inscrit(current_user.num_licence,id) == False:
+            competition = get_competition(id)
+            competition.inscription(current_user.num_licence,True)
+            flash('Vous êtes inscrit comme arbitre', 'success')
+            return redirect(url_for('competition',id = id))
+        elif form.role.data == "Tireur" and get_est_inscrit(current_user.num_licence,id) == False:
+            competition = get_competition(id)
+            competition.inscription(current_user.num_licence)
+            flash('Vous êtes inscrit comme tireur', 'success')
+            return redirect(url_for('competition', id = id))
+        else:
+            flash('Vous êtes déja inscrit', 'error')
+            return redirect(url_for('competition', id = id))
+    return render_template('competition.html',form=form, competition = get_competition(id), id = id)
 
 @app.route("/home/suppr-competition/<int:id>")
 def suppr_competition(id):
