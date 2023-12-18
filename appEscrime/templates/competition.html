@@ -92,6 +92,7 @@
             <div class="header-class">
                 <h2>Classements :</h2>
                 {% if current_user.is_authenticated %}
+                {% if current_user.peut_sinscrire(competition.id) %}
                 <form id="test1" class="form-inline">
                     <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Search"
                     aria-label="Search">
@@ -115,6 +116,7 @@
                     <form action="{{ url_for('deinscription_competition', id = competition.id )}}" method="post" role="form">
                         <button type="submit" class="btn btn-danger">Se désinscrire</button>
                     </form>
+                {% endif %}
                 {% endif %}
                 {% endif %}
             </div>

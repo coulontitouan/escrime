@@ -1,6 +1,7 @@
 from .app import db, login_manager
 from sqlalchemy import *
 from flask_login import UserMixin
+from datetime import date 
 
 TO_DATE = '%d/%m/%Y'
 
@@ -104,6 +105,18 @@ class Escrimeur(db.Model, UserMixin):
         naissance = self.date_naissance.strftime(TO_DATE)
         return ([self.nom, self.prenom, naissance, self.num_licence, self.nationalite],
                 [self.num_licence, self.mot_de_passe])
+    def peut_sinscrire(self,id_compet):
+        competition = get_competition(id_compet)
+        if competition.sexe == self.sexe :
+            today = date.today()
+            age = today.year - self.date_naissance.year - ((today.month, today.day) < (self.date_naissance.month, self.date_naissance.day))
+            agemax = competition.categorie.age_maxi
+            if agemax < 0:
+                agemax = 1000
+            if age < agemax and (age <39 and "Vétérans" not in competition.categorie.libelle or age > 39 and "Vétérans" in competition.categorie.libelle):
+                    return True
+            
+        return False
 
 class Classement(db.Model):
     __tablename__ = 'classement'
