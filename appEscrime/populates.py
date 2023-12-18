@@ -4,7 +4,7 @@ import os
 
 from sqlalchemy import and_
 from .app import db
-from .models import Classement, Lieu, Competition, Phase, Match, Participation, Resultat, Club, Escrimeur, Phase, Type_phase, Arme, Categorie
+from .models import Classement, Lieu, Competition, Phase, Match, Participation, Resultat, Club, Escrimeur, Phase, TypePhase, Arme, Categorie
 
 # def conversion_csv_utf8(chemin):
 #     with open('../data/' + chemin, 'r', encoding = 'latin-1') as fichier_entree:
@@ -133,7 +133,7 @@ def load_matchs(contenu, lecteur, escrimeurs, competitions, phases, types_phase)
     for ligne in lecteur:
         nom_phase = ligne['libelle phase']
         if nom_phase not in types_phase:
-            type_phase = Type_phase(libelle = nom_phase, nb_touches = 15)
+            type_phase = TypePhase(libelle = nom_phase, nb_touches = 15)
             types_phase[nom_phase] = type_phase
             db.session.add(type_phase)
 
@@ -186,6 +186,8 @@ def load_resultats(contenu, lecteur):
                                 id_escrimeur = ligne['adherent'],
                                 rang = ligne['rang'],
                                 points = ligne['points']))
+
+
 
 def save_competitions():
     with open('../data/competitions_CEB.csv', 'w', encoding = 'utf-8') as fichier:

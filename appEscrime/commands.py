@@ -6,14 +6,18 @@ import os
 import click
 from sqlalchemy import desc
 from .app import app , db
-from .models import Type_phase, Arme, Categorie, Club, Escrimeur
+from .models import TypePhase, Arme, Categorie, Club, Escrimeur
 from .populates import load_competitions, load_connexion, load_escrimeurs, load_matchs, load_resultats
 from .populates import save_competitions, save_classements, save_connexions
+
+DB_DIR = '../CEB.db'
 
 @app.cli.command()
 def loadbd():
     """Crée les tables et gère le peuplement de la base de données"""
 
+    if os.path.exists(DB_DIR):
+        os.remove(DB_DIR)
     # création de toutes les tables
     db.create_all()
 
@@ -44,7 +48,7 @@ def loadbd():
         db.session.add(club)
 
     # création du type de phase de poule
-    types_phase = {'Poule': Type_phase(libelle = 'Poule', touches_victoire = 5)}
+    types_phase = {'Poule': TypePhase(libelle = 'Poule', touches_victoire = 5)}
     for type_phase in types_phase.values():
         db.session.add(type_phase)
 
@@ -59,27 +63,28 @@ def loadbd():
     les_fichiers = os.listdir('../data') # Éxecution dans appEscrime
     les_fichiers.sort()
     for nom_fichier in les_fichiers:
-        with open('../data/' + nom_fichier, 'r', newline = '', encoding = 'utf-8') as fichier:
-            nom_fichier = nom_fichier[:-4]
-            print(nom_fichier)
-            lecteur = csv.DictReader(fichier, delimiter = ';')
-            contenu = nom_fichier.split('_')
+        if os.path.splitext(nom_fichier)[1] == '.csv':
+            with open('../data/' + nom_fichier, 'r', newline = '', encoding = 'utf-8') as fichier:
+                nom_fichier = nom_fichier[:-4]
+                print(nom_fichier)
+                lecteur = csv.DictReader(fichier, delimiter = ';')
+                contenu = nom_fichier.split('_')
 
-            if contenu[0] == 'classement':
-                load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories)
+                if contenu[0] == 'classement':
+                    load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories)
 
-            elif contenu[0] == 'connexion':
-                load_connexion(lecteur, escrimeurs)
- 
-            elif contenu[0] == 'competitions':
-                load_competitions(lecteur, armes, categories, competitions, lieux)
+                elif contenu[0] == 'connexion':
+                    load_connexion(lecteur, escrimeurs)
 
-            elif contenu[0] == 'matchs':
-                load_matchs(contenu, lecteur, escrimeurs, competitions, types_phase, phases)
+                elif contenu[0] == 'competitions':
+                    load_competitions(lecteur, armes, categories, competitions, lieux)
 
-            elif contenu[0] == 'resultats':
-                load_resultats(contenu, lecteur)
-        fichier.close()
+                elif contenu[0] == 'matchs':
+                    load_matchs(contenu, lecteur, escrimeurs, competitions, types_phase, phases)
+
+                elif contenu[0] == 'resultats':
+                    load_resultats(contenu, lecteur)
+            fichier.close()
         db.session.commit()
 
  
@@ -91,12 +96,15 @@ def syncbd():
 @app.cli.command()
 def deletebd():
     """Supprime la base de données"""
-    if os.path.exists('../CEB.db'):
-        os.remove('../CEB.db')
+    if os.path.exists(DB_DIR):
+        os.remove(DB_DIR)
 
 @app.cli.command()
 def savebd():
     """Sauvegarde la base de données dans des fichiers csv"""
+    for nom_fichier in os.listdir('../data'):
+        if os.path.splitext(nom_fichier)[1] == '.csv':
+            os.remove('../data/' + nom_fichier)
     save_classements()
     save_connexions()
     save_competitions()

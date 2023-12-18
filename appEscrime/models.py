@@ -2,6 +2,8 @@ from .app import db, login_manager
 from sqlalchemy import *
 from flask_login import UserMixin
 
+TO_DATE = '%d/%m/%Y'
+
 class Lieu(db.Model):
     __tablename__ = 'lieu'
     id = db.Column(db.Integer(), primary_key = True)
@@ -99,7 +101,7 @@ class Escrimeur(db.Model, UserMixin):
         return self.id_club == 1
     
     def to_csv(self):
-        naissance = self.date_naissance.strftime('%d/%m/%Y')
+        naissance = self.date_naissance.strftime(TO_DATE)
         return ([self.nom, self.prenom, naissance, self.num_licence, self.nationalite],
                 [self.num_licence, self.mot_de_passe])
 
@@ -229,7 +231,7 @@ class Competition(db.Model):
         for mot in split:
             res += mot[0].upper() + mot[1:]
         res += '_'
-        date_csv = self.date.strftime('%d/%m/%Y')
+        date_csv = self.date.strftime(TO_DATE)
         for carac in date_csv:
             if carac == '/':
                 res += '-'
@@ -238,10 +240,10 @@ class Competition(db.Model):
         return res + '_' + str(self.id)
 
     def to_csv(self):
-        date_csv = self.date.strftime('%d/%m/%Y')
+        date_csv = self.date.strftime(TO_DATE)
         return [self.nom, date_csv, self.sexe] + self.categorie.to_csv() + self.arme.to_csv() + [self.coefficient] + self.lieu.to_csv()
 
-class Type_phase(db.Model):
+class TypePhase(db.Model):
     __tablename__ = 'type_phase'
     libelle = db.Column(db.String(32), primary_key = True)
     touches_victoire = db.Column(db.Integer())
@@ -258,7 +260,7 @@ class Phase(db.Model):
     # Clé étrangère vers le type de phase
     libelle = db.Column(db.String(32), db.ForeignKey('type_phase.libelle'))
     # Relation plusieurs-à-un : Une phase est décrite par un seul type de phase
-    type = db.relationship('Type_phase', back_populates = 'phases')
+    type = db.relationship('TypePhase', back_populates = 'phases')
     # Relation un-à-plusieurs : Une compétition contient différentes phases
     matchs = db.relationship('Match', back_populates = 'phase')
     __table_args__ = (
