@@ -172,11 +172,14 @@ def deconnexion():
     return redirect(url_for("home"))
 
 @app.route('/cree/competition', methods=("GET", "POST"))
+@login_required
 def creationCompet():
     """Fonction qui permet de créer une compétition"""
     f = CreeCompetitionForm()
     f.nom_arme.choices = cree_liste(get_all_armes())
     f.nom_categorie.choices = cree_liste(get_all_categories())
+    if current_user.is_admin() == False:
+        return redirect(url_for("home"))
     if not  f.is_submitted():
         f.next.data = request.args.get("next")
     else:
@@ -222,7 +225,6 @@ class InscriptionForm(FlaskForm):
         role = RadioField('Role',choices = ['Arbitre','Tireur'])
         next = HiddenField()
 
-
 @app.route("/competition/<int:id>/inscription", methods=("GET", "POST"))
 def inscription_competition(id) :
     form = InscriptionForm()
@@ -243,3 +245,9 @@ def inscription_competition(id) :
             flash('Vous êtes déja inscrit', 'error')
             return redirect(url_for('competition', id = id))
     return render_template('competition.html',form=form, competition = get_competition(id), id = id)
+
+@app.route("/home/suppr-competition/<int:id>")
+def suppr_competition(id):
+    delete_competition(id)
+    flash('Compétition supprimée avec succès', 'warning')
+    return redirect(url_for('home'))
