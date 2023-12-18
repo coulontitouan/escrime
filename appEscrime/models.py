@@ -83,7 +83,17 @@ class Escrimeur(db.Model, UserMixin):
         return self.active           
 
     def is_anonymous(self):
-        return False          
+        return False
+
+    def is_admin(self):
+        return self.id_club == 1
+    
+    def is_arbitre(self, id_competition):
+        a= Resultat.query.filter_by(id_competition = id_competition, id_escrimeur = self.num_licence).first()
+        if a != None :
+            if a.points == -2:
+                return True
+        return False
 
     def get_id(self):
         return self.num_licence
@@ -96,9 +106,6 @@ class Escrimeur(db.Model, UserMixin):
     
     def get_sexe(self):
         return self.sexe
-    
-    def is_admin(self):
-        return self.id_club == 1
     
     def to_csv(self):
         naissance = self.date_naissance.strftime(TO_DATE)

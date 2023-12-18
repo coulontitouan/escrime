@@ -11,6 +11,11 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {% endfor %}
+{% if current_user.is_authenticated %}
+{% if current_user.is_arbitre(competition.id) %}
+<h1>Je suis un arbitre</h1>
+{% endif %}
+{% endif %}
 <div id="body">
     <div id="un">
         <h2>Poules :</h2>
