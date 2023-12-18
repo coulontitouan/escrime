@@ -171,7 +171,7 @@ def deconnexion():
     logout_user()
     return redirect(url_for("home"))
 
-@app.route('/cree/competition/', methods=("GET", "POST"))
+@app.route('/cree/competition', methods=("GET", "POST"))
 @login_required
 def creationCompet():
     """Fonction qui permet de créer une compétition"""

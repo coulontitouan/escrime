@@ -87,14 +87,15 @@ ul {
     height: 5rem;
     padding: 5px;
     width: auto;
-    transition: all 1s ease;
 }
 
-.logo.clicked{
+.clicked{
+    transition: all 1s ease;
     transform: rotate(360deg) translateX(100%);
 }
 
-.logo.notclicked{
+.notclicked{
+    transition: all 1s ease;
     transform: rotate(-360deg) translateX(0%);    
 }
 
