@@ -328,6 +328,21 @@ def get_typephase(id):
     return TypePhase.query.get(id)
 
 
+def delete_competition(id):
+    """Supprime une compétion dans la BD à partir de son id
+
+    Args:
+        id (int): l'id d'une compétition
+    """
+    matchs_comp = Match.query.filter(Match.id_competition == id).all()
+    Participation.query.filter(Participation.id_match in matchs_comp).delete()
+    Match.query.filter(Match.id_competition == id).delete()
+    Phase.query.filter(Phase.id_competition == id).delete()
+    Resultat.query.filter(Resultat.id_competition == id).delete()
+    Competition.query.filter(Competition.id == id).delete()
+    db.session.commit()
+
+
 def cree_liste(liste) :
     cpt = 1
     liste2 = []
