@@ -251,3 +251,10 @@ def suppr_competition(id):
     delete_competition(id)
     flash('Compétition supprimée avec succès', 'warning')
     return redirect(url_for('home'))
+
+@app.route("/competition/<int:idC>/poule/<int:idP>/match/<int:idM>")
+def match(idC, idP, idM):
+    """Fonction qui permet d'afficher un match"""
+    return render_template(
+        "match.html"
+    )
