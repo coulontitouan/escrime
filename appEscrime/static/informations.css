@@ -3,36 +3,36 @@
     width: 30vw;
     margin-left: 3vw;
 }
-article>div{
+main article>div{
     display: flex;
     flex-wrap: nowrap;
 }
-h3{
+main h3{
     text-align: center;
 }
-p{
+main p{
     width: 100%;
     text-align: justify;
     margin-top: 3em;
 }
-h1{
+main h1{
     margin-top: 4vh;
     margin-bottom: 4vh;
 }
 
-#arme{
+main #arme{
     height: auto;
     width: 30vw;
     margin-left: 5vh;
 }
-article>ul>li>div{
+main article>ul>li>div{
     display: flex
 }
 
-article>ul {
+main article>ul {
     padding: 0;
 }
 
-article>ul>li {
+main article>ul>li {
     text-align: center;
 }
