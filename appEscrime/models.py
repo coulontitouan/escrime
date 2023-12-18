@@ -157,6 +157,13 @@ class Competition(db.Model):
                                 points = points))
         db.session.commit()
 
+    def desinscription(self, num_licence):
+        # Vérifier si le participant est inscrit à cette compétition
+        resultat = Resultat.query.filter_by(id_competition=self.id, id_escrimeur=num_licence).first()
+        if resultat :
+            db.session.delete(resultat)
+            db.session.commit()
+
 class Type_phase(db.Model):
     __tablename__ = 'type_phase'
     libelle = db.Column(db.String(32), primary_key = True)

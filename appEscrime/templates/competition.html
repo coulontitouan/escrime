@@ -109,6 +109,10 @@
                 <button id = "openbtn" type="submit" class="btn btn-success">Confirmer</button>
                 </form>
             </dialog>
+            {% else %}
+                <form action="{{ url_for('deinscription_competition', id = competition.id )}}" method="post" role="form">
+                    <button type="submit" class="btn btn-danger">CACA</button>
+                </form>
             {% endif %}
         </div>
         <table class = "scroll">

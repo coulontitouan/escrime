@@ -243,3 +243,11 @@ def inscription_competition(id) :
             flash('Vous êtes déja inscrit', 'error')
             return redirect(url_for('competition', id = id))
     return render_template('competition.html',form=form, competition = get_competition(id), id = id)
+
+@app.route("/competition/<int:id>/deinscription", methods=("GET", "POST"))
+def deinscription_competition(id) :
+    form = InscriptionForm()
+    competition = get_competition(id)
+    competition.desinscription(current_user.num_licence)
+    print("test")
+    return render_template('competition.html', competition = get_competition(id), id = id)
