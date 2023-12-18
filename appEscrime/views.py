@@ -154,9 +154,13 @@ def competition(id):
     """Fonction qui permet d'afficher une compétition"""
     form = InscriptionForm()
     competition = get_competition(id)
+    try :
+        user = current_user.num_licence
+    except :
+        user = -1
     return render_template(
         "competition.html",
-        competition = competition, form = form, user = get_est_inscrit(current_user.num_licence,id)
+        competition = competition, form = form, user = competition.est_inscrit(user)
     )
 
 @app.route("/competition/<int:idC>/poule/<int:idP>")
@@ -226,21 +230,20 @@ class InscriptionForm(FlaskForm):
 @app.route("/competition/<int:id>/inscription", methods=("GET", "POST"))
 def inscription_competition(id) :
     form = InscriptionForm()
+    competition = get_competition(id)
     if not form.is_submitted():
         form.next.data = request.args.get("next")
     else:
-        if form.role.data == "Arbitre" and get_est_inscrit(current_user.num_licence,id) == False:
-            competition = get_competition(id)
+        if form.role.data == "Arbitre" and competition.est_inscrit(current_user.num_licence) == False:
             competition.inscription(current_user.num_licence,True)
             flash('Vous êtes inscrit comme arbitre', 'success')
             return redirect(url_for('competition',id = id))
-        elif form.role.data == "Tireur" and get_est_inscrit(current_user.num_licence,id) == False:
-            competition = get_competition(id)
+        elif form.role.data == "Tireur" and competition.est_inscrit(current_user.num_licence) == False:
             competition.inscription(current_user.num_licence)
             flash('Vous êtes inscrit comme tireur', 'success')
             return redirect(url_for('competition', id = id))
         else:
-            flash('Vous êtes déja inscrit', 'error')
+            flash('Vous êtes déja inscrit', 'danger')
             return redirect(url_for('competition', id = id))
     return render_template('competition.html',form=form, competition = get_competition(id), id = id)
 
@@ -249,5 +252,5 @@ def deinscription_competition(id) :
     form = InscriptionForm()
     competition = get_competition(id)
     competition.desinscription(current_user.num_licence)
-    print("test")
-    return render_template('competition.html', competition = get_competition(id), id = id)
+    flash('Vous êtes désinscrit', 'warning')
+    return render_template('competition.html',form = form, competition = get_competition(id), id = id)

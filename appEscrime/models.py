@@ -163,7 +163,13 @@ class Competition(db.Model):
         if resultat :
             db.session.delete(resultat)
             db.session.commit()
-
+            
+    def est_inscrit(self,num_licence):
+        user= Resultat.query.filter_by(id_competition = self.id, id_escrimeur = num_licence).first()
+        if user == None :
+            return False
+        else:
+            return True
 class Type_phase(db.Model):
     __tablename__ = 'type_phase'
     libelle = db.Column(db.String(32), primary_key = True)
@@ -293,9 +299,3 @@ def get_all_competitions():
 # def get_nb_tireurs_poule(id_poule):
 #     poule = get_phase(id_poule)
 
-def get_est_inscrit(num_licence, id_competition):
-    a= Resultat.query.filter_by(id_competition = id_competition, id_escrimeur = num_licence).first()
-    if a == None :
-        return False
-    else:
-        return True

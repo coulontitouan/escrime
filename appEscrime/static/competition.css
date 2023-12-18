@@ -78,7 +78,7 @@ table {
   margin-top: 5vh;
 }
 
-#test {
+.header-class {
   display: flex;
   justify-content: space-between;
 }
@@ -100,7 +100,7 @@ tbody tr:nth-child(even) {
   border: 2px solid black;
 }
 
-#test > ul {
+.header-class > ul {
 	display: flex;
   justify-content: space-evenly; 
 	width: 100%;
@@ -122,10 +122,6 @@ tbody tr:nth-child(even) {
   display: flex;
   justify-content: end;
 
-}
-#role{
-  display: flex;
-  justify-content: center;
 }
 .role{
   font-size: medium;}
