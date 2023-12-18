@@ -156,7 +156,7 @@ def competition(id):
     competition = get_competition(id)
     return render_template(
         "competition.html",
-        competition = competition, form = form
+        competition = competition, form = form, user = get_est_inscrit(current_user.num_licence,id)
     )
 
 @app.route("/competition/<int:idC>/poule/<int:idP>")
@@ -242,4 +242,4 @@ def inscription_competition(id) :
         else:
             flash('Vous êtes déja inscrit', 'error')
             return redirect(url_for('competition', id = id))
-    return render_template('competition.html',form=form, competition = get_competition(id), id = id )
+    return render_template('competition.html',form=form, competition = get_competition(id), id = id)
