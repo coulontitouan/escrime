@@ -174,11 +174,14 @@ def deconnexion():
     return redirect(url_for("home"))
 
 @app.route('/cree/competition', methods=("GET", "POST"))
+@login_required
 def creationCompet():
     """Fonction qui permet de créer une compétition"""
     f = CreeCompetitionForm()
     f.nom_arme.choices = cree_liste(get_all_armes())
     f.nom_categorie.choices = cree_liste(get_all_categories())
+    if current_user.is_admin() == False:
+        return redirect(url_for("home"))
     if not  f.is_submitted():
         f.next.data = request.args.get("next")
     else:
@@ -219,3 +222,9 @@ import os, signal
 def shutdown():
     os.kill(os.getpid(), signal.SIGINT)
     return jsonify({ "success": True, "message": "Server is shutting down..." })
+
+@app.route("/home/suppr-competition/<int:id>")
+def suppr_competition(id):
+    delete_competition(id)
+    flash('Compétition supprimée avec succès', 'warning')
+    return redirect(url_for('home'))
