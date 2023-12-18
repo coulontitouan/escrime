@@ -87,6 +87,8 @@ class SignUpForm(FlaskForm):
                 user.set_mdp(passwd)
                 db.session.commit()
                 return True
+            else:
+                return False
         else:
             return None
 
@@ -98,7 +100,9 @@ def connexion():
     for club in db.session.query(Club).all():
         if club.id != 1:
             selection_club.append((club.id, club.nom))
+    selection_club.sort(key=lambda x: x[1])
     f2.club.choices = selection_club
+
     if not f.is_submitted():
         f.next.data = request.args.get("next")
 
@@ -107,6 +111,7 @@ def connexion():
         if user:
             login_user(user)
             prochaine_page = f.next.data or url_for("home")
+            back = request.referrer
             return redirect(prochaine_page)
     return render_template(
         "connexion.html",formlogin=f, formsignup = f2)
@@ -123,13 +128,13 @@ def inscription():
     if not f2.is_submitted():
         f2.next.data = request.args.get("next")
     elif f2.validate_on_submit():
-        if f2.est_deja_inscrit_sans_mdp() is not None:
+        if f2.est_deja_inscrit_sans_mdp():
             user = f2.get_authenticated_user()
             if user:
                     login_user(user)
                     prochaine_page = f2.next.data or url_for("home")
                     return redirect(prochaine_page)
-        else:
+        elif f2.est_deja_inscrit_sans_mdp() == None:
             if f2.sexe.data == "Femme":
                 newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Dames",f2.date_naissance.data,f2.club.data)
             else:       
@@ -147,10 +152,11 @@ def inscription():
 @app.route("/competition/<int:id>")
 def competition(id):
     """Fonction qui permet d'afficher une compétition"""
+    form = InscriptionForm()
     competition = get_competition(id)
     return render_template(
         "competition.html",
-        competition = competition
+        competition = competition, form = form, user = get_est_inscrit(current_user.num_licence,id)
     )
 
 @app.route("/competition/<int:idC>/poule/<int:idP>")
@@ -166,11 +172,14 @@ def deconnexion():
     return redirect(url_for("home"))
 
 @app.route('/cree/competition/', methods=("GET", "POST"))
+@login_required
 def creationCompet():
     """Fonction qui permet de créer une compétition"""
     f = CreeCompetitionForm()
     f.nom_arme.choices = cree_liste(get_all_armes())
     f.nom_categorie.choices = cree_liste(get_all_categories())
+    if current_user.is_admin() == False:
+        return redirect(url_for("home"))
     if not  f.is_submitted():
         f.next.data = request.args.get("next")
     else:
@@ -211,3 +220,34 @@ import os, signal
 def shutdown():
     os.kill(os.getpid(), signal.SIGINT)
     return jsonify({ "success": True, "message": "Server is shutting down..." })
+
+class InscriptionForm(FlaskForm):
+        role = RadioField('Role',choices = ['Arbitre','Tireur'])
+        next = HiddenField()
+
+@app.route("/competition/<int:id>/inscription", methods=("GET", "POST"))
+def inscription_competition(id) :
+    form = InscriptionForm()
+    if not form.is_submitted():
+        form.next.data = request.args.get("next")
+    else:
+        if form.role.data == "Arbitre" and get_est_inscrit(current_user.num_licence,id) == False:
+            competition = get_competition(id)
+            competition.inscription(current_user.num_licence,True)
+            flash('Vous êtes inscrit comme arbitre', 'success')
+            return redirect(url_for('competition',id = id))
+        elif form.role.data == "Tireur" and get_est_inscrit(current_user.num_licence,id) == False:
+            competition = get_competition(id)
+            competition.inscription(current_user.num_licence)
+            flash('Vous êtes inscrit comme tireur', 'success')
+            return redirect(url_for('competition', id = id))
+        else:
+            flash('Vous êtes déja inscrit', 'error')
+            return redirect(url_for('competition', id = id))
+    return render_template('competition.html',form=form, competition = get_competition(id), id = id)
+
+@app.route("/home/suppr-competition/<int:id>")
+def suppr_competition(id):
+    delete_competition(id)
+    flash('Compétition supprimée avec succès', 'warning')
+    return redirect(url_for('home'))

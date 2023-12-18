@@ -203,6 +203,17 @@
         title.textContent = titlePage(title.textContent);
         currentPage.classList.add("loaded");
         }, false);
+
+      const dialog = document.getElementById('dialog');
+      const openbtn = document.getElementById('openbtn');
+      const closebtn = document.getElementById('closebtn');
+
+      openbtn.addEventListener('click', function() {
+          dialog.setAttribute('open', true);
+      });
+      closebtn.addEventListener('click', function() {
+          dialog.removeAttribute('open');
+      });
     </script>
     {% endblock %}
 </body>

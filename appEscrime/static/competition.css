@@ -91,3 +91,41 @@ table {
 tbody tr:nth-child(even) {
   background-color: rgba(255, 0, 0, 0.2);
 }
+
+#dialog {
+  position: absolute;
+  top: 50%;
+  left: 40%;
+  width: 25%;
+  border: 2px solid black;
+}
+
+#test > ul {
+	display: flex;
+  justify-content: space-evenly; 
+	width: 100%;
+	padding: 0%;
+}
+#uneimage {
+  width: 70%;
+  height: auto;
+}
+
+#haut {
+  display: flex;
+  justify-content: space-between;
+}
+
+#closebtn{
+  width: 10%;
+  height: 100%;
+  display: flex;
+  justify-content: end;
+
+}
+#role{
+  display: flex;
+  justify-content: center;
+}
+.role{
+  font-size: medium;}
