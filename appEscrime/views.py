@@ -33,7 +33,7 @@ def home():
         competitions = competitions
     )
 
-@app.route("/informations/")
+@app.route("/informations")
 def informations():
     return render_template(
         "informations.html"
@@ -171,7 +171,7 @@ def deconnexion():
     logout_user()
     return redirect(url_for("home"))
 
-@app.route('/cree/competition', methods=("GET", "POST"))
+@app.route('/cree/competition/', methods=("GET", "POST"))
 @login_required
 def creationCompet():
     """Fonction qui permet de créer une compétition"""
@@ -203,16 +203,16 @@ def profil():
         "profil.html"
     )
 
-# class Changer_mdpForm(FlaskForm):
-#     new_mdp=PasswordField("Password",validators=[DataRequired()])
-#     next = HiddenField()
+class Changer_mdpForm(FlaskForm):
+    new_mdp=PasswordField("Password",validators=[DataRequired()])
+    next = HiddenField()
 
-# @app.route("/profil/changer-mdp", methods=("POST",))
-# def changer_mdp():
-#     f =Changer_mdpForm()
-#     return render_template(
-#         "changer-mdp.html", f
-#     )
+@app.route("/profil/changer-mdp", methods=("POST",))
+def changer_mdp():
+    f =Changer_mdpForm()
+    return render_template(
+        "changer-mdp.html", f
+    )
 
 from flask import request, jsonify
 import os, signal
