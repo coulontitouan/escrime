@@ -186,7 +186,7 @@ class Competition(db.Model):
     def inscription(self, num_licence, arbitre = False):
         points = -1
         if arbitre:
-            points = -1
+            points = -2
         db.session.add(Resultat(id_competition = self.id,
                                 id_escrimeur = num_licence,
                                 rang = None,
@@ -221,6 +221,21 @@ class Competition(db.Model):
 
     def cree_poule(self, id_poule):
         db.session.add(Phase(id = id_poule, competition = self, phase = 'Poule'))
+
+    
+    def to_titre_csv(self):
+        res = ''
+        split = self.nom.split(' ')
+        for mot in split:
+            res += mot[0].upper() + mot[1:]
+        res += '_'
+        date_csv = self.date.strftime(TO_DATE)
+        for carac in date_csv:
+            if carac == '/':
+                res += '-'
+            else:
+                res += carac
+        return res + '_' + str(self.id)
 
     def to_csv(self):
         date_csv = self.date.strftime(TO_DATE)
