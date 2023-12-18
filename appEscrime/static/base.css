@@ -87,7 +87,17 @@ ul {
     height: 5rem;
     padding: 5px;
     width: auto;
+    transition: all 1s ease;
 }
+
+.logo.clicked{
+    transform: rotate(360deg) translateX(100%);
+}
+
+.logo.notclicked{
+    transform: rotate(-360deg) translateX(0%);    
+}
+
 
 #header .menu-btn:hover {
     background-color: #f4f4f4;
@@ -237,7 +247,9 @@ ul {
     position: fixed;
     width: fit-content;
     height: fit-content;
-    margin: 1%;
+    top: 0;
+    left: 0;
+    z-index: 10;
 }
 
 #shutdownbutton svg {
@@ -309,9 +321,9 @@ main {
     margin-bottom: 5vh;
 }
 
-#connexion {
-    flex-basis: content;
+#connexion, #deconnexion{
     display: flex;
+    flex-basis: fit-content !important;
 }
 
 .logo img {

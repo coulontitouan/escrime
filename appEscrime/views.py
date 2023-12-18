@@ -194,16 +194,16 @@ def profil():
         "profil.html"
     )
 
-# class Changer_mdpForm(FlaskForm):
-#     new_mdp=PasswordField("Password",validators=[DataRequired()])
-#     next = HiddenField()
+class Changer_mdpForm(FlaskForm):
+    new_mdp=PasswordField("Password",validators=[DataRequired()])
+    next = HiddenField()
 
-# @app.route("/profil/changer-mdp", methods=("POST",))
-# def changer_mdp():
-#     f =Changer_mdpForm()
-#     return render_template(
-#         "changer-mdp.html", f
-#     )
+@app.route("/profil/changer-mdp", methods=("POST",))
+def changer_mdp():
+    f =Changer_mdpForm()
+    return render_template(
+        "changer-mdp.html", f
+    )
 
 from flask import request, jsonify
 import os, signal
