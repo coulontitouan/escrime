@@ -5,7 +5,7 @@
 {% block content %}        
     <h1>{{ competition.nom }}</h1>
     <main>  
-        <div id="un">
+        <div id="un" class = "pic-ctn">
             {% for p in poules %}
             <table class = "scroll">
                 <thead>
@@ -29,10 +29,59 @@
                 </tbody>
             </table>
             {% endfor %}
-            <table class = "scroll">
-                <thead>
+            <table class = "scroll" class = "pic">
+                <thead class = >
                     <tr>
                         <th id="intitule" colspan="3">Poule A - 8 Tireurs - G. DUTROU <a href="{{url_for('poule', idC = competition.id , idP = 1)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
+                    </tr>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>LOUIS</td>
+                        <td>Emile</td>
+                        <td>1610</td>
+                    </tr>
+                    <tr>
+                        <td>FOURNIRET</td>
+                        <td>Michel</td>
+                        <td>1520</td>
+                    </tr>
+                    <tr>
+                        <td>ALEGRE</td>
+                        <td>Patrice</td>
+                        <td>1365</td>
+                    </tr>
+                    <tr>
+                        <td>ALEGRE</td>
+                        <td>Patrice</td>
+                        <td>1365</td>
+                    </tr>
+                    <tr>
+                        <td>DUPONT</td>
+                        <td>Xavier</td>
+                        <td>1780</td>
+                    </tr>
+                    <tr>
+                        <td>DUPONT</td>
+                        <td>Xavier</td>
+                        <td>1780</td>
+                    </tr>
+                    <tr>
+                        <td>DUPONT</td>
+                        <td>Xavier</td>
+                        <td>1780</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class = "scroll" class = "pic">
+                <thead class = >
+                    <tr>
+                        <th id="intitule" colspan="3">Poule B - 8 Tireurs - G. DUTROU <a href="{{url_for('poule', idC = competition.id , idP = 1)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
                     </tr>
                     <tr>
                         <th>Nom</th>

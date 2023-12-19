@@ -119,3 +119,38 @@ h1{
 h3{
     margin: 3vh;
 }
+
+.pic-ctn {
+    position: relative;
+    margin-top: 15vh;
+    overflow: hidden;
+  }
+  
+  .pic-ctn > img {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    animation: display 12s infinite linear;
+  }
+  
+  .pic-ctn > img:nth-child(2) {
+    animation-delay: 4s;
+  }
+  
+@keyframes display {
+    0%, 100% {
+      opacity: 0;
+    }
+    8.33%, 25% {
+      opacity: 1;
+    }
+    33.33%, 41.66% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 0;
+    }
+  }
+  
