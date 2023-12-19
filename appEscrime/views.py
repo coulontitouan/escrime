@@ -1,15 +1,12 @@
 from .app import app ,db
-from flask import flash, render_template, redirect, url_for
-from flask_login import login_user , current_user, logout_user
-from flask import request,redirect, url_for
-from flask_login import login_required
+from flask import flash, render_template, redirect, url_for, request
+from flask_login import login_user , current_user, logout_user, login_required
 from wtforms import StringField , HiddenField, DateField , RadioField, PasswordField,SelectField
 from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 from hashlib import sha256
 from .models import *
 from .commands import newuser
-from wtforms import DateField
 
 with app.app_context():
     class CreeCompetitionForm(FlaskForm):
@@ -215,11 +212,9 @@ class Changer_mdpForm(FlaskForm):
     next = HiddenField()
 
 @app.route("/profil/changer-mdp", methods=("POST",))
-def changer_mdp():
-    f =Changer_mdpForm()
-    return render_template(
-        "changer-mdp.html", f
-    )
+def changer_mdp() :
+    f = Changer_mdpForm()
+    return render_template("changer-mdp.html", f = f)
 
 from flask import request, jsonify
 import os, signal
@@ -234,34 +229,61 @@ class InscriptionForm(FlaskForm):
 
 @app.route("/competition/<int:id>/inscription", methods=("GET", "POST"))
 def inscription_competition(id) :
+    """Inscrit un utilisateur à une compétition spécifique.
+
+    Args:
+        id (int): Identifiant unique de la compétition.
+
+    Returns:
+        flask.Response: Renvoie la page de la compétition
+    """
     form = InscriptionForm()
     competition = get_competition(id)
-    if not form.is_submitted():
+    inscrit = competition.est_inscrit(current_user.num_licence)
+    if not form.is_submitted() :
         form.next.data = request.args.get("next")
-    else:
-        if form.role.data == "Arbitre" and competition.est_inscrit(current_user.num_licence) == False:
+    else :
+        if form.role.data == "Arbitre" and not inscrit :
             competition.inscription(current_user.num_licence,True)
             flash('Vous êtes inscrit comme arbitre', 'success')
             return redirect(url_for('competition',id = id))
-        elif form.role.data == "Tireur" and competition.est_inscrit(current_user.num_licence) == False:
+        if form.role.data == "Tireur" and not inscrit :
             competition.inscription(current_user.num_licence)
             flash('Vous êtes inscrit comme tireur', 'success')
             return redirect(url_for('competition', id = id))
-        else:
-            flash('Vous êtes déja inscrit', 'danger')
-            return redirect(url_for('competition', id = id))
-    return render_template('competition.html',form=form, competition = get_competition(id), id = id)
+        flash('Vous êtes déja inscrit', 'danger')
+        return redirect(url_for('competition', id = id))
+    return render_template('competition.html',form = form, competition = competition, id = id)
 
 @app.route("/home/suppr-competition/<int:id>")
-def suppr_competition(id):
+def suppr_competition(id : int) :
+    """Supprime une compétition.
+
+    Args:
+        id (int): Identifiant unique de la compétition.
+
+    Returns:
+        flask.Response: Renvoie la page d'accueil
+    """
     delete_competition(id)
     flash('Compétition supprimée avec succès', 'warning')
+
     return redirect(url_for('home'))
 
 @app.route("/competition/<int:id>/deinscription", methods=("GET", "POST"))
-def deinscription_competition(id) :
+def deinscription_competition(id : int) :
+    """Gère la désinscription d'un utilisateur à une compétition spécifique.
+
+    Args:
+        id (int): Identifiant unique de la compétition.
+
+    Returns:
+        flask.Response: Renvoie la page de la compétition
+    """
     form = InscriptionForm()
     competition = get_competition(id)
     competition.desinscription(current_user.num_licence)
     flash('Vous êtes désinscrit', 'warning')
-    return render_template('competition.html',form = form, competition = get_competition(id), id = id)
+
+    return render_template('competition.html', form=form, competition=competition, id=id)
+

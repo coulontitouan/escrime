@@ -166,6 +166,15 @@ class Competition(db.Model):
     # Relation un-à-plusieurs : Une compétition comprend plusieurs escrimeurs
     resultats = db.relationship('Resultat', back_populates = 'competition')
 
+    def get_tireurs(self):
+        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2)
+    
+    def get_tireurs_order_by_pts(self):
+        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2).order_by(Resultat.points.desc())
+
+    def get_arbitres(self):
+        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points == -2)
+
     def get_tireurs_phase(self, id_phase):
         joueurs = set()
         matchs = Match.query.filter_by(id_phase = (self.id,id_phase))
@@ -190,11 +199,16 @@ class Competition(db.Model):
     def get_lieu(self):
         return self.lieu
     
-    def inscription(self, num_licence, arbitre = False):
+    def inscription(self, num_licence : int, arbitre : bool = False) :
+        """Inscrit un tireur à une compétition
+
+        Args:
+            num_licence (int): Numéro de licence de l'escrimeur
+            arbitre (bool, optional): True si l'escrimeur est arbitre. Defaults to False.
+        """
         points = -1
-        if arbitre:
+        if arbitre :
             points = -2
-        
         db.session.add(Resultat(id_competition = self.id,
                                 id_escrimeur = num_licence,
                                 rang = None,
@@ -361,11 +375,8 @@ def get_match(id):
 def get_typephase(id):
     return TypePhase.query.get(id)
 
-
 # def get_nb_tireurs_poule(id_poule):
 #     poule = get_phase(id_poule)
-
-
 
 def delete_competition(id):
     """Supprime une compétion dans la BD à partir de son id

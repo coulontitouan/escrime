@@ -87,7 +87,6 @@ def loadbd():
             fichier.close()
         db.session.commit()
 
- 
 @app.cli.command()
 def syncbd():
     """Crée les tables de la base de données"""
@@ -122,7 +121,7 @@ def newuser(num_licence, password, prenom, nom, sexe,ddn,club):
 @click.argument('sexe')
 @click.argument('mot_de_passe')
 def newadmin(prenom, nom, sexe, mot_de_passe ):
-    """Ajoute un admin"""
+    """Ajoute un admin (prenom nom sexe mdp)"""
     m = sha256()
     m.update(mot_de_passe.encode())
     num = Escrimeur.query.order_by(desc(Escrimeur.num_licence)).filter_by(id_club=1).first()
