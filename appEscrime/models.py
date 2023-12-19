@@ -166,6 +166,12 @@ class Competition(db.Model):
     # Relation un-à-plusieurs : Une compétition comprend plusieurs escrimeurs
     resultats = db.relationship('Resultat', back_populates = 'competition')
 
+    def get_tireurs(self):
+        return Escrimeur.query.join(Resultat).filter_by(Resultat.id_competition == self.id, Resultat.points != -2)
+    
+    def get_arbitres(self):
+        return Escrimeur.query.join(Resultat).filter_by(Resultat.id_competition == self.id, Resultat.points == -2)
+
     def get_tireurs_phase(self, id_phase):
         joueurs = set()
         matchs = Match.query.filter_by(id_phase = (self.id,id_phase))
@@ -175,7 +181,7 @@ class Competition(db.Model):
                 joueurs.add(Escrimeur.query.get(p.id_escrimeur))
         return joueurs
     
-    def get_arbitre_phase(self, id_phase):
+    def get_arbitres_phase(self, id_phase):
         return Escrimeur.query.get(Match.query.filter_by(id_phase = (self.id,id_phase)).first().num_arbitre)
     
     def get_points(self, id_tireur):
@@ -194,12 +200,55 @@ class Competition(db.Model):
         points = -1
         if arbitre:
             points = -2
-        
         db.session.add(Resultat(id_competition = self.id,
                                 id_escrimeur = num_licence,
                                 rang = None,
                                 points = points))
         db.session.commit()
+
+    def repartition_poules(self):
+        arbitres = self.get_arbitres()
+        tireurs = self.get_tireurs()
+        nb_arbitres = len(arbitres)
+        len_poules = 5
+        nb_poules = len(tireurs) // len_poules
+
+        while (nb_poules > nb_arbitres):
+            len_poules += 1
+            if len_poules == 10:
+                return None
+            nb_poules = len(tireurs) // len_poules
+        
+        for i in range(1, nb_poules + 1):
+            self.cree_poule(i)
+        db.session.commit()
+
+        poules = [j for j in range(1, nb_poules + 1)]
+        rotation_poules = poules + poules[::-1]
+        repartition = [[]]*nb_poules
+        for i in range(tireurs):
+            id_poule = rotation_poules[i % len(rotation_poules)]
+            repartition[id_poule].append(tireurs[i])
+        print(repartition)
+        return repartition
+
+    def cree_poule(self, id_poule):
+        db.session.add(Phase(id = id_poule, competition = self, phase = 'Poule'))
+
+    
+    def to_titre_csv(self):
+        res = ''
+        split = self.nom.split(' ')
+        for mot in split:
+            res += mot[0].upper() + mot[1:]
+        res += '_'
+        date_csv = self.date.strftime(TO_DATE)
+        for carac in date_csv:
+            if carac == '/':
+                res += '-'
+            else:
+                res += carac
+        return res + '_' + str(self.id)
 
     def to_csv(self):
         date_csv = self.date.strftime(TO_DATE)
@@ -243,6 +292,18 @@ class Phase(db.Model):
         {},
     )
 
+    def cree_match(self, id_match, arbitre, tireur1, tireur2):
+        if self.libelle == 'Poule':
+            match = Match(id = id_match,
+                          competition = self.competition,
+                          phase = self,
+                          piste = self.id,
+                          etat = "A venir",
+                          arbitre = arbitre)
+            match.cree_participation(tireur1)
+            match.cree_participation(tireur2)
+            db.session.add(match)
+
     def to_csv(self):
         return [self.id, self.libelle]
 
@@ -270,6 +331,11 @@ class Match(db.Model):
         {},
     )
 
+    def cree_participation(self, num_licence):
+        db.session.add(Participation(id_match = self.id,
+                                     id_escrimeur = num_licence,
+                                     statut = "A venir",
+                                     touches = 0))
 
     def to_csv(self):
         return [self.id, self.participations[0], self.participations[1], self.num_arbitre, self.piste, self.etat] + self.phase.to_csv()
@@ -314,6 +380,7 @@ class Resultat(db.Model):
     def to_csv(self):
         return [self.rang, self.id_escrimeur, self.points]
 
+
 def get_lieu(nom, adresse, ville):
     """Fonction qui permet de récupérer un lieu dans la base de données"""
     return Lieu.query.filter_by(nom = nom, adresse = adresse, ville = ville).first()
@@ -325,6 +392,9 @@ def get_arme(id):
 def get_all_armes():
     """Fonction qui permet de récupérer toutes les armes dans la base de données"""
     return Arme.query.all()
+
+def get_club(id):
+    return Club.query.get(id)
 
 def get_categorie(id):
     """Fonction qui permet de récupérer une catégorie dans la base de données"""
@@ -343,14 +413,14 @@ def get_max_competition_id():
 def get_compet_accueil():
     return Competition.query.all()
 
-def get_club(id):
-    return Club.query.get(id)
-
 def get_competition(id):
     return Competition.query.get(id)
 
 def get_all_competitions():
     return Competition.query.all()
+
+def get_tireurs_competition(id_compet):
+    return get_competition(id_compet).get_tireurs()
 
 def get_participation(id):
     return Participation.query.get(id)
@@ -361,11 +431,12 @@ def get_match(id):
 def get_typephase(id):
     return TypePhase.query.get(id)
 
-
-# def get_nb_tireurs_poule(id_poule):
-#     poule = get_phase(id_poule)
-
-
+def get_est_inscrit(num_licence, id_competition):
+    a = Resultat.query.filter_by(id_competition = id_competition, id_escrimeur = num_licence).first()
+    if a == None :
+        return False
+    else:
+        return True
 
 def delete_competition(id):
     """Supprime une compétion dans la BD à partir de son id
