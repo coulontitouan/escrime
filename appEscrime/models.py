@@ -102,7 +102,7 @@ class Escrimeur(db.Model, UserMixin):
     
     def to_csv(self):
         naissance = self.date_naissance.strftime(TO_DATE)
-        return ([self.nom, self.prenom, naissance, self.num_licence, self.nationalite],
+        return ([self.nom, self.prenom, naissance, self.num_licence, self.nationalite] + self.club.to_csv(),
                 [self.num_licence, self.mot_de_passe])
 
 class Classement(db.Model):
@@ -127,7 +127,7 @@ class Classement(db.Model):
     )
 
     def to_csv(self):
-        return self.tireur.to_csv()[0] + self.tireur.club.to_csv() + [self.points, self.rang]
+        return self.tireur.to_csv()[0] + [self.points, self.rang]
 
 class Competition(db.Model):
     __tablename__ = 'competition'
