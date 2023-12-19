@@ -7,22 +7,23 @@ from wtforms import StringField , HiddenField, DateField , RadioField, PasswordF
 from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 from hashlib import sha256
-from .models import *
+from .models import Escrimeur, Club, Competition, Lieu
+from .requests import *
 from .commands import newuser
 from wtforms import DateField
 
 with app.app_context():
     class CreeCompetitionForm(FlaskForm):
         """Classe qui permet de créer une compétition"""
-        nom_lieu = StringField('Nom lieu',validators=[DataRequired()])
-        adresse_lieu = StringField('Adresse lieu',validators=[DataRequired()])
-        ville_lieu = StringField('Ville lieu',validators=[DataRequired()])
-        nom_competition = StringField('Nom compétition',validators=[DataRequired()])
+        nom_lieu = StringField('Nom lieu', validators=[DataRequired()])
+        adresse_lieu = StringField('Adresse lieu', validators=[DataRequired()])
+        ville_lieu = StringField('Ville lieu', validators=[DataRequired()])
+        nom_competition = StringField('Nom compétition', validators=[DataRequired()])
         date_competition = DateField('Date compétition', format='%Y-%m-%d', validators=[DataRequired()])
-        sexe_competition = RadioField('Sexe',choices = ['Hommes','Femmes'])
-        coefficient_competition = StringField('Coefficient',validators=[DataRequired()])
-        nom_arme = SelectField("Arme",coerce=str,default=1)
-        nom_categorie = SelectField("Catégorie",coerce=str,default=1)
+        sexe_competition = RadioField('Sexe', choices = ['Hommes','Femmes'])
+        coefficient_competition = StringField('Coefficient', validators=[DataRequired()])
+        nom_arme = SelectField("Arme", coerce=str, default=1)
+        nom_categorie = SelectField("Catégorie", coerce=str, default=1)
         next = HiddenField()
     
 @app.route("/")
@@ -40,35 +41,35 @@ def informations():
     )
 
 class LoginForm(FlaskForm):
-    num_licence=StringField('num_licence',validators=[DataRequired()])
-    mot_de_passe=PasswordField("Password",validators=[DataRequired()])
+    num_licence = StringField('num_licence', validators=[DataRequired()])
+    mot_de_passe = PasswordField("Password", validators=[DataRequired()])
     next = HiddenField()
 
     def get_authenticated_user(self):
         user = Escrimeur.query.get(self.num_licence.data)
         if user is None:
             return None
-        m=sha256()
+        m = sha256()
         m.update(self.mot_de_passe.data.encode())
-        passwd= m.hexdigest()
+        passwd = m.hexdigest()
         return user if passwd == user.mot_de_passe else None
     
         
 class SignUpForm(FlaskForm):
-    num_licence=StringField('num_licence',validators=[DataRequired()])
-    mot_de_passe=PasswordField("Password",validators=[DataRequired()])
-    prenom = StringField('prenom',validators=[DataRequired()])
-    nom = StringField('nom',validators=[DataRequired()])
-    sexe = RadioField('sexe',choices = ['Homme','Femme'],validators=[DataRequired()])
-    date_naissance = DateField('date',validators=[DataRequired()])
-    club = SelectField("club",coerce=str,default=2,validators=[DataRequired()], choices = [(1,""),(2,""),(3,""),(4,""),(5,"")])
-    next=HiddenField()
+    num_licence = StringField('num_licence', validators=[DataRequired()])
+    mot_de_passe = PasswordField("Password", validators=[DataRequired()])
+    prenom = StringField('prenom', validators=[DataRequired()])
+    nom = StringField('nom', validators=[DataRequired()])
+    sexe = RadioField('sexe', choices = ['Homme','Femme'],validators=[DataRequired()])
+    date_naissance = DateField('date', validators=[DataRequired()])
+    club = SelectField("club", coerce=str, default=2, validators=[DataRequired()], choices = [(1,""),(2,""),(3,""),(4,""),(5,"")])
+    next = HiddenField()
 
     def get_authenticated_user(self):
         user = Escrimeur.query.get(self.num_licence.data)
         if user is None:
             return None
-        m=sha256()
+        m = sha256()
         m.update(self.mot_de_passe.data.encode())
         passwd= m.hexdigest()
         return user if passwd == user.mot_de_passe else None
@@ -76,12 +77,12 @@ class SignUpForm(FlaskForm):
     
     def est_deja_inscrit_sans_mdp(self):
         user = Escrimeur.query.get(self.num_licence.data)
-        a= "Homme"
+        a = "Homme"
         if user is not None:
             if self.sexe.data == "Femme":
                 a = "Dames" 
             if user.sexe == a and user.prenom.upper() == self.prenom.data.upper() and user.nom.upper() == self.nom.data.upper():
-                m=sha256()
+                m = sha256()
                 m.update(self.mot_de_passe.data.encode())
                 passwd= m.hexdigest()
                 user.set_mdp(passwd)
@@ -94,7 +95,7 @@ class SignUpForm(FlaskForm):
 
 @app.route("/connexion/", methods=("GET", "POST"))
 def connexion():
-    f =LoginForm()
+    f = LoginForm()
     f2 = SignUpForm()
     selection_club = []
     for club in db.session.query(Club).all():
@@ -111,18 +112,17 @@ def connexion():
         if user:
             login_user(user)
             prochaine_page = f.next.data or url_for("home")
-            back = request.referrer
             return redirect(prochaine_page)
     return render_template(
         "connexion.html",formlogin=f, formsignup = f2)
 
 @app.route("/connexion/inscription", methods=("GET", "POST"))
 def inscription():
-    f =LoginForm()
+    f = LoginForm()
     f2 = SignUpForm()
     selection_club = []
     for club in db.session.query(Club).all():
-        if club.id !=1:
+        if club.id != 1:
             selection_club.append((club.id,club.nom))
     f2.club.choices = selection_club
     if not f2.is_submitted():
@@ -136,18 +136,15 @@ def inscription():
                     return redirect(prochaine_page)
         elif f2.est_deja_inscrit_sans_mdp() == None:
             if f2.sexe.data == "Femme":
-                newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Dames",f2.date_naissance.data,f2.club.data)
+                newuser(f2.num_licence.data, f2.mot_de_passe.data, f2.prenom.data, f2.nom.data, "Dames", f2.date_naissance.data, f2.club.data)
             else:       
-                newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Hommes",f2.date_naissance.data,f2.club.data)
-
+                newuser(f2.num_licence.data, f2.mot_de_passe.data, f2.prenom.data, f2.nom.data, "Hommes", f2.date_naissance.data, f2.club.data)
                 user = f2.get_authenticated_user()
                 if user:
-                        login_user(user)
-                        prochaine_page = f2.next.data or url_for("home")
-                        return redirect(prochaine_page)
-
-    return render_template(
-        "connexion.html",formlogin=f, formsignup = f2)
+                    login_user(user)
+                    prochaine_page = f2.next.data or url_for("home")
+                    return redirect(prochaine_page)
+    return render_template("connexion.html",formlogin=f, formsignup = f2)
 
 @app.route("/competition/<int:id>")
 def competition(id):
@@ -156,7 +153,7 @@ def competition(id):
     competition = get_competition(id)
     try :
         user = current_user.num_licence
-    except :
+    except(AttributeError):
         user = -1
     return render_template(
         "competition.html",
@@ -184,7 +181,7 @@ def creationCompet():
     f.nom_categorie.choices = cree_liste(get_all_categories())
     if current_user.is_admin() == False:
         return redirect(url_for("home"))
-    if not  f.is_submitted():
+    if not f.is_submitted():
         f.next.data = request.args.get("next")
     else:
         lieu = get_lieu(f.nom_lieu.data, f.adresse_lieu.data, f.ville_lieu.data)
@@ -197,7 +194,7 @@ def creationCompet():
         sexe = f.sexe_competition.data
         if sexe == "Femmes":
             sexe = "Dames"
-        competition = Competition(id = (get_max_competition_id() + 1), nom = f.nom_competition.data, date = f.date_competition.data, coefficient = f.coefficient_competition.data, sexe = sexe, id_lieu = lieu.id, id_arme = arme.id, id_categorie = categorie.id)
+        competition = Competition(id=(get_max_competition_id() + 1), nom=f.nom_competition.data, date=f.date_competition.data, coefficient=f.coefficient_competition.data, sexe=sexe, id_lieu=lieu.id, id_arme=arme.id, id_categorie=categorie.id)
         db.session.add(competition)
         db.session.commit()
         flash('Compétition créée avec succès', 'success')  # Utilise Flash de Flask pour les messages
@@ -210,13 +207,13 @@ def profil():
         "profil.html"
     )
 
-class Changer_mdpForm(FlaskForm):
+class ChangerMdpForm(FlaskForm):
     new_mdp=PasswordField("Password",validators=[DataRequired()])
     next = HiddenField()
 
 @app.route("/profil/changer-mdp", methods=("POST",))
 def changer_mdp():
-    f =Changer_mdpForm()
+    f =ChangerMdpForm()
     return render_template(
         "changer-mdp.html", f
     )
@@ -226,10 +223,10 @@ import os, signal
 @app.route("/shutdown", methods=['GET'])
 def shutdown():
     os.kill(os.getpid(), signal.SIGINT)
-    return jsonify({ "success": True, "message": "Server is shutting down..." })
+    return jsonify({"success": True, "message": "Server is shutting down..."})
 
 class InscriptionForm(FlaskForm):
-        role = RadioField('Role',choices = ['Arbitre','Tireur'])
+        role = RadioField('Role', choices = ['Arbitre','Tireur'])
         next = HiddenField()
 
 @app.route("/competition/<int:id>/inscription", methods=("GET", "POST"))
@@ -242,15 +239,15 @@ def inscription_competition(id) :
         if form.role.data == "Arbitre" and competition.est_inscrit(current_user.num_licence) == False:
             competition.inscription(current_user.num_licence,True)
             flash('Vous êtes inscrit comme arbitre', 'success')
-            return redirect(url_for('competition',id = id))
+            return redirect(url_for('competition', id=id))
         elif form.role.data == "Tireur" and competition.est_inscrit(current_user.num_licence) == False:
             competition.inscription(current_user.num_licence)
             flash('Vous êtes inscrit comme tireur', 'success')
-            return redirect(url_for('competition', id = id))
+            return redirect(url_for('competition', id=id))
         else:
             flash('Vous êtes déja inscrit', 'danger')
-            return redirect(url_for('competition', id = id))
-    return render_template('competition.html',form=form, competition = get_competition(id), id = id)
+            return redirect(url_for('competition', id=id))
+    return render_template('competition.html', form=form, competition=get_competition(id), id=id)
 
 @app.route("/home/suppr-competition/<int:id>")
 def suppr_competition(id):
@@ -259,9 +256,9 @@ def suppr_competition(id):
     return redirect(url_for('home'))
 
 @app.route("/competition/<int:id>/deinscription", methods=("GET", "POST"))
-def deinscription_competition(id) :
+def deinscription_competition(id):
     form = InscriptionForm()
     competition = get_competition(id)
     competition.desinscription(current_user.num_licence)
     flash('Vous êtes désinscrit', 'warning')
-    return render_template('competition.html',form = form, competition = get_competition(id), id = id)
+    return render_template('competition.html', form=form, competition=get_competition(id), id=id)

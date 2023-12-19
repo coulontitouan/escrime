@@ -1,24 +1,10 @@
 import csv
 from datetime import datetime
-import os
 
 from sqlalchemy import and_
 from .app import db
 from .models import Classement, Lieu, Competition, Phase, Match, Participation, Resultat, Club, Escrimeur, Phase, TypePhase, Arme, Categorie
-
-# def conversion_csv_utf8(chemin):
-#     with open('../data/' + chemin, 'r', encoding = 'latin-1') as fichier_entree:
-#         lecteur = csv.reader(fichier_entree, delimiter=';')
-#         if os.path.exists('../data/.encoded/' + chemin):
-#             os.remove('../data/.encoded/' + chemin)
-#         for ligne in lecteur:
-#             data = [carac for carac in ligne]
-#             with open('../data/.encoded/' + chemin, 'a', newline = '', encoding = 'utf-8') as fichier_sortie:
-#                 writer = csv.writer(fichier_sortie, delimiter=';')
-#                 writer.writerow(data)
-#             fichier_sortie.close()
-#     fichier_entree.close()
-
+from .constants import *
 
 def load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories):
     """Charge les escrimeurs, classements, armes, catégories et clubs dans la base de données
@@ -151,7 +137,7 @@ def load_matchs(contenu, lecteur, escrimeurs, competitions, phases, types_phase)
     for ligne in lecteur:
         nom_phase = ligne['libelle phase']
         if nom_phase not in types_phase:
-            type_phase = TypePhase(libelle = nom_phase, nb_touches = 15)
+            type_phase = TypePhase(libelle = nom_phase, nb_touches = TOUCHES_BRACKET)
             types_phase[nom_phase] = type_phase
             db.session.add(type_phase)
 
