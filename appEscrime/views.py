@@ -178,8 +178,8 @@ def deconnexion():
 def creationCompet():
     """Fonction qui permet de créer une compétition"""
     f = CreeCompetitionForm()
-    f.nom_arme.choices = cree_liste(get_all_armes())
-    f.nom_categorie.choices = cree_liste(get_all_categories())
+    f.nom_arme.choices = cree_liste_nom_objet(get_all_armes())
+    f.nom_categorie.choices = cree_liste_nom_objet(get_all_categories())
     if current_user.is_admin() == False:
         return redirect(url_for("home"))
     if not f.is_submitted():
