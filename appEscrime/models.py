@@ -1,7 +1,11 @@
+from random import randint
+from sqlite3 import IntegrityError
+
+import sqlalchemy
 from .app import db, login_manager
 from sqlalchemy import *
 from flask_login import UserMixin
-from datetime import date 
+from datetime import date
 
 TO_DATE = '%d/%m/%Y'
 
@@ -103,7 +107,7 @@ class Escrimeur(db.Model, UserMixin):
     
     def to_csv(self):
         naissance = self.date_naissance.strftime(TO_DATE)
-        return ([self.nom, self.prenom, naissance, self.num_licence, self.nationalite],
+        return ([self.nom, self.prenom, naissance, self.num_licence, self.nationalite] + self.club.to_csv(),
                 [self.num_licence, self.mot_de_passe])
     def peut_sinscrire(self,id_compet):
         competition = get_competition(id_compet)
@@ -113,10 +117,12 @@ class Escrimeur(db.Model, UserMixin):
             agemax = competition.categorie.age_maxi
             if agemax < 0:
                 agemax = 1000
-            if age < agemax and (age <39 and "Vétérans" not in competition.categorie.libelle or age > 39 and "Vétérans" in competition.categorie.libelle):
+            if age <= agemax and (age <= 39 and "Vétérans" not in competition.categorie.libelle or age > 39 and "Vétérans" in competition.categorie.libelle) :
                     return True
-            
         return False
+    
+    def get_classement(self, id_arme, id_categorie):
+        return Classement.query.get((self.num_licence, id_arme, id_categorie))
 
 class Classement(db.Model):
     __tablename__ = 'classement'
@@ -140,7 +146,7 @@ class Classement(db.Model):
     )
 
     def to_csv(self):
-        return self.tireur.to_csv()[0] + self.tireur.club.to_csv() + [self.points, self.rang]
+        return self.tireur.to_csv()[0] + [self.points, self.rang]
 
 class Competition(db.Model):
     __tablename__ = 'competition'
@@ -166,16 +172,42 @@ class Competition(db.Model):
     # Relation un-à-plusieurs : Une compétition comprend plusieurs escrimeurs
     resultats = db.relationship('Resultat', back_populates = 'competition')
 
-    def get_tireurs_phase(self, id_phase):
+    def nb_phases(self) :
+        return len(self.phases)
+
+    def get_tireurs(self):
+        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2)
+    
+    def get_tireurs_order_by_pts(self):
+        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2).order_by(Resultat.points.desc())
+    
+    def get_tireurs_order_by_rang(self) :
+        # participants = self.get_tireurs()
+        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2).outerjoin(Classement).filter((Classement.id_arme == self.id_arme) & (Classement.id_categorie == self.id_categorie)).order_by(Classement.rang)
+    
+    def get_tireurs_sans_rang(self) :
+        liste = self.get_tireurs_order_by_rang()
+        liste2 = []
+        for x in self.get_tireurs() :
+            if x not in liste :
+                liste2.append(x)
+        return liste2
+
+    def get_arbitres(self):
+        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points == -2)
+
+    def get_tireurs_phase(self, id_phase): # PAS BON, IL FAUT DONNER L'ID COMPET ET L'ID PHASE DANS LA REQUETE
         joueurs = set()
         matchs = Match.query.filter_by(id_phase = (self.id,id_phase))
         for m in matchs:
-            participations = Participation.query.filter_by(id_match = m.id)
+            participations = Participation.query.filter_by(id_match = m.id,
+                                                           id_phase = m.id_phase,
+                                                           id_competition = m.id_competition)
             for p in participations:
                 joueurs.add(Escrimeur.query.get(p.id_escrimeur))
         return joueurs
     
-    def get_arbitre_phase(self, id_phase):
+    def get_arbitres_phase(self, id_phase): # PAS BON, IL FAUT DONNER L'ID COMPET ET L'ID PHASE DANS LA REQUETE
         return Escrimeur.query.get(Match.query.filter_by(id_phase = (self.id,id_phase)).first().num_arbitre)
     
     def get_points(self, id_tireur):
@@ -190,16 +222,84 @@ class Competition(db.Model):
     def get_lieu(self):
         return self.lieu
     
-    def inscription(self, num_licence, arbitre = False):
+    def get_poules(self) :
+        res = []
+        for phase in self.phases :
+            if phase.libelle == 'Poule' :
+                res.append(phase)
+        return res
+    
+    def inscription(self, num_licence : int, arbitre : bool = False) :
+        """Inscrit un tireur à une compétition
+
+        Args:
+            num_licence (int): Numéro de licence de l'escrimeur
+            arbitre (bool, optional): True si l'escrimeur est arbitre. Defaults to False.
+        """
         points = -1
-        if arbitre:
+        if arbitre :
             points = -2
-        
         db.session.add(Resultat(id_competition = self.id,
                                 id_escrimeur = num_licence,
                                 rang = None,
                                 points = points))
         db.session.commit()
+
+    def ajoute_poule(self, id_poule):
+        db.session.add(Phase(id = id_poule, competition = self, libelle = 'Poule'))
+
+    def programme_poules(self):
+        arbitres = self.get_arbitres()
+        i = 0
+        repartition = self.repartition_poules()
+        for poule in self.phases:
+            poule.cree_matchs(arbitres[i], repartition[poule.id-1])
+            i += 1
+        db.session.commit()
+
+    def repartition_poules(self):
+        arbitres = self.get_arbitres()
+        tireurs = self.get_tireurs()
+        nb_arbitres = arbitres.count()
+        len_poules = 5
+        nb_poules = tireurs.count() // len_poules
+
+        while (nb_poules > nb_arbitres):
+            len_poules += 1
+            if len_poules == 10:
+                return None
+            nb_poules = tireurs.count() // len_poules
+        
+        for i in range(1, nb_poules + 1):
+            try:
+                self.ajoute_poule(i)
+                db.session.commit()
+            except(sqlalchemy.exc.IntegrityError):
+                db.session.rollback()
+
+        poules = [j for j in range(1, nb_poules + 1)]
+        rotation_poules = poules + poules[::-1]
+        repartition = []
+        for i in range(nb_poules):
+            repartition.append([])
+        for i in range(tireurs.count()):
+            id_poule = rotation_poules[i % len(rotation_poules)]
+            repartition[id_poule-1].append(tireurs[i])
+        return repartition
+
+    def to_titre_csv(self):
+        res = ''
+        split = self.nom.split(' ')
+        for mot in split:
+            res += mot[0].upper() + mot[1:]
+        res += '_'
+        date_csv = self.date.strftime(TO_DATE)
+        for carac in date_csv:
+            if carac == '/':
+                res += '-'
+            else:
+                res += carac
+        return res + '_' + str(self.id)
 
     def to_csv(self):
         date_csv = self.date.strftime(TO_DATE)
@@ -243,18 +343,86 @@ class Phase(db.Model):
         {},
     )
 
+    def nb_tireurs(self) :
+        tireurs = set()
+        for match in self.matchs :
+            for participation in match.participations :
+                if participation.id_phase == self.id :
+                    tireurs.add(participation.tireur)
+        return len(tireurs)
+    
+    def get_tireurs(self) :
+        tireurs = set()
+        for match in self.matchs :
+            for participation in match.participations :
+                if participation.id_phase == self.id :
+                    tireurs.add(participation.tireur)
+        return tireurs
+    
+    def get_arbitre(self) :
+        return Escrimeur.query.get(self.matchs[0].num_arbitre)
+
+    def cree_matchs(self, arbitre, tireurs):
+        liste_matchs = self.programme_matchs_poule(tireurs)
+        for i in range(len(liste_matchs)):
+            self.ajoute_match(i+1, arbitre, liste_matchs[i][0], liste_matchs[i][1])
+
+    def ajoute_match(self, id_match, arbitre, tireur1, tireur2):
+        if self.libelle == 'Poule':
+            match = Match(id = id_match,
+                          id_competition = self.id_competition,
+                          id_phase = self.id,
+                          piste = self.id,
+                          etat = "A venir",
+                          arbitre = arbitre)
+            db.session.add(match)
+            match.cree_participation(tireur1)
+            match.cree_participation(tireur2)
+    
+    def programme_matchs_poule(self, tireurs):
+        nb_journees = len(tireurs) - 1 + (len(tireurs) % 2)
+        matchs = set()
+        journees = []
+        programme = dict()
+        for i in range(nb_journees):
+            journees.append(set())
+        for i in range(len(tireurs)):
+            for j in range(i + 1, len(tireurs)):
+                matchs.add((tireurs[i], tireurs[j]))
+
+        for match in matchs:
+            ok = False
+            for j in range(len(journees)):
+                if match[0] not in journees[j] and match[1] not in journees[j]:
+                    journees[j].add(match[0])
+                    journees[j].add(match[1])
+                    if j+1 not in programme.keys():
+                        programme[j+1] = []
+                    programme[j+1].append(match)
+                    ok = True
+                    break
+            if ok == False:
+                programme[1].append(match)
+
+        res = []
+        for journee in programme.values():
+            journee.sort(key=lambda x: x[0].num_licence)
+            for match in journee:
+                res.append(match)
+        return res
+
     def to_csv(self):
         return [self.id, self.libelle]
 
 class Match(db.Model):
     __tablename__ = 'match'
-    id = db.Column(db.Integer(), primary_key = True)
+    id = db.Column(db.Integer())
     # Clé étrangère vers la compétition comprenant le match
-    id_competition = db.Column(db.Integer(), db.ForeignKey('competition.id'), primary_key = True)
+    id_competition = db.Column(db.Integer(), db.ForeignKey('competition.id'))
     # Relation plusieurs-à-un unidirectionnel : Un match est compris dans une seule compétition
     competition = db.relationship('Competition')
     # Clé étrangère vers la phase comprenant le match
-    id_phase = db.Column(db.Integer(), db.ForeignKey('phase.id'), primary_key = True)
+    id_phase = db.Column(db.Integer(), db.ForeignKey('phase.id'))
     # Relation plusieurs-à-un : Un match est compris dans une seule phase de la compétition
     phase = db.relationship('Phase', back_populates = 'matchs')
     piste = db.Column(db.Integer())
@@ -270,12 +438,28 @@ class Match(db.Model):
         {},
     )
 
+    def cree_participation(self, tireur):
+        #print(self.id_competition, self.id_phase, self.id, tireur.num_licence)
+        db.session.add(Participation(id_competition = self.id_competition,
+                                     id_phase = self.id_phase,
+                                     id_match = self.id,
+                                     id_escrimeur = tireur.num_licence,
+                                     statut = "A venir",
+                                     touches = 0))
 
     def to_csv(self):
         return [self.id, self.participations[0], self.participations[1], self.num_arbitre, self.piste, self.etat] + self.phase.to_csv()
 
 class Participation(db.Model):
     __tablename__ = 'participation'
+    # Clé étrangère vers la compétition comprenant le match
+    id_competition = db.Column(db.Integer(), db.ForeignKey('competition.id'))
+    # Relation plusieurs-à-un unidirectionnel : Un match est compris dans une seule compétition
+    competition = db.relationship('Competition')
+    # Clé étrangère vers la phase comprenant le match
+    id_phase = db.Column(db.Integer(), db.ForeignKey('phase.id'))
+    # Relation plusieurs-à-un : Un match est compris dans une seule phase de la compétition
+    phase = db.relationship('Phase')
     # Clé étrangère vers le match
     id_match = db.Column(db.Integer(), db.ForeignKey('match.id'))
     # Relation plusieurs-à-un : Une participation est liée à un seul match
@@ -287,7 +471,7 @@ class Participation(db.Model):
     statut = db.Column(db.String(16))
     touches = db.Column(db.Integer())
     __table_args__ = (
-        PrimaryKeyConstraint(id_match, id_escrimeur),
+        PrimaryKeyConstraint(id_competition, id_phase, id_match, id_escrimeur),
         {},
     )
 
@@ -314,6 +498,7 @@ class Resultat(db.Model):
     def to_csv(self):
         return [self.rang, self.id_escrimeur, self.points]
 
+
 def get_lieu(nom, adresse, ville):
     """Fonction qui permet de récupérer un lieu dans la base de données"""
     return Lieu.query.filter_by(nom = nom, adresse = adresse, ville = ville).first()
@@ -325,6 +510,9 @@ def get_arme(id):
 def get_all_armes():
     """Fonction qui permet de récupérer toutes les armes dans la base de données"""
     return Arme.query.all()
+
+def get_club(id):
+    return Club.query.get(id)
 
 def get_categorie(id):
     """Fonction qui permet de récupérer une catégorie dans la base de données"""
@@ -343,14 +531,14 @@ def get_max_competition_id():
 def get_compet_accueil():
     return Competition.query.all()
 
-def get_club(id):
-    return Club.query.get(id)
-
 def get_competition(id):
     return Competition.query.get(id)
 
 def get_all_competitions():
     return Competition.query.all()
+
+def get_tireurs_competition(id_compet):
+    return get_competition(id_compet).get_tireurs()
 
 def get_participation(id):
     return Participation.query.get(id)
@@ -361,11 +549,8 @@ def get_match(id):
 def get_typephase(id):
     return TypePhase.query.get(id)
 
-
 # def get_nb_tireurs_poule(id_poule):
 #     poule = get_phase(id_poule)
-
-
 
 def delete_competition(id):
     """Supprime une compétion dans la BD à partir de son id
@@ -373,8 +558,7 @@ def delete_competition(id):
     Args:
         id (int): l'id d'une compétition
     """
-    matchs_comp = Match.query.filter(Match.id_competition == id).all()
-    Participation.query.filter(Participation.id_match in matchs_comp).delete()
+    Participation.query.filter(Participation.id_competition == id).delete()
     Match.query.filter(Match.id_competition == id).delete()
     Phase.query.filter(Phase.id_competition == id).delete()
     Resultat.query.filter(Resultat.id_competition == id).delete()

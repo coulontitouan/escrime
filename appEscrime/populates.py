@@ -32,7 +32,7 @@ def load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories):
         categories (dict): le dictionnaire des catégories déjà présentes dans la base
     """
 
-    if '-' in contenu[3]:
+    if len(contenu) > 3 and '-' in contenu[3]:
         split_cat = contenu[3].split('-')
         contenu[3] = split_cat[0][:-1] + split_cat[-1]
 
@@ -44,11 +44,11 @@ def load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories):
             clubs[nom_club] = club
             db.session.add(club)
 
-        licence = ligne['adherent']
-        if licence not in escrimeurs:
+        if contenu[1] == 'none':
+            # Fichier rassemblant les escrimeurs n'ayant jamais participé à une compétition
             naissance = ligne['date naissance'].split('/')
             club = clubs[nom_club]
-            escrimeur = Escrimeur(num_licence = licence,
+            escrimeur = Escrimeur(num_licence = ligne['adherent'],
                                   prenom = ligne['prenom'],
                                   nom = ligne['nom'],
                                   sexe = contenu[2],
@@ -57,17 +57,35 @@ def load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories):
                                                             int(naissance[1]),
                                                             int(naissance[0])),
                                   club = club)
-            escrimeurs[licence] = escrimeur
+            escrimeurs[ligne['adherent']] = escrimeur
             db.session.add(escrimeur)
 
-        arme = armes[contenu[1]]
-        categorie = categories[contenu[3]]
-        escrimeur = escrimeurs[ligne['adherent']]
-        db.session.add(Classement(rang = ligne['rang'],
-                                  points = ligne['points'],
-                                  num_licence = escrimeur.num_licence,
-                                  id_arme = arme.id,
-                                  id_categorie = categorie.id))
+        else:
+
+            licence = ligne['adherent']
+            if licence not in escrimeurs:
+                naissance = ligne['date naissance'].split('/')
+                club = clubs[nom_club]
+                escrimeur = Escrimeur(num_licence = licence,
+                                      prenom = ligne['prenom'],
+                                      nom = ligne['nom'],
+                                      sexe = contenu[2],
+                                      nationalite = ligne['nation'],
+                                      date_naissance = datetime(int(naissance[2]),
+                                                                int(naissance[1]),
+                                                                int(naissance[0])),
+                                      club = club)
+                escrimeurs[licence] = escrimeur
+                db.session.add(escrimeur)
+
+            arme = armes[contenu[1]]
+            categorie = categories[contenu[3]]
+            escrimeur = escrimeurs[ligne['adherent']]
+            db.session.add(Classement(rang = ligne['rang'],
+                                      points = ligne['points'],
+                                      num_licence = escrimeur.num_licence,
+                                      id_arme = arme.id,
+                                      id_categorie = categorie.id))
 
 
 def load_connexion(lecteur, escrimeurs):
@@ -158,19 +176,26 @@ def load_matchs(contenu, lecteur, escrimeurs, competitions, phases, types_phase)
                 nb_touches = int(ligne['touches' + i])
                 if ligne['etat'] == 'Termine':
                     if nb_touches == types_phase[ligne['libelle phase']].touches_victoire:
-                        db.session.add(Participation(match = mmatch,
+                        db.session.add(Participation(id_competition = mmatch.id_competition,
+                                                     id_phase = mmatch.id_phase,
+                                                     match = mmatch,
                                                      tireur = escrimeur,
                                                      touches = nb_touches,
                                                      statut = "Vainqueur"))
                     else:
-                        db.session.add(Participation(match = mmatch,
+                        db.session.add(Participation(id_competition = mmatch.id_competition,
+                                                     id_phase = mmatch.id_phase,
+                                                     match = mmatch,
                                                      tireur = escrimeur,
                                                      touches = nb_touches,
                                                      statut = "Perdant"))
                 else:
-                    db.session.add(Participation(match = mmatch,
+                    db.session.add(Participation(id_competition = mmatch.id_competition,
+                                                 id_phase = mmatch.id_phase,
+                                                 match = mmatch,
                                                  tireur = escrimeur,
-                                                 touches = nb_touches))
+                                                 touches = nb_touches,
+                                                 statut = "A venir"))
 
 
 def load_resultats(contenu, lecteur):
@@ -191,6 +216,7 @@ def load_resultats(contenu, lecteur):
 
 def save_competitions():
     with open('../data/competitions_CEB.csv', 'w', encoding = 'utf-8') as fichier:
+        print('competitions_CEB')
         writer = csv.writer(fichier, delimiter = ";")
         writer.writerow(['nom','date','sexe','categorie','arme','coefficient','lieu','ville','adresse'])
         for competition in Competition.query.all():
@@ -201,6 +227,7 @@ def save_competitions():
         titre = competition.to_titre_csv()
         with open('../data/resultats_' + titre + '.csv',
                   'w', encoding = 'utf-8') as fichier:
+            print(titre)
             writer = csv.writer(fichier, delimiter = ";")
             writer.writerow(['rang','adherent','points'])
             for resultat in Resultat.query.filter(Resultat.id_competition == competition.id).all():
@@ -209,6 +236,7 @@ def save_competitions():
 
 def save_connexions():
     with open('../data/connexion.csv', 'w', encoding = 'utf-8') as fichier:
+        print('connexion')
         writer = csv.writer(fichier, delimiter = ";")
         writer.writerow(['adherent','mdp'])
         for escrimeur in Escrimeur.query.all():
@@ -234,3 +262,18 @@ def save_classements():
                     for classement in classements:
                         writer.writerow(classement.to_csv())
                 fichier.close()
+    
+    classement_none = Escrimeur.query.filter(Escrimeur.classements == None).all()
+    with open('../data/classement_none_Homme.csv', 'w', encoding = 'utf-8') as fichier_h:
+        with open('../data/classement_none_Dames.csv', 'w', encoding = 'utf-8') as fichier_f:
+            writer_h = csv.writer(fichier_h, delimiter = ';')
+            writer_f = csv.writer(fichier_f, delimiter = ';')
+            ligne_1 = 'nom;prenom;date naissance;adherent;nation;comite regional;club'
+            writer_h.writerow([col for col in ligne_1.split(';')])
+            writer_f.writerow([col for col in ligne_1.split(';')])
+            for escrimeur in classement_none:
+                if escrimeur.sexe == 'Homme':
+                    writer_h.writerow(escrimeur.to_csv()[0])
+                else:
+                    writer_f.writerow(escrimeur.to_csv()[0])
+    fichier.close()
