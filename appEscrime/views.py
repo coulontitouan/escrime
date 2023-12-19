@@ -160,6 +160,15 @@ def competition(id):
         competition = competition, form = form, user = competition.est_inscrit(user)
     )
 
+@app.route("/competition/<int:id>/createPoule")
+def competitionCreatePoules(id):
+    """Fonction qui permet d'afficher une compétition"""
+    print("deb de route")
+    competition = get_competition(id)
+    competition.programme_poules()
+    print("fin de route")
+    return redirect(url_for("competition", id=id))
+
 @app.route("/competition/<int:idC>/poule/<int:idP>")
 def poule(idC, idP):
     """Fonction qui permet d'afficher une poule"""
