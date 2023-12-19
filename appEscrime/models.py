@@ -172,6 +172,9 @@ class Competition(db.Model):
     # Relation un-à-plusieurs : Une compétition comprend plusieurs escrimeurs
     resultats = db.relationship('Resultat', back_populates = 'competition')
 
+    def nb_phases(self) :
+        return len(self.phases)
+
     def get_tireurs(self):
         return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2)
     
@@ -182,7 +185,7 @@ class Competition(db.Model):
         # participants = self.get_tireurs()
         return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2).outerjoin(Classement).filter((Classement.id_arme == self.id_arme) & (Classement.id_categorie == self.id_categorie)).order_by(Classement.rang)
     
-    def get_tireurs_bug(self) :
+    def get_tireurs_sans_rang(self) :
         liste = self.get_tireurs_order_by_rang()
         liste2 = []
         for x in self.get_tireurs() :
@@ -218,6 +221,13 @@ class Competition(db.Model):
     
     def get_lieu(self):
         return self.lieu
+    
+    def get_poules(self) :
+        res = []
+        for phase in self.phases :
+            if phase.libelle == 'Poule' :
+                res.append(phase)
+        return res
     
     def inscription(self, num_licence : int, arbitre : bool = False) :
         """Inscrit un tireur à une compétition
@@ -332,6 +342,25 @@ class Phase(db.Model):
         PrimaryKeyConstraint(id, id_competition),
         {},
     )
+
+    def nb_tireurs(self) :
+        tireurs = set()
+        for match in self.matchs :
+            for participation in match.participations :
+                if participation.id_phase == self.id :
+                    tireurs.add(participation.tireur)
+        return len(tireurs)
+    
+    def get_tireurs(self) :
+        tireurs = set()
+        for match in self.matchs :
+            for participation in match.participations :
+                if participation.id_phase == self.id :
+                    tireurs.add(participation.tireur)
+        return tireurs
+    
+    def get_arbitre(self) :
+        return Escrimeur.query.get(self.matchs[0].num_arbitre)
 
     def cree_matchs(self, arbitre, tireurs):
         liste_matchs = self.programme_matchs_poule(tireurs)

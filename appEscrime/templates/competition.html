@@ -15,78 +15,37 @@
     <div id="body">
         <div id="un">
             <h2>Poules :</h2>
-            {% for p in poules %}
-            <table class = "scroll">
-                <thead>
-                    <tr>
-                        <th id="intitule" colspan="3">{{ p.id }} - {{ len(competition.get_tireurs_phase(p.id)) }} Tireurs - {{ competition.get_arbitre_phase(id=p.id).nom }} <a href="{{url_for('poule', id=p.id)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
-                    </tr>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Prénom</th>
-                        <th>Points</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for tireur in competition.get_tireurs_phase() %}
-                    <tr>
-                        <td>{{ tireur.nom }}</td>
-                        <td>{{ tireur.prenom }}</td>
-                        <td>{{ competition.get_points(t.num_licence) }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            {% if competition.nb_phases() != 0 %}
+            {% for poule in competition.get_poules() %}
+                <table class="scroll">
+                    <thead>
+                        <tr>
+                            <th id="intitule" colspan="3">Poule {{ poule.id }} - {{ poule.nb_tireurs() }} Tireurs - {{ poule.get_arbitre().prenom[0] }} {{ poule.get_arbitre().nom }} <a href="{{url_for('poule', idC = competition.id , idP = loop.index)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
+                        </tr>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tireur in poule.get_tireurs() %}
+                            <tr>
+                                <td>{{ tireur.nom }}</td>
+                                <td>{{ tireur.prenom }}</td>
+                                {% if competition.get_points(tireur.num_licence) == -1 %}
+                                    <td>0</td>
+                                {% else %}
+                                    <td>{{ competition.get_points(tireur.num_licence) }}</td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             {% endfor %}
-            <table class = "scroll">
-                <thead>
-                    <tr>
-                        <th id="intitule" colspan="3">Poule A - 8 Tireurs - G. DUTROU <a href="{{url_for('poule', idC = competition.id , idP = 1)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
-                    </tr>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Prénom</th>
-                        <th>Points</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>LOUIS</td>
-                        <td>Emile</td>
-                        <td>1610</td>
-                    </tr>
-                    <tr>
-                        <td>FOURNIRET</td>
-                        <td>Michel</td>
-                        <td>1520</td>
-                    </tr>
-                    <tr>
-                        <td>ALEGRE</td>
-                        <td>Patrice</td>
-                        <td>1365</td>
-                    </tr>
-                    <tr>
-                        <td>ALEGRE</td>
-                        <td>Patrice</td>
-                        <td>1365</td>
-                    </tr>
-                    <tr>
-                        <td>DUPONT</td>
-                        <td>Xavier</td>
-                        <td>1780</td>
-                    </tr>
-                    <tr>
-                        <td>DUPONT</td>
-                        <td>Xavier</td>
-                        <td>1780</td>
-                    </tr>
-                    <tr>
-                        <td>DUPONT</td>
-                        <td>Xavier</td>
-                        <td>1780</td>
-                    </tr>
-                </tbody>
-            </table>
+            {% else %}
+                <p>Aucune poule créée</p>
+            {% endif %}
         </div>
         <div id="deux">
             <div class="header-class">
@@ -173,7 +132,7 @@
                             <td>{{ tireur.get_classement(competition.id_arme, competition.id_categorie).points }}</td>
                         </tr>
                     {% endfor %}
-                    {% for tireur in competition.get_tireurs_bug() %}
+                    {% for tireur in competition.get_tireurs_sans_rang() %}
                         <tr>
                             <td>NC</td>
                             <td>{{ tireur.nom }}</td>
