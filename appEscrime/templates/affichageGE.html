@@ -1,0 +1,285 @@
+{% block styles %}
+{{ bootstrap.load_css() }}
+    <link rel="stylesheet" href="{{url_for('static', filename='affichageGE.css')}}">
+{% endblock %}
+{% block content %}        
+    <h1>{{ competition.nom }}</h1>
+    <main>  
+        <div id="un">
+            {% for p in poules %}
+            <table class = "scroll">
+                <thead>
+                    <tr>
+                        <th id="intitule" colspan="3">{{ p.id }} - {{ len(competition.get_tireurs_phase(p.id)) }} Tireurs - {{ competition.get_arbitre_phase(id=p.id).nom }} <a href="{{url_for('poule', id=p.id)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
+                    </tr>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tireur in competition.get_tireurs_phase() %}
+                    <tr>
+                        <td>{{ tireur.nom }}</td>
+                        <td>{{ tireur.prenom }}</td>
+                        <td>{{ competition.get_points(t.num_licence) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endfor %}
+            <table class = "scroll">
+                <thead>
+                    <tr>
+                        <th id="intitule" colspan="3">Poule A - 8 Tireurs - G. DUTROU <a href="{{url_for('poule', idC = competition.id , idP = 1)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
+                    </tr>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>LOUIS</td>
+                        <td>Emile</td>
+                        <td>1610</td>
+                    </tr>
+                    <tr>
+                        <td>FOURNIRET</td>
+                        <td>Michel</td>
+                        <td>1520</td>
+                    </tr>
+                    <tr>
+                        <td>ALEGRE</td>
+                        <td>Patrice</td>
+                        <td>1365</td>
+                    </tr>
+                    <tr>
+                        <td>ALEGRE</td>
+                        <td>Patrice</td>
+                        <td>1365</td>
+                    </tr>
+                    <tr>
+                        <td>DUPONT</td>
+                        <td>Xavier</td>
+                        <td>1780</td>
+                    </tr>
+                    <tr>
+                        <td>DUPONT</td>
+                        <td>Xavier</td>
+                        <td>1780</td>
+                    </tr>
+                    <tr>
+                        <td>DUPONT</td>
+                        <td>Xavier</td>
+                        <td>1780</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3> Matchs à venir : </h3>
+            <div id = "matchsComming">
+                <ul id = 'matchsGauche'>
+                    <li class = "match">
+                        <p class = "matchTime">  14h30 </p>
+                        <p class = "opposant "> JUNIOR N.</p>
+                        <p class = "opposant "> DUPONT X.</p>
+                        <p class = "opposant "> Poule A - Piste 1 </p>
+                    </li>
+                    <li class = "match">
+                        <p class = "matchTime"> 14h30 </p>
+                        <p class = "opposant "> JUNIOR N.</p>
+                        <p class = "opposant "> DUPONT X.</p>
+                        <p class = "opposant "> Poule A - Piste 1 </p>
+                    </li>
+                    <li class = "match">
+                        <p class = "matchTime"> 14h30 </p>
+                        <p class = "opposant "> JUNIOR N.</p>
+                        <p class = "opposant "> DUPONT X.</p>
+                        <p class = "opposant "> Poule A - Piste 1 </p>
+                    </li>
+                </ul>
+                    <ul  id = 'matchsDroite'>
+                        <li class = "match">
+                            <p class = "matchTime"> 14h30 </p>
+                            <p class = "opposant "> JUNIOR N.</p>
+                            <p class = "opposant "> DUPONT X.</p>
+                            <p class = "opposant "> Poule A - Piste 1 </p>
+                        </li>
+                        <li class = "match">
+                            <p class = "matchTime"> 14h30 </p>
+                            <p class = "opposant "> JUNIOR N.</p>
+                            <p class = "opposant "> DUPONT X.</p>
+                            <p class = "opposant "> Poule A - Piste 1 </p>
+                        </li>
+                        <li class = "match">
+                            <p class = "matchTime"> 14h30 </p>
+                            <p class = "opposant "> JUNIOR N.</p>
+                            <p class = "opposant "> DUPONT X.</p>
+                            <p class = "opposant "> Poule A - Piste 1 </p>
+                        </li>
+                    </ul>
+            </div>
+        </div>
+        <div id="deux">
+            <table class = "scroll">
+                <thead>
+                    <tr>
+                        <th id="intitule" colspan="5">Classement provisoire <a href="https://openclassrooms.com/forum/sujet/scroll-vertical-sur-balise-table"><img id="info" src="../static/images/istockphoto-1140611970-612x612-removebg-preview(1).png" alt=""></a></th>
+                    </tr>
+                    <tr>
+                        <th>N°</th>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Club</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>JUNIOR</td>
+                        <td>Neymar</td>
+                        <td>Orléans</td>
+                        <td>2910</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>JUNIOR</td>
+                        <td>Neymar</td>
+                        <td>Orléans</td>
+                        <td>2910</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>JUNIOR</td>
+                        <td>Neymar</td>
+                        <td>Orléans</td>
+                        <td>2910</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>JUNIOR</td>
+                        <td>Neymar</td>
+                        <td>Orléans</td>
+                        <td>2910</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>JUNIOR</td>
+                        <td>Neymar</td>
+                        <td>Orléans</td>
+                        <td>2910</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>JUNIOR</td>
+                        <td>Neymar</td>
+                        <td>Orléans</td>
+                        <td>2910</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>JUNIOR</td>
+                        <td>Neymar</td>
+                        <td>Orléans</td>
+                        <td>2910</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>JUNIOR</td>
+                        <td>Neymar</td>
+                        <td>Orléans</td>
+                        <td>2910</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>JUNIOR</td>
+                        <td>Neymar</td>
+                        <td>Orléans</td>
+                        <td>2910</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>JUNIOR</td>
+                        <td>Neymar</td>
+                        <td>Orléans</td>
+                        <td>2910</td>
+                    </tr>
+                    <tr>
+                        <td>11</td>
+                        <td>JUNIOR</td>
+                        <td>Neymar</td>
+                        <td>Orléans</td>
+                        <td>2910</td>
+                    </tr>
+                    <tr>
+                        <td>12</td>
+                        <td>JUNIOR</td>
+                        <td>Neymar</td>
+                        <td>Orléans</td>
+                        <td>2910</td>
+                    </tr>
+                    <tr>
+                        <td>13</td>
+                        <td>JUNIOR</td>
+                        <td>Neymar</td>
+                        <td>Orléans</td>
+                        <td>2910</td>
+                    </tr>
+                    <tr>
+                        <td>14</td>
+                        <td>JUNIOR</td>
+                        <td>Neymar</td>
+                        <td>Orléans</td>
+                        <td>2910</td>
+                    </tr>
+                    <tr>
+                        <td>15</td>
+                        <td>JUNIOR</td>
+                        <td>Neymar</td>
+                        <td>Orléans</td>
+                        <td>2910</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3> Dernier matchs : </h3>
+                <ul id = 'matchsPasse'>
+                    <li class = "match">
+                        <div class = "resultat">
+                        <p class = "opposantt "> JUNIOR N.</p>
+                        <p class = "touche "> 3</p>
+                        </div>
+                        <div class = "resultat">
+                        <p class = "opposantt "> DUPONT X.</p>
+                        <p class = "touche "> 5</p>
+                        </div>
+                        <p class = "lieux "> Poule A - Piste 1 </p>
+                    </li>
+                    <li class = "match">
+                        <div class = "resultat">
+                        <p class = "opposantt "> JUNIOR N.</p>
+                        <p class = "touche "> 3</p>
+                        </div>
+                        <div class = "resultat">
+                        <p class = "opposantt "> DUPONT X.</p>
+                        <p class = "touche "> 5</p>
+                        </div>
+                        <p class = "lieux "> Poule A - Piste 1 </p>
+                    </li>
+                    <li class = "match">
+                        <div class = "resultat">
+                        <p class = "opposantt "> JUNIOR N.</p>
+                        <p class = "touche "> 3</p>
+                        </div>
+                        <div class = "resultat">
+                        <p class = "opposantt "> DUPONT X.</p>
+                        <p class = "touche "> 5</p>
+                        </div>
+                        <p class = "lieux "> Poule A - Piste 1 </p>
+                    </li>
+            </div>
+        </div>
+    </main>
+    {% endblock %}

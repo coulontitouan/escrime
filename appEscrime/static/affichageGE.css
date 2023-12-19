@@ -1,0 +1,121 @@
+main {
+    display: flex;
+    margin-bottom: 15vh;
+    margin-top: 5vh;
+  }
+  
+  
+  #un table thead {
+    display:block;
+  }
+  
+  #un table tbody {
+    width: 100%;
+    display:block;
+    overflow-y:auto;
+  }
+  
+  #un table td, th {
+    width: 10vw;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+  }
+  
+  #intitule{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+    border-top: 0;
+    background-color: rgba(255, 0, 0, 0.9);
+    color: white;
+  }
+  
+  #un {
+    flex-basis: 35%;
+    margin-right: 5vw;
+    margin-left: 2vw;
+  }
+  
+  #deux {
+    width: 100%;
+  }
+  
+  
+  #deux table td, th {
+    width: 10vw;
+    text-align: center;
+  }
+  
+  #deux table {
+    border: 1px solid black;
+    width: 60%;
+  }
+  
+.scroll {
+    border: 1px solid black;
+    height: 15vh;
+  }
+  
+  #deux table thead > tr {
+    border-bottom: 1px solid black;
+  }
+  
+  
+  tbody tr:nth-child(even) {
+    background-color: rgba(255, 0, 0, 0.2);
+  }
+  .match{
+    list-style-type: none;
+    background-color: gray;
+    width: 10vw; 
+  }
+  #matchsComming> ul{
+    padding: 0;
+    width: 10vw;
+  }
+  #matchsComming{
+    display: flex;
+  }
+  #matchsGauche{
+    margin-right: 2vw;
+  }
+  .matchTime{
+    text-align: center;
+  }
+  .opposant{
+    padding-left: 0.5vw;
+  }
+h1{
+    text-align: center;
+}
+#matchsPasse{
+    display: flex;
+    padding: 0;
+    width: 40vw;
+    justify-content: space-between;
+}
+
+#deux>.scroll{
+    width: 40vw;
+}
+#matchsPasse>.match{
+    display: flex;
+    flex-wrap: wrap;
+}
+.resultat{
+    flex-basis: 50%;
+}
+.lieux{
+    flex-basis: 100%;
+}
+.touche, .lieux{
+    text-align: center;
+}
+.opposantt{
+    padding-left: 0.5vw;
+    margin-bottom: 0.3;
+  }
+h3{
+    margin: 3vh;
+}

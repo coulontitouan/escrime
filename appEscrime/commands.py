@@ -119,9 +119,8 @@ def newuser(num_licence, password, prenom, nom, sexe,ddn,club):
 @app.cli.command()
 @click.argument('prenom')
 @click.argument('nom')
-@click.argument('sexe')
 @click.argument('mot_de_passe')
-def newadmin(prenom, nom, sexe, mot_de_passe ):
+def newadmin(prenom, nom, mot_de_passe ):
     """Ajoute un admin"""
     m = sha256()
     m.update(mot_de_passe.encode())
@@ -131,7 +130,7 @@ def newadmin(prenom, nom, sexe, mot_de_passe ):
     else:
         num = num.num_licence
     date_convert = datetime.strptime('01-01-0001', '%d-%m-%Y').date()
-    u = Escrimeur(num_licence= prenom , prenom=prenom, nom=nom, sexe=sexe, date_naissance=date_convert, id_club=1, mot_de_passe=m.hexdigest())
+    u = Escrimeur(num_licence= prenom , prenom=prenom, nom=nom, sexe='admin', date_naissance=date_convert, id_club=1, mot_de_passe=m.hexdigest())
     db.session.add(u)
     db.session.commit()
 
