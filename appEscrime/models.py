@@ -5,7 +5,7 @@ import sqlalchemy
 from .app import db, login_manager
 from sqlalchemy import *
 from flask_login import UserMixin
-from datetime import date 
+from datetime import date
 
 TO_DATE = '%d/%m/%Y'
 
@@ -117,10 +117,12 @@ class Escrimeur(db.Model, UserMixin):
             agemax = competition.categorie.age_maxi
             if agemax < 0:
                 agemax = 1000
-            if age < agemax and (age <39 and "Vétérans" not in competition.categorie.libelle or age > 39 and "Vétérans" in competition.categorie.libelle):
+            if age <= agemax and (age <= 39 and "Vétérans" not in competition.categorie.libelle or age > 39 and "Vétérans" in competition.categorie.libelle) :
                     return True
-            
         return False
+    
+    def get_classement(self, id_arme, id_categorie):
+        return Classement.query.get((self.num_licence, id_arme, id_categorie))
 
 class Classement(db.Model):
     __tablename__ = 'classement'
@@ -170,9 +172,27 @@ class Competition(db.Model):
     # Relation un-à-plusieurs : Une compétition comprend plusieurs escrimeurs
     resultats = db.relationship('Resultat', back_populates = 'competition')
 
+    def nb_phases(self) :
+        return len(self.phases)
+
     def get_tireurs(self):
         return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2)
     
+    def get_tireurs_order_by_pts(self):
+        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2).order_by(Resultat.points.desc())
+    
+    def get_tireurs_order_by_rang(self) :
+        # participants = self.get_tireurs()
+        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2).outerjoin(Classement).filter((Classement.id_arme == self.id_arme) & (Classement.id_categorie == self.id_categorie)).order_by(Classement.rang)
+    
+    def get_tireurs_sans_rang(self) :
+        liste = self.get_tireurs_order_by_rang()
+        liste2 = []
+        for x in self.get_tireurs() :
+            if x not in liste :
+                liste2.append(x)
+        return liste2
+
     def get_arbitres(self):
         return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points == -2)
 
@@ -202,9 +222,22 @@ class Competition(db.Model):
     def get_lieu(self):
         return self.lieu
     
-    def inscription(self, num_licence, arbitre = False):
+    def get_poules(self) :
+        res = []
+        for phase in self.phases :
+            if phase.libelle == 'Poule' :
+                res.append(phase)
+        return res
+    
+    def inscription(self, num_licence : int, arbitre : bool = False) :
+        """Inscrit un tireur à une compétition
+
+        Args:
+            num_licence (int): Numéro de licence de l'escrimeur
+            arbitre (bool, optional): True si l'escrimeur est arbitre. Defaults to False.
+        """
         points = -1
-        if arbitre:
+        if arbitre :
             points = -2
         db.session.add(Resultat(id_competition = self.id,
                                 id_escrimeur = num_licence,
@@ -309,6 +342,25 @@ class Phase(db.Model):
         PrimaryKeyConstraint(id, id_competition),
         {},
     )
+
+    def nb_tireurs(self) :
+        tireurs = set()
+        for match in self.matchs :
+            for participation in match.participations :
+                if participation.id_phase == self.id :
+                    tireurs.add(participation.tireur)
+        return len(tireurs)
+    
+    def get_tireurs(self) :
+        tireurs = set()
+        for match in self.matchs :
+            for participation in match.participations :
+                if participation.id_phase == self.id :
+                    tireurs.add(participation.tireur)
+        return tireurs
+    
+    def get_arbitre(self) :
+        return Escrimeur.query.get(self.matchs[0].num_arbitre)
 
     def cree_matchs(self, arbitre, tireurs):
         liste_matchs = self.programme_matchs_poule(tireurs)
@@ -497,12 +549,8 @@ def get_match(id):
 def get_typephase(id):
     return TypePhase.query.get(id)
 
-def get_est_inscrit(num_licence, id_competition):
-    a = Resultat.query.filter_by(id_competition = id_competition, id_escrimeur = num_licence).first()
-    if a == None :
-        return False
-    else:
-        return True
+# def get_nb_tireurs_poule(id_poule):
+#     poule = get_phase(id_poule)
 
 def delete_competition(id):
     """Supprime une compétion dans la BD à partir de son id

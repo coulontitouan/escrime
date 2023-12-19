@@ -5,128 +5,39 @@
 {% block content %}        
     <h1>{{ competition.nom }}</h1>
     <main>  
-        <div id="un" class = "pic-ctn">
-            {% for p in poules %}
-            <table class = "scroll">
-                <thead>
-                    <tr>
-                        <th id="intitule" colspan="3">{{ p.id }} - {{ len(competition.get_tireurs_phase(p.id)) }} Tireurs - {{ competition.get_arbitre_phase(id=p.id).nom }} <a href="{{url_for('poule', id=p.id)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
-                    </tr>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Prénom</th>
-                        <th>Points</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for tireur in competition.get_tireurs_phase() %}
-                    <tr>
-                        <td>{{ tireur.nom }}</td>
-                        <td>{{ tireur.prenom }}</td>
-                        <td>{{ competition.get_points(t.num_licence) }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div id="un" >
+            {% if competition.nb_phases() != 0 %}
+            {% for poule in competition.get_poules() %}
+                <table class="scroll poule">
+                    <thead>
+                        <tr>
+                            <th id="intitule" colspan="3">Poule {{ poule.id }} - {{ poule.nb_tireurs() }} Tireurs - {{ poule.get_arbitre().prenom[0] }} {{ poule.get_arbitre().nom }} <a href="{{url_for('poule', idC = competition.id , idP = loop.index)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
+                        </tr>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tireur in poule.get_tireurs() %}
+                            <tr>
+                                <td>{{ tireur.nom }}</td>
+                                <td>{{ tireur.prenom }}</td>
+                                {% if competition.get_points(tireur.num_licence) == -1 %}
+                                    <td>0</td>
+                                {% else %}
+                                    <td>{{ competition.get_points(tireur.num_licence) }}</td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             {% endfor %}
-            <table class = "scroll" class = "pic">
-                <thead class = >
-                    <tr>
-                        <th id="intitule" colspan="3">Poule A - 8 Tireurs - G. DUTROU <a href="{{url_for('poule', idC = competition.id , idP = 1)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
-                    </tr>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Prénom</th>
-                        <th>Points</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>LOUIS</td>
-                        <td>Emile</td>
-                        <td>1610</td>
-                    </tr>
-                    <tr>
-                        <td>FOURNIRET</td>
-                        <td>Michel</td>
-                        <td>1520</td>
-                    </tr>
-                    <tr>
-                        <td>ALEGRE</td>
-                        <td>Patrice</td>
-                        <td>1365</td>
-                    </tr>
-                    <tr>
-                        <td>ALEGRE</td>
-                        <td>Patrice</td>
-                        <td>1365</td>
-                    </tr>
-                    <tr>
-                        <td>DUPONT</td>
-                        <td>Xavier</td>
-                        <td>1780</td>
-                    </tr>
-                    <tr>
-                        <td>DUPONT</td>
-                        <td>Xavier</td>
-                        <td>1780</td>
-                    </tr>
-                    <tr>
-                        <td>DUPONT</td>
-                        <td>Xavier</td>
-                        <td>1780</td>
-                    </tr>
-                </tbody>
-            </table>
-            <table class = "scroll" class = "pic">
-                <thead class = >
-                    <tr>
-                        <th id="intitule" colspan="3">Poule B - 8 Tireurs - G. DUTROU <a href="{{url_for('poule', idC = competition.id , idP = 1)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
-                    </tr>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Prénom</th>
-                        <th>Points</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>LOUIS</td>
-                        <td>Emile</td>
-                        <td>1610</td>
-                    </tr>
-                    <tr>
-                        <td>FOURNIRET</td>
-                        <td>Michel</td>
-                        <td>1520</td>
-                    </tr>
-                    <tr>
-                        <td>ALEGRE</td>
-                        <td>Patrice</td>
-                        <td>1365</td>
-                    </tr>
-                    <tr>
-                        <td>ALEGRE</td>
-                        <td>Patrice</td>
-                        <td>1365</td>
-                    </tr>
-                    <tr>
-                        <td>DUPONT</td>
-                        <td>Xavier</td>
-                        <td>1780</td>
-                    </tr>
-                    <tr>
-                        <td>DUPONT</td>
-                        <td>Xavier</td>
-                        <td>1780</td>
-                    </tr>
-                    <tr>
-                        <td>DUPONT</td>
-                        <td>Xavier</td>
-                        <td>1780</td>
-                    </tr>
-                </tbody>
-            </table>
+            {% else %}
+                <p>Aucune poule créée</p>
+            {% endif %}
+           
             <h3> Matchs à venir : </h3>
             <div id = "matchsComming">
                 <ul id = 'matchsGauche'>
@@ -172,7 +83,7 @@
             </div>
         </div>
         <div id="deux">
-            <table class = "scroll">
+            <table id="Cprovisoire" class = "scroll" style="display:table;">
                 <thead>
                     <tr>
                         <th id="intitule" colspan="5">Classement provisoire <a href="https://openclassrooms.com/forum/sujet/scroll-vertical-sur-balise-table"><img id="info" src="../static/images/istockphoto-1140611970-612x612-removebg-preview(1).png" alt=""></a></th>
@@ -186,111 +97,53 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% for tireur in competition.get_tireurs_order_by_pts() %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ tireur.nom }}</td>
+                            <td>{{ tireur.prenom }}</td>
+                            <td>{{ tireur.club.nom }}</td>
+                            {% if competition.get_points(tireur.num_licence) == -1 %}
+                                <td>0</td>
+                            {% else %}
+                                <td>{{ competition.get_points(tireur.num_licence) }}</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <table id="Cnational" class = "scroll" style="display:none;">
+                <thead>
                     <tr>
-                        <td>1</td>
-                        <td>JUNIOR</td>
-                        <td>Neymar</td>
-                        <td>Orléans</td>
-                        <td>2910</td>
+                        <th id="intitule" colspan="5">Tête de série <a href="https://openclassrooms.com/forum/sujet/scroll-vertical-sur-balise-table"><img id="info" src="../static/images/istockphoto-1140611970-612x612-removebg-preview(1).png" alt=""></a></th>
                     </tr>
                     <tr>
-                        <td>2</td>
-                        <td>JUNIOR</td>
-                        <td>Neymar</td>
-                        <td>Orléans</td>
-                        <td>2910</td>
+                        <th>Rang</th>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Club</th>
+                        <th>Points nationaux</th>
                     </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>JUNIOR</td>
-                        <td>Neymar</td>
-                        <td>Orléans</td>
-                        <td>2910</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>JUNIOR</td>
-                        <td>Neymar</td>
-                        <td>Orléans</td>
-                        <td>2910</td>
-                    </tr>
-                    <tr>
-                        <td>5</td>
-                        <td>JUNIOR</td>
-                        <td>Neymar</td>
-                        <td>Orléans</td>
-                        <td>2910</td>
-                    </tr>
-                    <tr>
-                        <td>6</td>
-                        <td>JUNIOR</td>
-                        <td>Neymar</td>
-                        <td>Orléans</td>
-                        <td>2910</td>
-                    </tr>
-                    <tr>
-                        <td>7</td>
-                        <td>JUNIOR</td>
-                        <td>Neymar</td>
-                        <td>Orléans</td>
-                        <td>2910</td>
-                    </tr>
-                    <tr>
-                        <td>8</td>
-                        <td>JUNIOR</td>
-                        <td>Neymar</td>
-                        <td>Orléans</td>
-                        <td>2910</td>
-                    </tr>
-                    <tr>
-                        <td>9</td>
-                        <td>JUNIOR</td>
-                        <td>Neymar</td>
-                        <td>Orléans</td>
-                        <td>2910</td>
-                    </tr>
-                    <tr>
-                        <td>10</td>
-                        <td>JUNIOR</td>
-                        <td>Neymar</td>
-                        <td>Orléans</td>
-                        <td>2910</td>
-                    </tr>
-                    <tr>
-                        <td>11</td>
-                        <td>JUNIOR</td>
-                        <td>Neymar</td>
-                        <td>Orléans</td>
-                        <td>2910</td>
-                    </tr>
-                    <tr>
-                        <td>12</td>
-                        <td>JUNIOR</td>
-                        <td>Neymar</td>
-                        <td>Orléans</td>
-                        <td>2910</td>
-                    </tr>
-                    <tr>
-                        <td>13</td>
-                        <td>JUNIOR</td>
-                        <td>Neymar</td>
-                        <td>Orléans</td>
-                        <td>2910</td>
-                    </tr>
-                    <tr>
-                        <td>14</td>
-                        <td>JUNIOR</td>
-                        <td>Neymar</td>
-                        <td>Orléans</td>
-                        <td>2910</td>
-                    </tr>
-                    <tr>
-                        <td>15</td>
-                        <td>JUNIOR</td>
-                        <td>Neymar</td>
-                        <td>Orléans</td>
-                        <td>2910</td>
-                    </tr>
+                </thead>
+                <tbody>
+                    {% for tireur in competition.get_tireurs_order_by_rang() %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ tireur.nom }}</td>
+                            <td>{{ tireur.prenom }}</td>
+                            <td>{{ tireur.club.nom }}</td>
+                            <td>{{ tireur.get_classement(competition.id_arme, competition.id_categorie).points }}</td>
+                        </tr>
+                    {% endfor %}
+                    {% for tireur in competition.get_tireurs_sans_rang() %}
+                        <tr>
+                            <td>NC</td>
+                            <td>{{ tireur.nom }}</td>
+                            <td>{{ tireur.prenom }}</td>
+                            <td>{{ tireur.club.nom }}</td>
+                            <td>0</td>
+                        </tr>
+                    {% endfor %}
                 </tbody>
             </table>
             <h3> Dernier matchs : </h3>
@@ -331,4 +184,49 @@
             </div>
         </div>
     </main>
+    <script>
+        setInterval(changeClassement, 3000);
+        setInterval(changePoule, 4000);
+        
+        function changeClassement() {
+            var x = document.querySelector("#Cprovisoire");
+            var y = document.querySelector("#Cnational");
+            if (x.style.display === "none") {
+                x.style.display = "table";
+                y.style.display = "none";
+            } else {
+                x.style.display = "none";
+                y.style.display = "table";
+            }
+        }
+        var pouleGlobal = document.getElementsByClassName('poule');
+        var pouleAffiche = 0;
+        var pouleDebut = pouleGlobal[pouleAffiche].style.display == "table";
+        for (var i = pouleAffiche+1; i < pouleGlobal.length; i++) {
+            pouleGlobal[i].style.display = "none";
+        }
+
+        function changePoule(){
+            var x = pouleGlobal[pouleAffiche];
+            if (pouleAffiche+1 == pouleGlobal.length){
+                pouleAffiche = 0
+                
+            }
+            else{
+                pouleAffiche +=1
+            }
+            var y = pouleGlobal[pouleAffiche]
+            if (x.style.display === "none") {
+                x.style.display = "none";
+                y.style.display = "table";
+            } else {
+                x.style.display = "none";
+                y.style.display = "table";
+            }
+            console.log(pouleAffiche);
+            
+            
+           
+        }
+    </script>
     {% endblock %}
