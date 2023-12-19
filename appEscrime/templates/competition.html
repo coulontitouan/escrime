@@ -91,6 +91,7 @@
         <div id="deux">
             <div class="header-class">
                 <h2>Classements :</h2>
+                <button class="btn btn-primary" type="button" onclick="change()">Changer Classement</button>
                 {% if current_user.is_authenticated %}
                 {% if current_user.peut_sinscrire(competition.id) %}
                 <form id="test1" class="form-inline">
@@ -120,7 +121,7 @@
                 {% endif %}
                 {% endif %}
             </div>
-            <table class = "scroll">
+            <table id="Cprovisoire" class = "scroll" style="display:table;">
                 <thead>
                     <tr>
                         <th id="intitule" colspan="5">Classement provisoire <a href="https://openclassrooms.com/forum/sujet/scroll-vertical-sur-balise-table"><img id="info" src="../static/images/istockphoto-1140611970-612x612-removebg-preview(1).png" alt=""></a></th>
@@ -149,6 +150,53 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <table id="Cnational" class = "scroll" style="display:none;">
+                <thead>
+                    <tr>
+                        <th id="intitule" colspan="5">Tête de série <a href="https://openclassrooms.com/forum/sujet/scroll-vertical-sur-balise-table"><img id="info" src="../static/images/istockphoto-1140611970-612x612-removebg-preview(1).png" alt=""></a></th>
+                    </tr>
+                    <tr>
+                        <th>Rang</th>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Club</th>
+                        <th>Points nationaux</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tireur in competition.get_tireurs_order_by_rang() %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ tireur.nom }}</td>
+                            <td>{{ tireur.prenom }}</td>
+                            <td>{{ tireur.club.nom }}</td>
+                            <td>{{ tireur.get_classement(competition.id_arme, competition.id_categorie).points }}</td>
+                        </tr>
+                    {% endfor %}
+                    {% for tireur in competition.get_tireurs_bug() %}
+                        <tr>
+                            <td>NC</td>
+                            <td>{{ tireur.nom }}</td>
+                            <td>{{ tireur.prenom }}</td>
+                            <td>{{ tireur.club.nom }}</td>
+                            <td>0</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
+    <script>
+        function change() {
+            var x = document.querySelector("#Cprovisoire");
+            var y = document.querySelector("#Cnational");
+            if (x.style.display === "none") {
+                x.style.display = "table";
+                y.style.display = "none";
+            } else {
+                x.style.display = "none";
+                y.style.display = "table";
+            }
+        }
+    </script>
     {% endblock %}

@@ -1,7 +1,7 @@
 from .app import db, login_manager
 from sqlalchemy import *
 from flask_login import UserMixin
-from datetime import date 
+from datetime import date
 
 TO_DATE = '%d/%m/%Y'
 
@@ -113,10 +113,12 @@ class Escrimeur(db.Model, UserMixin):
             agemax = competition.categorie.age_maxi
             if agemax < 0:
                 agemax = 1000
-            if age < agemax and (age <39 and "Vétérans" not in competition.categorie.libelle or age > 39 and "Vétérans" in competition.categorie.libelle):
+            if age <= agemax and (age <= 39 and "Vétérans" not in competition.categorie.libelle or age > 39 and "Vétérans" in competition.categorie.libelle) :
                     return True
-            
         return False
+    
+    def get_classement(self, id_arme, id_categorie):
+        return Classement.query.get((self.num_licence, id_arme, id_categorie))
 
 class Classement(db.Model):
     __tablename__ = 'classement'
@@ -171,6 +173,18 @@ class Competition(db.Model):
     
     def get_tireurs_order_by_pts(self):
         return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2).order_by(Resultat.points.desc())
+    
+    def get_tireurs_order_by_rang(self) :
+        # participants = self.get_tireurs()
+        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2).outerjoin(Classement).filter((Classement.id_arme == self.id_arme) & (Classement.id_categorie == self.id_categorie)).order_by(Classement.rang)
+    
+    def get_tireurs_bug(self) :
+        liste = self.get_tireurs_order_by_rang()
+        liste2 = []
+        for x in self.get_tireurs() :
+            if x not in liste :
+                liste2.append(x)
+        return liste2
 
     def get_arbitres(self):
         return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points == -2)
