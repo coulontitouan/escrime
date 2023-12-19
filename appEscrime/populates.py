@@ -201,6 +201,7 @@ def load_resultats(contenu, lecteur):
 
 
 def save_competitions():
+    """Sauvegarde les compétitions dans des fichiers csv"""
     with open('../data/competitions_CEB.csv', 'w', encoding = 'utf-8') as fichier:
         print('competitions_CEB')
         writer = csv.writer(fichier, delimiter = ";")
@@ -221,6 +222,7 @@ def save_competitions():
         fichier.close()
 
 def save_connexions():
+    """Sauvegarde les informations de connexion dans un fichier csv"""
     with open('../data/connexion.csv', 'w', encoding = 'utf-8') as fichier:
         print('connexion')
         writer = csv.writer(fichier, delimiter = ";")
@@ -230,6 +232,7 @@ def save_connexions():
     fichier.close()
 
 def save_classements():
+    """Sauvegarde les classements dans des fichiers csv"""
     for arme in Arme.query.all():
         for categorie in Categorie.query.all():
             for sexe in ('Dames', 'Homme'):
