@@ -1,4 +1,7 @@
-# Base de données
+"""Module contenant les constantes de l'application."""
+
+from hashlib import sha256
+
 TIREUR = -1
 ARBITRE = -2
 AGE_MAX_M13 = 13
@@ -13,3 +16,4 @@ AGE_MAX_VETERANS4 = -1
 CLUB_ADMIN = 1
 TOUCHES_POULE = 5
 TOUCHES_BRACKET = 15
+CRYPTAGE = sha256()
