@@ -265,3 +265,7 @@ def deinscription_competition(id) :
     competition.desinscription(current_user.num_licence)
     flash('Vous êtes désinscrit', 'warning')
     return render_template('competition.html',form = form, competition = get_competition(id), id = id)
+
+@app.route("/competition/<int:id>/affichage-grand-ecran", methods=("GET", "POST"))
+def affichage_grand_ecran(id):
+    return render_template('affichageGE.html', competition = get_competition(id), id = id)
