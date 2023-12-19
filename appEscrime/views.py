@@ -138,7 +138,7 @@ def inscription():
             if f2.sexe.data == "Femme":
                 newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Dames",f2.date_naissance.data,f2.club.data)
             else:       
-                newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Homme",f2.date_naissance.data,f2.club.data)
+                newuser(f2.num_licence.data,f2.mot_de_passe.data,f2.prenom.data,f2.nom.data,"Hommes",f2.date_naissance.data,f2.club.data)
 
                 user = f2.get_authenticated_user()
                 if user:
@@ -154,9 +154,13 @@ def competition(id):
     """Fonction qui permet d'afficher une compétition"""
     form = InscriptionForm()
     competition = get_competition(id)
+    try :
+        user = current_user.num_licence
+    except :
+        user = -1
     return render_template(
         "competition.html",
-        competition = competition, form = form, user = get_est_inscrit(current_user.num_licence,id)
+        competition = competition, form = form, user = competition.est_inscrit(user)
     )
 
 @app.route("/competition/<int:idC>/poule/<int:idP>")
@@ -190,7 +194,10 @@ def creationCompet():
             lieu = Lieu(nom =  f.nom_lieu.data, adresse =  f.adresse_lieu.data, ville =  f.ville_lieu.data)
             db.session.add(lieu)
             db.session.commit()
-        competition = Competition(id = (get_max_competition_id() + 1), nom = f.nom_competition.data, date = f.date_competition.data, coefficient = f.coefficient_competition.data, sexe = f.sexe_competition.data, id_lieu = lieu.id, id_arme = arme.id, id_categorie = categorie.id)
+        sexe = f.sexe_competition.data
+        if sexe == "Femmes":
+            sexe = "Dames"
+        competition = Competition(id = (get_max_competition_id() + 1), nom = f.nom_competition.data, date = f.date_competition.data, coefficient = f.coefficient_competition.data, sexe = sexe, id_lieu = lieu.id, id_arme = arme.id, id_categorie = categorie.id)
         db.session.add(competition)
         db.session.commit()
         flash('Compétition créée avec succès', 'success')  # Utilise Flash de Flask pour les messages
@@ -228,21 +235,20 @@ class InscriptionForm(FlaskForm):
 @app.route("/competition/<int:id>/inscription", methods=("GET", "POST"))
 def inscription_competition(id) :
     form = InscriptionForm()
+    competition = get_competition(id)
     if not form.is_submitted():
         form.next.data = request.args.get("next")
     else:
-        if form.role.data == "Arbitre" and get_est_inscrit(current_user.num_licence,id) == False:
-            competition = get_competition(id)
+        if form.role.data == "Arbitre" and competition.est_inscrit(current_user.num_licence) == False:
             competition.inscription(current_user.num_licence,True)
             flash('Vous êtes inscrit comme arbitre', 'success')
             return redirect(url_for('competition',id = id))
-        elif form.role.data == "Tireur" and get_est_inscrit(current_user.num_licence,id) == False:
-            competition = get_competition(id)
+        elif form.role.data == "Tireur" and competition.est_inscrit(current_user.num_licence) == False:
             competition.inscription(current_user.num_licence)
             flash('Vous êtes inscrit comme tireur', 'success')
             return redirect(url_for('competition', id = id))
         else:
-            flash('Vous êtes déja inscrit', 'error')
+            flash('Vous êtes déja inscrit', 'danger')
             return redirect(url_for('competition', id = id))
     return render_template('competition.html',form=form, competition = get_competition(id), id = id)
 
@@ -251,3 +257,11 @@ def suppr_competition(id):
     delete_competition(id)
     flash('Compétition supprimée avec succès', 'warning')
     return redirect(url_for('home'))
+
+@app.route("/competition/<int:id>/deinscription", methods=("GET", "POST"))
+def deinscription_competition(id) :
+    form = InscriptionForm()
+    competition = get_competition(id)
+    competition.desinscription(current_user.num_licence)
+    flash('Vous êtes désinscrit', 'warning')
+    return render_template('competition.html',form = form, competition = get_competition(id), id = id)
