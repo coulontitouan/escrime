@@ -6,7 +6,7 @@ import os
 import click
 from sqlalchemy import desc
 from .app import app , db
-from .models import TypePhase, Arme, Categorie, Club, Escrimeur
+from .models import TypePhase, Arme, Categorie, Club, Escrimeur, Competition
 from .populates import load_competitions, load_connexion, load_escrimeurs, load_matchs, load_resultats
 from .populates import save_competitions, save_classements, save_connexions
 
@@ -136,5 +136,6 @@ def newadmin(prenom, nom, sexe, mot_de_passe ):
 
 
 @app.cli.command()
-def test():
-    save_classements()
+@click.argument('id_competition')
+def test(id_competition):
+    Competition.query.get(int(id_competition)).programme_poules()

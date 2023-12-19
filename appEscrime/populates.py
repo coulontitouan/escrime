@@ -32,16 +32,23 @@ def load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories):
         categories (dict): le dictionnaire des catégories déjà présentes dans la base
     """
 
-    if '-' in contenu[3]:
+    if len(contenu) > 3 and '-' in contenu[3]:
         split_cat = contenu[3].split('-')
         contenu[3] = split_cat[0][:-1] + split_cat[-1]
 
     for ligne in lecteur:
+        nom_club = ligne['club']
+        if nom_club not in clubs:
+            club = Club(nom = nom_club,
+                        region = ligne['comite regional'])
+            clubs[nom_club] = club
+            db.session.add(club)
+
         if contenu[1] == 'none':
             # Fichier rassemblant les escrimeurs n'ayant jamais participé à une compétition
             naissance = ligne['date naissance'].split('/')
             club = clubs[nom_club]
-            escrimeur = Escrimeur(num_licence = licence,
+            escrimeur = Escrimeur(num_licence = ligne['adherent'],
                                   prenom = ligne['prenom'],
                                   nom = ligne['nom'],
                                   sexe = contenu[2],
@@ -50,16 +57,10 @@ def load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories):
                                                             int(naissance[1]),
                                                             int(naissance[0])),
                                   club = club)
-            escrimeurs[licence] = escrimeur
+            escrimeurs[ligne['adherent']] = escrimeur
             db.session.add(escrimeur)
 
         else:
-            nom_club = ligne['club']
-            if nom_club not in clubs:
-                club = Club(nom = nom_club,
-                            region = ligne['comite regional'])
-                clubs[nom_club] = club
-                db.session.add(club)
 
             licence = ligne['adherent']
             if licence not in escrimeurs:
@@ -175,19 +176,26 @@ def load_matchs(contenu, lecteur, escrimeurs, competitions, phases, types_phase)
                 nb_touches = int(ligne['touches' + i])
                 if ligne['etat'] == 'Termine':
                     if nb_touches == types_phase[ligne['libelle phase']].touches_victoire:
-                        db.session.add(Participation(match = mmatch,
+                        db.session.add(Participation(id_competition = mmatch.id_competition,
+                                                     id_phase = mmatch.id_phase,
+                                                     match = mmatch,
                                                      tireur = escrimeur,
                                                      touches = nb_touches,
                                                      statut = "Vainqueur"))
                     else:
-                        db.session.add(Participation(match = mmatch,
+                        db.session.add(Participation(id_competition = mmatch.id_competition,
+                                                     id_phase = mmatch.id_phase,
+                                                     match = mmatch,
                                                      tireur = escrimeur,
                                                      touches = nb_touches,
                                                      statut = "Perdant"))
                 else:
-                    db.session.add(Participation(match = mmatch,
+                    db.session.add(Participation(id_competition = mmatch.id_competition,
+                                                 id_phase = mmatch.id_phase,
+                                                 match = mmatch,
                                                  tireur = escrimeur,
-                                                 touches = nb_touches))
+                                                 touches = nb_touches,
+                                                 statut = "A venir"))
 
 
 def load_resultats(contenu, lecteur):
@@ -256,9 +264,16 @@ def save_classements():
                 fichier.close()
     
     classement_none = Escrimeur.query.filter(Escrimeur.classements == None).all()
-    with open('../data/sans_classements.csv', 'w', encoding = 'utf-8') as fichier:
-        writer = csv.writer(fichier, delimiter = ';')
-        ligne_1 = 'nom;prenom;date naissance;adherent;nation;comite regional;club'
-        writer.writerow([col for col in ligne_1.split(';')])
-        for escrimeur in classement_none:
-            writer.writerow(escrimeur.to_csv()[0])
+    with open('../data/classement_none_Homme.csv', 'w', encoding = 'utf-8') as fichier_h:
+        with open('../data/classement_none_Dames.csv', 'w', encoding = 'utf-8') as fichier_f:
+            writer_h = csv.writer(fichier_h, delimiter = ';')
+            writer_f = csv.writer(fichier_f, delimiter = ';')
+            ligne_1 = 'nom;prenom;date naissance;adherent;nation;comite regional;club'
+            writer_h.writerow([col for col in ligne_1.split(';')])
+            writer_f.writerow([col for col in ligne_1.split(';')])
+            for escrimeur in classement_none:
+                if escrimeur.sexe == 'Homme':
+                    writer_h.writerow(escrimeur.to_csv()[0])
+                else:
+                    writer_f.writerow(escrimeur.to_csv()[0])
+    fichier.close()
