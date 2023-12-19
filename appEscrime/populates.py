@@ -176,19 +176,26 @@ def load_matchs(contenu, lecteur, escrimeurs, competitions, phases, types_phase)
                 nb_touches = int(ligne['touches' + i])
                 if ligne['etat'] == 'Termine':
                     if nb_touches == types_phase[ligne['libelle phase']].touches_victoire:
-                        db.session.add(Participation(match = mmatch,
+                        db.session.add(Participation(id_competition = mmatch.id_competition,
+                                                     id_phase = mmatch.id_phase,
+                                                     match = mmatch,
                                                      tireur = escrimeur,
                                                      touches = nb_touches,
                                                      statut = "Vainqueur"))
                     else:
-                        db.session.add(Participation(match = mmatch,
+                        db.session.add(Participation(id_competition = mmatch.id_competition,
+                                                     id_phase = mmatch.id_phase,
+                                                     match = mmatch,
                                                      tireur = escrimeur,
                                                      touches = nb_touches,
                                                      statut = "Perdant"))
                 else:
-                    db.session.add(Participation(match = mmatch,
+                    db.session.add(Participation(id_competition = mmatch.id_competition,
+                                                 id_phase = mmatch.id_phase,
+                                                 match = mmatch,
                                                  tireur = escrimeur,
-                                                 touches = nb_touches))
+                                                 touches = nb_touches,
+                                                 statut = "A venir"))
 
 
 def load_resultats(contenu, lecteur):
