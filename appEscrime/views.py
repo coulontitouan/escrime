@@ -11,6 +11,7 @@ from .models import Escrimeur, Club, Competition, Lieu
 from .requests import *
 from .commands import newuser
 from wtforms import DateField
+import appEscrime.constants as cst
 
 with app.app_context():
     class CreeCompetitionForm(FlaskForm):
@@ -49,7 +50,7 @@ class LoginForm(FlaskForm):
         user = Escrimeur.query.get(self.num_licence.data)
         if user is None:
             return None
-        m = sha256()
+        m = cst.CRYPTAGE
         m.update(self.mot_de_passe.data.encode())
         passwd = m.hexdigest()
         return user if passwd == user.mot_de_passe else None
@@ -69,7 +70,7 @@ class SignUpForm(FlaskForm):
         user = Escrimeur.query.get(self.num_licence.data)
         if user is None:
             return None
-        m = sha256()
+        m = cst.CRYPTAGE
         m.update(self.mot_de_passe.data.encode())
         passwd= m.hexdigest()
         return user if passwd == user.mot_de_passe else None
@@ -82,7 +83,7 @@ class SignUpForm(FlaskForm):
             if self.sexe.data == "Femme":
                 a = "Dames" 
             if user.sexe == a and user.prenom.upper() == self.prenom.data.upper() and user.nom.upper() == self.nom.data.upper():
-                m = sha256()
+                m = cst.CRYPTAGE
                 m.update(self.mot_de_passe.data.encode())
                 passwd= m.hexdigest()
                 user.set_mdp(passwd)
