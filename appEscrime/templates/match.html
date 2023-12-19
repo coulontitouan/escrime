@@ -1,8 +1,139 @@
-{% extends 'base.html' %}
-{% block styles %}
-{{ super() }}
-<link rel="stylesheet" href="{{url_for('static', filename='match.css')}}">
-{% endblock %}
-{% block content %}
+<!doctype html>
+<html lang="fr">
 
-{% endblock %}
+<head>
+    {% block head %}
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png')}}" />
+    {% block styles %}
+    <!-- Bootstrap CSS -->
+    {{ bootstrap.load_css() }}
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='match.css')}}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+        integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    {% endblock %}
+
+    <title>Compétition ESCRIME</title>
+    {% endblock %}
+</head>
+
+<body>
+    <span id="message" onclick="this.style.display = 'none'">Commencez d'abord le match !</span>
+    <div class="tireur">
+        <span class="nom">A.Gardelle</span>
+        <div class="points" onclick="ajoutpoints(this)">
+            <p><span>0</span> touche(s)</p>
+        </div>
+        <div class="moins" onclick="retirepoints(this)">
+            <p><span>-</span></p>
+        </div>
+    </div>
+    <div id="informations">
+        <div>
+            <span>G.Dutroux</span>
+            <span>Poule A</span>
+            <span>Piste 2</span>
+            <span>5 touches maxi</span>
+        </div>
+        <span></span>
+        <div>
+            <button class='btnpause' onclick="pause(this)"></button>
+            <span id="chrono" onclick="pause(this)">00:00</span>
+            <a onclick="reset()">&#8635;</a>
+        </div>
+        <button onclick="start(this)">Commencer</button>
+        <button onclick="" style="display: none;">Valider</button>
+    </div>
+    <div class="tireur">
+        <span class="nom">N.Doucet</span>
+        <div class="points" onclick="ajoutpoints(this)">
+            <p><span>0</span> touche(s)</p>
+        </div>
+        <div class="moins" onclick="retirepoints(this)">
+            <p><span>-</span></p>
+        </div>
+    </div>
+    <aside>
+        <form>
+        </form>
+    </aside>
+    <script style="display: none;">
+        var started = false;
+        let message = document.getElementById('message');
+
+        function showMessage() {
+            message.style.display = "block";
+            setTimeout(function () {
+                message.style.display = "none";
+            }, 2000);
+        }
+
+        function start(elem) {
+            started = true;
+            elem.parentElement.querySelector('button:last-child').style.display = "unset";
+            elem.style.display = "none";
+        }
+
+        function reset() {  
+            if (started){
+                minutes = "00";
+                secondes = "00";
+                chrono.innerHTML = `${minutes}:${secondes}`;
+            }else{
+                showMessage()
+            }
+        }
+
+        var paused = false;
+        function pause(btn) {
+            if(started){
+                paused = !paused;
+                btn.parentElement.querySelector("button").classList.toggle("paused");
+            }else{
+                showMessage()
+            }
+        }
+        function ajoutpoints(elem) {
+            if (started) {
+                elem = elem.querySelector('span');
+                elem.innerHTML = parseInt(elem.innerHTML) + 1;
+            }else{
+                showMessage()
+            }
+        }
+        function retirepoints(elem) {
+            if (started){
+                elem = elem.previousElementSibling.querySelector('span')
+                if (parseInt(elem.innerHTML) > 0) {
+                    elem.innerHTML = parseInt(elem.innerHTML) - 1;
+                }
+            }else{
+                showMessage()
+            }
+        }
+
+        var chrono = document.getElementById('chrono');
+        var minutes = "00";
+        var secondes = "00";
+        var timer = setInterval(function () {
+            if (!paused && started) {
+                if (secondes == 59) {
+                    minutes++;
+                    if (minutes < 10) {
+                        minutes = "0" + minutes;
+                    }
+                    secondes = 0;
+                } else {
+                    secondes++;
+                }
+                if (secondes < 10) {
+                    secondes = "0" + secondes;
+                }
+                chrono.innerHTML = `${minutes}:${secondes}`;
+            }
+        }, 1000);
+    </script>
+</body>

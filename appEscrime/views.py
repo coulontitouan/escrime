@@ -252,9 +252,23 @@ def suppr_competition(id):
     flash('Compétition supprimée avec succès', 'warning')
     return redirect(url_for('home'))
 
+class MatchForm(FlaskForm):
+    touches1 = StringField('touches1',validators=[DataRequired()])
+    touches2 = StringField('touches2',validators=[DataRequired()])
+    next=HiddenField()
+
 @app.route("/competition/<int:idC>/poule/<int:idP>/match/<int:idM>")
 def match(idC, idP, idM):
     """Fonction qui permet d'afficher un match"""
+
+    competition, poule, match = [None, None, None]
+    # competition = get_competition(idC)
+    # poule = get_poule(idC, idP)
+    # match = get_match(idC, idP, idM)
+
     return render_template(
-        "match.html"
+        "match.html",
+        competition = competition, 
+        poule = poule, 
+        match = match
     )
