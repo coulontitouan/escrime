@@ -87,14 +87,15 @@ ul {
     height: 5rem;
     padding: 5px;
     width: auto;
-    transition: all 1s ease;
 }
 
-.logo.clicked{
+.clicked{
+    transition: all 1s ease;
     transform: rotate(360deg) translateX(100%);
 }
 
-.logo.notclicked{
+.notclicked{
+    transition: all 1s ease;
     transform: rotate(-360deg) translateX(0%);    
 }
 
@@ -147,7 +148,7 @@ ul {
 
 #header .menu-btn:checked~.liens {
     overflow-y: hidden;
-    max-height: 300px;
+    max-height: 340px;
     /* approximate max height */
     transition-duration: .2s;
 }
@@ -321,6 +322,10 @@ main {
     margin-bottom: 5vh;
 }
 
+#deconnexion a{
+    display: flex;
+}
+
 #connexion, #deconnexion{
     display: flex;
     flex-basis: fit-content !important;
@@ -388,5 +393,9 @@ main {
 
     #titre {
         visibility: hidden;
+    }
+
+    #deconnexion p{
+        display: none;
     }
 }

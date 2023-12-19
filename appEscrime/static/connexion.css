@@ -1,7 +1,3 @@
-*{
-	box-sizing: unset;
-}
-
 main{
 	align-items: center;
 }
@@ -14,7 +10,7 @@ main{
 #carre{
 	background: radial-gradient(circle, rgba(255,125,125,1) 0%, rgba(255,192,192,1) 100%);
 	width: 30rem;
-	height: 53rem;
+	height: 40rem;
 	overflow: hidden;
 	border-radius: 10px;
 	box-shadow: 5px 20px 50px #000;
@@ -68,8 +64,8 @@ form > label{
 	background: #e0dede;
 	justify-content: center;
 	display: flex;
-	margin: 0.5em auto;
-	padding: 1.3em;
+	margin: 0.3em auto;
+	padding: 0.5em;
 	border: none;
 	outline: none;
 	border-radius: 5px;
@@ -103,15 +99,16 @@ form > label{
 }
 
 .login{
-	height: 42rem;
+	height: 51rem;
 	background: #eee;
 	border-radius: 60% / 10%;
-	transform: translateY(-51rem);
+	transform: translateY(-38rem);
 	transition: .8s ease-in-out;
 }
 
 .login .titre{
 	color: #ff4b4b;
+	padding-top: .5em;
 }
 
 .signup form > label{
