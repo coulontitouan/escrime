@@ -41,7 +41,7 @@
             <table class = "scroll">
                 <thead>
                     <tr>
-                        <th id="intitule" colspan="3">Poule A - 8 Tireurs - G. DUTROU <a href="{{url_for('poule', idC = competition.id , idP = 1)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
+                        <th id="intitule" colspan="3">Poule A - 8 Tireurs - G. DUTROU <a href="{{url_for('affiche_poule', id_compet = competition.id , id_poule = 1)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
                     </tr>
                     <tr>
                         <th>Nom</th>
@@ -101,7 +101,7 @@
                 {% if not user %}
                 <button id = "openbtn" type="button" class="btn btn-success">S'inscrire</button>
                 <dialog id = "dialog" class="shadow p-3 mb-5 bg-body rounded">
-                    <form action="{{ url_for('inscription_competition', id = competition.id) }}" method="post" role="form">
+                    <form action="{{ url_for('inscription_competition', id_compet = competition.id) }}" method="post" role="form">
                     <div id="haut">
                         <h2>Inscription</h2>
                         <a id = "closebtn"><img id="uneimage" src="{{ url_for('static', filename = 'images/croix.png') }}" alt=""></a>
@@ -113,7 +113,7 @@
                     </form>
                 </dialog>
                 {% else %}
-                    <form action="{{ url_for('deinscription_competition', id = competition.id )}}" method="post" role="form">
+                    <form action="{{ url_for('deinscription_competition', id_compet = competition.id )}}" method="post" role="form">
                         <button type="submit" class="btn btn-danger">Se désinscrire</button>
                     </form>
                 {% endif %}
