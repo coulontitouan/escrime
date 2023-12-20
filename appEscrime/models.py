@@ -3,7 +3,7 @@
 
 from datetime import date
 import sqlalchemy
-from sqlalchemy import PrimaryKeyConstraint
+from sqlalchemy import ForeignKeyConstraint, PrimaryKeyConstraint
 from flask_login import UserMixin
 import appEscrime.constants as cst
 from .app import db, login_manager
@@ -489,6 +489,7 @@ class Phase(db.Model):
             arbitre (Escrimeur): l'arbitre de la phase.
             tireurs (list): la liste des tireurs de la phase.
         """
+        print(tireurs, "\n")
         liste_matchs = self.programme_matchs_poule(tireurs)
         for index, match in enumerate(liste_matchs, start=1):
             self.ajoute_match(index, arbitre, match[0], match[1])
@@ -509,9 +510,9 @@ class Phase(db.Model):
                           piste = self.id,
                           etat = "A venir",
                           arbitre = arbitre)
-            db.session.add(match)
             match.cree_participation(tireur1)
             match.cree_participation(tireur2)
+            db.session.add(match)
 
     def programme_matchs_poule(self, tireurs):
         """Organise l'ordre des matchs de la phase.
@@ -559,11 +560,9 @@ class Match(db.Model):
     __tablename__ = 'match'
     id = db.Column(db.Integer())
     # Clé étrangère vers la compétition comprenant le match
-    id_competition = db.Column(db.Integer(), db.ForeignKey('competition.id'))
-    # Relation plusieurs-à-un unidirectionnel : Un match est compris dans une seule compétition
-    competition = db.relationship('Competition')
+    id_competition = db.Column(db.Integer(), nullable=False)
     # Clé étrangère vers la phase comprenant le match
-    id_phase = db.Column(db.Integer(), db.ForeignKey('phase.id'))
+    id_phase = db.Column(db.Integer(), nullable=False)
     # Relation plusieurs-à-un : Un match est compris dans une seule phase de la compétition
     phase = db.relationship('Phase', back_populates = 'matchs')
     piste = db.Column(db.Integer())
@@ -576,6 +575,7 @@ class Match(db.Model):
     participations = db.relationship('Participation', back_populates = 'match')
     __table_args__ = (
         PrimaryKeyConstraint(id, id_phase, id_competition),
+        ForeignKeyConstraint([id_competition, id_phase], [Phase.id_competition, Phase.id]),
         {},
     )
 
@@ -605,15 +605,11 @@ class Participation(db.Model):
     """Classe représentant une participation d'un escrimeur à un match d'une compétition."""
     __tablename__ = 'participation'
     # Clé étrangère vers la compétition comprenant le match
-    id_competition = db.Column(db.Integer(), db.ForeignKey('competition.id'))
-    # Relation plusieurs-à-un unidirectionnel : Un match est compris dans une seule compétition
-    competition = db.relationship('Competition')
+    id_competition = db.Column(db.Integer(), nullable=False)
     # Clé étrangère vers la phase comprenant le match
-    id_phase = db.Column(db.Integer(), db.ForeignKey('phase.id'))
-    # Relation plusieurs-à-un : Un match est compris dans une seule phase de la compétition
-    phase = db.relationship('Phase')
+    id_phase = db.Column(db.Integer(), nullable=False)
     # Clé étrangère vers le match
-    id_match = db.Column(db.Integer(), db.ForeignKey('match.id'))
+    id_match = db.Column(db.Integer(), nullable=False)
     # Relation plusieurs-à-un : Une participation est liée à un seul match
     match = db.relationship('Match', back_populates = 'participations')
     # Clé étrangère vers le tireur
@@ -624,6 +620,7 @@ class Participation(db.Model):
     touches = db.Column(db.Integer())
     __table_args__ = (
         PrimaryKeyConstraint(id_competition, id_phase, id_match, id_escrimeur),
+        ForeignKeyConstraint([id_competition, id_phase, id_match], [Match.id_competition, Match.id_phase, Match.id]),
         {},
     )
 
