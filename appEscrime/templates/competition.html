@@ -46,6 +46,11 @@
             {% endfor %}
             {% else %}
                 <p>Aucune poule créée</p>
+                {% if current_user.is_authenticated %}
+                {% if current_user.is_admin() %}
+                    <a href="{{url_for('competitionCreatePoules', id=1)}}"><button class="btn btn-primary" type="button">Répartir les poules</button></a>
+                {% endif %}
+                {% endif %}
             {% endif %}
         </div>
         <div id="deux">
