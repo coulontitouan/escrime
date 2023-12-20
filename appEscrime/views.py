@@ -282,17 +282,17 @@ def inscription_competition(id) :
         return redirect(url_for('competition', id = id))
     return render_template('competition.html',form = form, competition = competition, id = id)
 
-@app.route("/suppr-competition/<int:id>")
-def suppr_competition(id : int) :
+@app.route("/suppr-competition/<int:id_compet>")
+def suppr_competition(id_compet : int) :
     """Supprime une compétition.
 
     Args:
-        id (int): Identifiant unique de la compétition.
+        id_compet (int): Identifiant unique de la compétition.
 
     Returns:
         flask.Response: Renvoie la page d'accueil
     """
-    rq.delete_competition(id)
+    rq.delete_competition(id_compet)
     flash('Compétition supprimée avec succès', 'warning')
 
     return redirect(url_for('home'))
@@ -302,8 +302,8 @@ class MatchForm(FlaskForm):
     touches2 = StringField('touches2',validators=[DataRequired()])
     next=HiddenField()
 
-@app.route("/competition/<int:idC>/poule/<int:idP>/match/<int:idM>")
-def match(idC, idP, idM):
+@app.route("/competition/<int:id_compet>/poule/<int:id_phase>/match/<int:id_match>")
+def affiche_match(id_compet, id_phase, id_match):
     """Fonction qui permet d'afficher un match"""
 
     competition, poule, match = [None, None, None]
