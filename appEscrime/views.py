@@ -33,9 +33,9 @@ class SearchForm(FlaskForm):
     submit = SubmitField("Submit", validators=[DataRequired()])
 
 class HomeForm(FlaskForm):
-    categoriesField = SelectField("catégories",coerce=str,default=1, choices = [""])
-    armesField = SelectField("armes",coerce=str,default=1, choices = [""])
-    genresField = SelectField("genres",coerce=str,default=1, choices = ["","Homme", "Dames"])
+    categoriesField = SelectField("catégories",coerce=str,default=1, choices = ["Catégorie"])
+    armesField = SelectField("armes",coerce=str,default=1, choices = ["Arme"])
+    genresField = SelectField("genres",coerce=str,default=1, choices = ["Genre","Homme", "Dames"])
 
     
 @app.route("/", methods =("GET","POST",))
@@ -47,13 +47,13 @@ def home():
         form.armesField.choices.append(arme.libelle)
     competitions = Competition.query
     print(form.categoriesField.data)
-    if form.categoriesField.data != "" and form.categoriesField.data != "1":
+    if form.categoriesField.data != "Catégorie" and form.categoriesField.data != "1":
         competitions = competitions.filter(
                         Competition.id_categorie == rq.get_categorie_par_libelle(form.categoriesField.data).id)
-    if form.armesField.data != "" and form.armesField.data != "1":
+    if form.armesField.data != "Arme" and form.armesField.data != "1":
         competitions = competitions.filter(
                         Competition.id_arme == rq.get_arme_par_libelle(form.armesField.data).id)
-    if form.genresField.data != "" and form.genresField.data != "1":
+    if form.genresField.data != "Genre" and form.genresField.data != "1":
         competitions = competitions.filter(
                         Competition.sexe == form.genresField.data)
     return render_template(

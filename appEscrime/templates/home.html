@@ -13,15 +13,15 @@
 {% endfor %}
 <div id="body">
     <h1>Les compétitions :</h1>
-    <div id="FiltresBox">
-        <h2>Filtres:</h2>
-        <form action="{{ url_for('home') }}" method="post" role="form">
-              {{ form.categoriesField(class_="form-control1")}}
-              {{ form.armesField(class_="form-control1")}}
-              {{ form.genresField(class_="form-control1")}}
-              <button>Filtrer</button>
-              {% if form.categoriesField.data != "" and form.categoriesField.data != "1" or form.armesField.data != "" and form.armesField.data != "1" or form.genresField.data != "" and form.genresField.data != "1" %}
-                <a href="{{ url_for('home') }}">Enlever les filtres</a>
+    <div id="filtresBox">
+        <h2>Filtres :</h2>
+        <form id="filtres" action="{{ url_for('home') }}" method="post" role="form">
+              {{ form.categoriesField(class="form-select" )}}
+              {{ form.armesField(class="form-select" )}}
+              {{ form.genresField(class="form-select" )}}
+              <button class="btn btn-outline-success">Filtrer</button>
+              {% if form.categoriesField.data != "Catégorie" and form.categoriesField.data != "1" or form.armesField.data != "Arme" and form.armesField.data != "1" or form.genresField.data != "Genre" and form.genresField.data != "1" %}
+                <a class="btn btn-outline-danger" href="{{ url_for('home') }}">Enlever les filtres</a>
               {% endif %}
         </form>
     </div>
