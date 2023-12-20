@@ -34,7 +34,7 @@
                 <td>{{ c.sexe }}</td>
                 <td>{{ c.get_lieu().nom }}</td>
                 <td>{{ c.date }}</td>
-                <td><a href="{{url_for('competition', id=c.id)}}"><button class="favorite styled" type="button" >Voir plus</button></a></td>
+                <td><a href="{{url_for('affiche_competition', id_compet=c.id)}}"><button class="favorite styled" type="button" >Voir plus</button></a></td>
                 {% if current_user.is_authenticated %}
                 {% if current_user.is_admin() %}
                 <td><a onclick="supprC('{{c.id}}')"><img width="50px" height="50px" src="{{url_for('static', filename='images/redCross.png')}}" alt="Une croix rouge"></a></td>
@@ -42,15 +42,6 @@
                 {% endif %}
             </tr>
             {% endfor %}
-            <tr>
-                <td>Tournoi de pré-rentrée</td>
-                <td>M15</td>
-                <td>Sabre</td>
-                <td>Homme</td>
-                <td>Beaugency</td>
-                <td>04/08/23</td>
-                <td><a href="https://google.com"><button class="favorite styled" type="button" >Voir plus</button></a></td>
-            </tr>
         </tbody>
     </table>
 </div>
@@ -59,7 +50,6 @@
         let texte =  "Vous êtes sur le point de supprimer la compétition " +
                     "êtes-vous sûr(e) ?"
         if(confirm(texte) == true){
-            alert("suppression de la compétition")
             location.href = "/home/suppr-competition/" + id.toString()
         }
     }
