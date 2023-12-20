@@ -133,7 +133,7 @@ class Escrimeur(db.Model, UserMixin):
 
         Returns :
             bool : True si l'utilisateur est administrateur, False sinon."""
-        return self.id_club == 1
+        return self.id_club == cst.CLUB_ADMIN
 
     def peut_sinscrire(self, id_compet):
         """Vérifie si l'escrimeur à l'âge requis pour s'inscrie à une compétition donnée.
@@ -260,10 +260,21 @@ class Competition(db.Model):
                                                      Resultat.points != cst.ARBITRE)
     
     def get_tireurs_order_by_pts(self):
-        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2).order_by(Resultat.points.desc())
+        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id,
+                                                     Resultat.points != cst.ARBITRE).order_by(
+                                                                            Resultat.points.desc())
     
-    def get_tireurs_order_by_rang(self) :
-        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2).outerjoin(Classement).filter((Classement.id_arme == self.id_arme) & (Classement.id_categorie == self.id_categorie)).order_by(Classement.rang)
+    def get_tireurs_order_by_rang(self):
+        filtre_res = Resultat.query.filter(Resultat.id_competition == self.id,
+                                           Resultat.points != cst.ARBITRE)
+        filtre_cla = (Classement.query.filter(
+                                            (Classement.id_arme == self.id_arme)
+                                            & (Classement.id_categorie == self.id_categorie)))
+        return (Escrimeur.query.join(Resultat)
+                .filter(*filtre_res.whereclause)
+                .outerjoin(Classement)
+                .filter(*filtre_cla.whereclause)
+                .order_by(Classement.rang))
     
     def get_tireurs_sans_rang(self) :
         liste = self.get_tireurs_order_by_rang()
@@ -508,7 +519,7 @@ class Phase(db.Model):
                           id_competition = self.id_competition,
                           id_phase = self.id,
                           piste = self.id,
-                          etat = "A venir",
+                          etat = cst.MATCH_A_VENIR,
                           arbitre = arbitre)
             match.cree_participation(tireur1)
             match.cree_participation(tireur2)
@@ -576,6 +587,10 @@ class Match(db.Model):
         {},
     )
 
+    def set_en_cours(self):
+        """Met le match en cours."""
+        self.etat = cst.MATCH_EN_COURS
+
     def cree_participation(self, tireur):
         """Crée les participations des tireurs au match.
 
@@ -586,8 +601,30 @@ class Match(db.Model):
                                      id_phase = self.id_phase,
                                      id_match = self.id,
                                      id_escrimeur = tireur.num_licence,
-                                     statut = "A venir",
+                                     statut = cst.MATCH_A_VENIR,
                                      touches = 0))
+    
+    def valide_resultat(self, vainqueur, perdant):
+        """Valide le résultat d'un match.
+
+        Args:
+            vainqueur (Escrimeur): l'escrimeur vainqueur du match.
+            perdant (Escrimeur): l'escrimeur perdant du match.
+        """
+        num_vainqueur, touches_vainqueur = vainqueur[0], vainqueur[1]
+        num_perdant, touches_perdant = perdant[0], perdant[1]
+        for participation in self.participations:
+            print(participation.id_escrimeur, num_vainqueur, num_perdant)
+            if participation.id_escrimeur == num_vainqueur:
+                participation.statut = cst.VAINQUEUR
+                participation.touches = touches_vainqueur
+            elif participation.id_escrimeur == num_perdant:
+                participation.statut = cst.PERDANT
+                participation.touches = touches_perdant
+            else:
+                print("Tireur inconnue wtf ?!")
+        self.etat = cst.MATCH_TERMINE
+        db.session.commit()    
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture du match dans un fichier csv."""
