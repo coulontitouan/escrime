@@ -1,24 +1,12 @@
+"""Module de chargement des données dans la base de données et de sauvegarde sur des fichiers csv"""
+
 import csv
 from datetime import datetime
-import os
 
 from sqlalchemy import and_
+import appEscrime.constants as cst
 from .app import db
-from .models import Classement, Lieu, Competition, Phase, Match, Participation, Resultat, Club, Escrimeur, Phase, TypePhase, Arme, Categorie
-
-# def conversion_csv_utf8(chemin):
-#     with open('../data/' + chemin, 'r', encoding = 'latin-1') as fichier_entree:
-#         lecteur = csv.reader(fichier_entree, delimiter=';')
-#         if os.path.exists('../data/.encoded/' + chemin):
-#             os.remove('../data/.encoded/' + chemin)
-#         for ligne in lecteur:
-#             data = [carac for carac in ligne]
-#             with open('../data/.encoded/' + chemin, 'a', newline = '', encoding = 'utf-8') as fichier_sortie:
-#                 writer = csv.writer(fichier_sortie, delimiter=';')
-#                 writer.writerow(data)
-#             fichier_sortie.close()
-#     fichier_entree.close()
-
+from .models import Classement, Lieu, Competition, Phase, Match, Participation, Resultat, Club, Escrimeur, TypePhase, Arme, Categorie # pylint: disable=line-too-long
 
 def load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories):
     """Charge les escrimeurs, classements, armes, catégories et clubs dans la base de données
@@ -151,7 +139,7 @@ def load_matchs(contenu, lecteur, escrimeurs, competitions, phases, types_phase)
     for ligne in lecteur:
         nom_phase = ligne['libelle phase']
         if nom_phase not in types_phase:
-            type_phase = TypePhase(libelle = nom_phase, nb_touches = 15)
+            type_phase = TypePhase(libelle = nom_phase, nb_touches = cst.TOUCHES_BRACKET)
             types_phase[nom_phase] = type_phase
             db.session.add(type_phase)
 
@@ -215,14 +203,17 @@ def load_resultats(contenu, lecteur):
 
 
 def save_competitions():
+    """Sauvegarde les compétitions dans des fichiers csv"""
     with open('../data/competitions_CEB.csv', 'w', encoding = 'utf-8') as fichier:
         print('competitions_CEB')
         writer = csv.writer(fichier, delimiter = ";")
-        writer.writerow(['nom','date','sexe','categorie','arme','coefficient','lieu','ville','adresse'])
+        writer.writerow(
+            ['nom','date','sexe','categorie','arme','coefficient','lieu','ville','adresse']
+        )
         for competition in Competition.query.all():
             writer.writerow(competition.to_csv())
     fichier.close()
-    
+
     for competition in Competition.query.all():
         titre = competition.to_titre_csv()
         with open('../data/resultats_' + titre + '.csv',
@@ -235,6 +226,7 @@ def save_competitions():
         fichier.close()
 
 def save_connexions():
+    """Sauvegarde les informations de connexion dans un fichier csv"""
     with open('../data/connexion.csv', 'w', encoding = 'utf-8') as fichier:
         print('connexion')
         writer = csv.writer(fichier, delimiter = ";")
@@ -244,12 +236,14 @@ def save_connexions():
     fichier.close()
 
 def save_classements():
+    """Sauvegarde les classements dans des fichiers csv"""
+    ligne_1 = 'nom;prenom;date naissance;adherent;nation;comite regional;club;points;rang'
     for arme in Arme.query.all():
         for categorie in Categorie.query.all():
             for sexe in ('Dames', 'Homme'):
                 classements = Classement.query.filter(and_(Classement.arme == arme,
                                                            Classement.categorie == categorie,
-                                                           Classement.tireur.has(sexe = sexe))).all()
+                                                           Classement.tireur.has(sexe=sexe))).all()
                 nom_arme = arme.libelle
                 nom_cat = categorie.libelle
                 titre = nom_arme + '_' + sexe + '_' + nom_cat
@@ -257,20 +251,19 @@ def save_classements():
                           'w', encoding = 'utf-8') as fichier:
                     print(titre)
                     writer = csv.writer(fichier, delimiter = ';')
-                    ligne_1 = 'nom;prenom;date naissance;adherent;nation;comite regional;club;points;rang'
-                    writer.writerow([col for col in ligne_1.split(';')])
+                    writer.writerow(list(ligne_1.split(';')))
                     for classement in classements:
                         writer.writerow(classement.to_csv())
                 fichier.close()
-    
-    classement_none = Escrimeur.query.filter(Escrimeur.classements == None).all()
+
+    classement_none = Escrimeur.query.filter(Escrimeur.classements is None).all()
     with open('../data/classement_none_Homme.csv', 'w', encoding = 'utf-8') as fichier_h:
         with open('../data/classement_none_Dames.csv', 'w', encoding = 'utf-8') as fichier_f:
             writer_h = csv.writer(fichier_h, delimiter = ';')
             writer_f = csv.writer(fichier_f, delimiter = ';')
             ligne_1 = 'nom;prenom;date naissance;adherent;nation;comite regional;club'
-            writer_h.writerow([col for col in ligne_1.split(';')])
-            writer_f.writerow([col for col in ligne_1.split(';')])
+            writer_h.writerow(list(ligne_1.split(';')))
+            writer_f.writerow(list(ligne_1.split(';')))
             for escrimeur in classement_none:
                 if escrimeur.sexe == 'Homme':
                     writer_h.writerow(escrimeur.to_csv()[0])

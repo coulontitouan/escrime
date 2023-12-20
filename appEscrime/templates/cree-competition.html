@@ -6,7 +6,7 @@
 {% block content %}
 <div id="formulaire" class="shadow p-3 mb-5 bg-body rounded">
     <h1 class="text-center mb-4">Créer une compétition</h1>
-    <form id="formulaire2" action="{{ url_for('creationCompet') }}" method="post" role="form">
+    <form id="formulaire2" action="{{ url_for('creation_competition') }}" method="post" role="form">
         <div id="gauche">
             <div class = "form-group">
                 {{ form.nom_lieu.label }} {{ form.nom_lieu }}

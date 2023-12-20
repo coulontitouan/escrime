@@ -37,7 +37,7 @@
             {% if current_user.is_authenticated %}
             {% if current_user.is_admin() %}
             <li id="pagecreecompet">
-                <a href="{{ url_for('creationCompet') }}" {% if request.path == url_for('creationCompet') %} id="active" {% endif %}>Créer une compétition</a>
+                <a href="{{ url_for('creation_competition') }}" {% if request.path == url_for('creation_competition') %} id="active" {% endif %}>Créer une compétition</a>
             </li>
             {% endif %}
             {% endif %}
