@@ -1,15 +1,14 @@
 """Module contenant les objets de la base de données."""
+# pylint: disable=too-few-public-methods
 
+from datetime import date
 import sqlalchemy
-from .app import db, login_manager
 from sqlalchemy import PrimaryKeyConstraint
 from flask_login import UserMixin
-from datetime import date
-
-import appEscrime.constants as cst
 import requests as rq
+import appEscrime.constants as cst
+from .app import db, login_manager
 
-TO_DATE = '%d/%m/%Y'
 
 class Lieu(db.Model):
     """Classe représentant un lieu acceuillant des compétitions."""
@@ -105,35 +104,35 @@ class Escrimeur(db.Model, UserMixin):
 
     def get_id(self):
         """Retourne l'identifiant de l'escrimeur.
-        
+
         Returns :
             string : l'identifiant de l'escrimeur."""
         return self.num_licence
 
     def set_mdp(self, mdp):
         """Retourne le mot de passe de l'escrimeur.
-        
+
         Returns :
             string : le mot de passe de l'escrimeur."""
         self.mot_de_passe = mdp
 
     def get_club(self):
         """Retourne le nom club de l'escrimeur.
-        
+
         Returns :
             string : le nom du club de l'escrimeur."""
         return self.club.nom
 
     def get_sexe(self):
         """Retourne le sexe de l'escrimeur.
-        
+
         Returns :
             string : le sexe de l'escrimeur."""
         return self.sexe
 
     def is_admin(self):
         """Retourne si l'utilisateur a le statut administrateur.
-        
+
         Returns :
             bool : True si l'utilisateur est administrateur, False sinon."""
         return self.id_club == 1
@@ -162,7 +161,7 @@ class Escrimeur(db.Model, UserMixin):
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de l'escrimeur dans un fichier csv."""
-        naissance = self.date_naissance.strftime(TO_DATE)
+        naissance = self.date_naissance.strftime(cst.TO_DATE)
         return ([self.nom,
                  self.prenom,
                  naissance,
@@ -233,7 +232,7 @@ class Competition(db.Model):
 
     def get_arme(self):
         """Retourne l'arme de la compétition.
-        
+
         Returns:
             Arme: l'arme de la compétition.
         """
@@ -258,7 +257,7 @@ class Competition(db.Model):
 
     def get_arbitres(self):
         """Retourne les arbitres inscrits à la compétition.
-        
+
         Returns:
             Query: le résultat de la requête des arbitres inscrits à la compétition.
         """
@@ -284,10 +283,10 @@ class Competition(db.Model):
 
     def get_points(self, id_tireur):
         """Retourne les points d'un tireur à la compétition.
-        
+
         Args:
             id_tireur (string): l'identifiant du tireur.
-        
+
         Returns:
             int: les points inscrits par le tireur à la compétition."""
         return Resultat.query.get((self.id,id_tireur)).points
@@ -341,11 +340,11 @@ class Competition(db.Model):
                 db.session.rollback()
 
         poules = []
-        for j in range(nb_poules):
+        for j in range(len(self.phases)):
             poules.append(j+1)
         rotation_poules = poules + poules[::-1]
         repartition = []
-        for i in range(nb_poules):
+        for i in range(len(self.phases)):
             repartition.append([])
         for i in range(tireurs.count()):
             id_poule = rotation_poules[i % len(rotation_poules)]
@@ -397,7 +396,7 @@ class Competition(db.Model):
         for mot in split:
             res += mot[0].upper() + mot[1:]
         res += '_'
-        date_csv = self.date.strftime(TO_DATE)
+        date_csv = self.date.strftime(cst.TO_DATE)
         for carac in date_csv:
             if carac == '/':
                 res += '-'
@@ -407,7 +406,7 @@ class Competition(db.Model):
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de la compétition dans un fichier csv."""
-        date_csv = self.date.strftime(TO_DATE)
+        date_csv = self.date.strftime(cst.TO_DATE)
         descr = [self.nom, date_csv, self.sexe]
         coef = [self.coefficient]
         return descr + self.categorie.to_csv() + self.arme.to_csv() + coef + self.lieu.to_csv()
@@ -472,16 +471,17 @@ class Phase(db.Model):
 
     def programme_matchs_poule(self, tireurs):
         """Organise l'ordre des matchs de la phase.
-        
+
         Args:
-            tireurs (list): la liste des tireurs de la phase."""
+            tireurs (list): la liste des tireurs de la phase.
+        """
         nb_journees = len(tireurs) - 1 + (len(tireurs) % 2)
         journees = []
         programme = {}
         for _ in range(nb_journees):
             journees.append(set())
-        matchs = [(tireurs[i], tireurs[j]) 
-                  for i in range(len(tireurs)) 
+        matchs = [(tireurs[i], tireurs[j])
+                  for i in range(len(tireurs))
                   for j in range(i + 1, len(tireurs))]
 
         for match in matchs:
@@ -498,7 +498,7 @@ class Phase(db.Model):
 
         res = []
         for journee in programme.values():
-            journee.sort(key=lambda x: x[0].num_licence)
+            journee.sort(key=lambda x: x[0].get_id())
             for match in journee:
                 res.append(match)
         return res
@@ -609,4 +609,5 @@ class Resultat(db.Model):
 
 @login_manager.user_loader
 def load_user(num_licence):
+    """Charge un utilisateur."""
     return Escrimeur.query.get(num_licence)
