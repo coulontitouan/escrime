@@ -86,7 +86,6 @@ def loadbd():
             fichier.close()
         db.session.commit()
 
-
 @app.cli.command()
 def syncbd():
     """Crée les tables de la base de données"""

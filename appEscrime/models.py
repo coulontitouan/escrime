@@ -5,7 +5,6 @@ from datetime import date
 import sqlalchemy
 from sqlalchemy import PrimaryKeyConstraint
 from flask_login import UserMixin
-import requests as rq
 import appEscrime.constants as cst
 from .app import db, login_manager
 
@@ -88,20 +87,19 @@ class Escrimeur(db.Model, UserMixin):
     # Relation un-à-plusieurs : Un escrimeur peut participer à différentes compétitions
     resultats = db.relationship('Resultat', back_populates = 'escrimeur')
     mot_de_passe = db.Column(db.String(64), default = '')
-    _is_authenticated = db.Column(db.Boolean, default=False)
-    _is_active = db.Column(db.Boolean, default=False)
-    _is_anonymous = db.Column(db.Boolean, default=False)
 
     @property
     def is_authenticated(self):
-        return self._is_authenticated
+        return True
+
     @property
-    def is_active(self):
-        return self._is_active
+    def is_active(self):   
+        return True         
+
     @property
     def is_anonymous(self):
-        return self._is_anonymous
-
+        return False 
+    
     def get_id(self):
         """Retourne l'identifiant de l'escrimeur.
 
@@ -146,7 +144,7 @@ class Escrimeur(db.Model, UserMixin):
         Returns:
             bool : True si l'escrimeur peut s'inscrire, False sinon.
         """
-        compet = rq.get_competition(id_compet)
+        compet = Competition.query.get(id_compet)
         if compet.sexe == self.sexe:
             today = date.today()
             age = ((today.month, today.day) < (self.date_naissance.month, self.date_naissance.day))
@@ -158,6 +156,9 @@ class Escrimeur(db.Model, UserMixin):
             if age < agemax and (surclassable):
                 return True
         return False
+    
+    def get_classement(self, id_arme, id_categorie):
+        return Classement.query.get((self.num_licence, id_arme, id_categorie))
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de l'escrimeur dans un fichier csv."""
@@ -245,6 +246,9 @@ class Competition(db.Model):
             Lieu: le lieu de la compétition.
         """
         return self.lieu
+    
+    def nb_phases(self) :
+        return len(self.phases)
 
     def get_tireurs(self):
         """Retourne les tireurs inscrits à la compétition.
@@ -254,6 +258,20 @@ class Competition(db.Model):
         """
         return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id,
                                                      Resultat.points != cst.ARBITRE)
+    
+    def get_tireurs_order_by_pts(self):
+        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2).order_by(Resultat.points.desc())
+    
+    def get_tireurs_order_by_rang(self) :
+        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2).outerjoin(Classement).filter((Classement.id_arme == self.id_arme) & (Classement.id_categorie == self.id_categorie)).order_by(Classement.rang)
+    
+    def get_tireurs_sans_rang(self) :
+        liste = self.get_tireurs_order_by_rang()
+        liste2 = []
+        for x in self.get_tireurs() :
+            if x not in liste :
+                liste2.append(x)
+        return liste2
 
     def get_arbitres(self):
         """Retourne les arbitres inscrits à la compétition.
@@ -290,16 +308,23 @@ class Competition(db.Model):
         Returns:
             int: les points inscrits par le tireur à la compétition."""
         return Resultat.query.get((self.id,id_tireur)).points
-
-    def inscription(self, num_licence, arbitre = False):
-        """Inscrit un escrimeur à la compétition.
+    
+    def get_poules(self) :
+        res = []
+        for phase in self.phases :
+            if phase.libelle == 'Poule' :
+                res.append(phase)
+        return res
+    
+    def inscription(self, num_licence : int, arbitre : bool = False) :
+        """Inscrit un tireur à une compétition
 
         Args:
-            num_licence (string): l'identifiant de l'escrimeur.
-            arbitre (bool, optional): le statut d'arbitre de l'escrimeur. Defaults to False.
+            num_licence (int): Numéro de licence de l'escrimeur
+            arbitre (bool, optional): True si l'escrimeur est arbitre. Defaults to False.
         """
         points = cst.TIREUR
-        if arbitre:
+        if arbitre :
             points = cst.ARBITRE
         db.session.add(Resultat(id_competition = self.id,
                                 id_escrimeur = num_licence,
@@ -437,6 +462,25 @@ class Phase(db.Model):
         PrimaryKeyConstraint(id, id_competition),
         {},
     )
+
+    def nb_tireurs(self) :
+        tireurs = set()
+        for match in self.matchs :
+            for participation in match.participations :
+                if participation.id_phase == self.id :
+                    tireurs.add(participation.tireur)
+        return len(tireurs)
+    
+    def get_tireurs(self) :
+        tireurs = set()
+        for match in self.matchs :
+            for participation in match.participations :
+                if participation.id_phase == self.id :
+                    tireurs.add(participation.tireur)
+        return tireurs
+    
+    def get_arbitre(self) :
+        return Escrimeur.query.get(self.matchs[0].num_arbitre)
 
     def cree_matchs(self, arbitre, tireurs):
         """Crée les matchs de la phase.

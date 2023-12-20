@@ -1,6 +1,5 @@
 """Module qui contient les fonctions qui permettent de gérer les routes de l'application"""
-# pylint: disable=missing-function-docstring
-# pylint: disable=missing-class-docstring
+
 import os
 import signal
 from flask import request, redirect, url_for, flash, render_template, jsonify
@@ -52,8 +51,9 @@ class LoginForm(FlaskForm):
         user = Escrimeur.query.get(self.num_licence.data)
         if user is None:
             return None
-        cst.CRYPTAGE.update(self.mot_de_passe.data.encode())
-        passwd = cst.CRYPTAGE.hexdigest()
+        caca = cst.CRYPTAGE
+        caca.update(self.mot_de_passe.data.encode())
+        passwd = caca.hexdigest()
         return user if passwd == user.mot_de_passe else None
 
 
@@ -75,7 +75,7 @@ class SignUpForm(FlaskForm):
         if user is None:
             return None
         cst.CRYPTAGE.update(self.mot_de_passe.data.encode())
-        passwd= cst.CRYPTAGE.hexdigest()
+        passwd = cst.CRYPTAGE.hexdigest()
         return user if passwd == user.mot_de_passe else None
 
     def est_deja_inscrit_sans_mdp(self):
@@ -102,7 +102,7 @@ def connexion():
     form2 = SignUpForm()
     selection_club = []
     for club in db.session.query(Club).all():
-        if club.id != 1:
+        if club.id != cst.CLUB_ADMIN:
             selection_club.append((club.id, club.nom))
     selection_club.sort(key=lambda x: x[1])
     form2.club.choices = selection_club
@@ -117,7 +117,8 @@ def connexion():
             prochaine_page = form.next.data or url_for("home")
             return redirect(prochaine_page)
     return render_template(
-        "connexion.html",formlogin=form, formsignup = form2)
+        "connexion.html",formlogin=form, formsignup = form2
+        )
 
 @app.route("/connexion/inscription", methods=("GET", "POST"))
 def inscription():
@@ -172,6 +173,13 @@ def affiche_competition(id_compet):
         competition = competition, form = form, user = competition.est_inscrit(user)
     )
 
+@app.route("/competition/<int:id_compet>/createPoule")
+def competition_cree_poules(id_compet):
+    """Fonction qui permet de répartir les poules d'une compétition et redirige sur la page de cette compétition"""
+    competition = rq.get_competition(id_compet)
+    competition.programme_poules()
+    return redirect(url_for("competition", id=id_compet))
+
 @app.route("/competition/<int:id_compet>/poule/<int:id_poule>")
 def affiche_poule(id_compet, id_poule): # pylint: disable=unused-argument
     """Fonction qui permet d'afficher une poule"""
@@ -181,6 +189,7 @@ def affiche_poule(id_compet, id_poule): # pylint: disable=unused-argument
 
 @app.route("/deconnexion/")
 def deconnexion():
+    """Déconnecte un utilisateur"""
     logout_user()
     return redirect(url_for("home"))
 
@@ -246,37 +255,59 @@ class InscriptionForm(FlaskForm):
     role = RadioField('Role', choices = ['Arbitre','Tireur'])
     next = HiddenField()
 
-@app.route("/competition/<int:id_compet>/inscription", methods=("GET", "POST"))
-def inscription_competition(id_compet) :
+@app.route("/competition/<int:id>/inscription", methods=("GET", "POST"))
+def inscription_competition(id) :
+    """Inscrit un utilisateur à une compétition spécifique.
+
+    Args:
+        id (int): Identifiant unique de la compétition.
+
+    Returns:
+        flask.Response: Renvoie la page de la compétition
+    """
     form = InscriptionForm()
-    competition = rq.get_competition(id_compet)
-    if not form.is_submitted():
+    competition = rq.get_competition(id)
+    inscrit = competition.est_inscrit(current_user.num_licence)
+    if not form.is_submitted() :
         form.next.data = request.args.get("next")
-    else:
-        non_inscrit = competition.est_inscrit(current_user.num_licence) is False
-        if form.role.data == "Arbitre" and non_inscrit:
+    else :
+        if form.role.data == "Arbitre" and not inscrit :
             competition.inscription(current_user.num_licence,True)
             flash('Vous êtes inscrit comme arbitre', 'success')
-            return redirect(url_for('competition', id=id_compet))
-        if form.role.data == "Tireur" and non_inscrit:
+            return redirect(url_for('competition',id = id))
+        if form.role.data == "Tireur" and not inscrit :
             competition.inscription(current_user.num_licence)
             flash('Vous êtes inscrit comme tireur', 'success')
-            return redirect(url_for('competition', id=id_compet))
+            return redirect(url_for('competition', id = id))
         flash('Vous êtes déja inscrit', 'danger')
-        return redirect(url_for('competition', id=id_compet))
-    return render_template('competition.html',
-                           form=form,
-                           competition=rq.get_competition(id_compet),
-                           id=id_compet)
+        return redirect(url_for('competition', id = id))
+    return render_template('competition.html',form = form, competition = competition, id = id)
 
-@app.route("/home/suppr-competition/<int:id_compet>")
-def suppr_competition(id_compet):
-    rq.delete_competition(id_compet)
+@app.route("/home/suppr-competition/<int:id>")
+def suppr_competition(id : int) :
+    """Supprime une compétition.
+
+    Args:
+        id (int): Identifiant unique de la compétition.
+
+    Returns:
+        flask.Response: Renvoie la page d'accueil
+    """
+    rq.delete_competition(id)
     flash('Compétition supprimée avec succès', 'warning')
+
     return redirect(url_for('home'))
 
-@app.route("/competition/<int:id>/deinscription", methods=("GET", "POST"))
-def deinscription_competition(id_compet):
+@app.route("/competition/<int:id_compet>/deinscription", methods=("GET", "POST"))
+def deinscription_competition(id_compet : int) :
+    """Gère la désinscription d'un utilisateur à une compétition spécifique.
+
+    Args:
+        id (int): Identifiant unique de la compétition.
+
+    Returns:
+        flask.Response: Renvoie la page de la compétition
+    """
     form = InscriptionForm()
     competition = rq.get_competition(id_compet)
     competition.desinscription(current_user.num_licence)
