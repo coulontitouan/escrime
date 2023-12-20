@@ -1,0 +1,26 @@
+"""Module contenant les constantes de l'application."""
+
+from hashlib import sha256
+
+AGE_MAX_M13 = 13
+AGE_MAX_M15 = 15
+AGE_MAX_M17 = 17
+AGE_MAX_M20 = 20
+AGE_MAX_SENIORS = 39
+AGE_MAX_VETERANS1 = 49
+AGE_MAX_VETERANS2 = 59
+AGE_MAX_VETERANS3 = 69
+AGE_MAX_VETERANS4 = -1
+ARBITRE = -2
+CLUB_ADMIN = 1
+MATCH_A_VENIR = "A venir"
+MATCH_EN_COURS = "En cours"
+MATCH_TERMINE = "Terminé"
+PERDANT = "Perdant"
+TIREUR = -1
+TOUCHES_POULE = 5
+TOUCHES_BRACKET = 15
+VAINQUEUR = "Vainqueur"
+
+CRYPTAGE = sha256()
+TO_DATE = '%d/%m/%Y'

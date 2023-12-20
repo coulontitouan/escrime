@@ -1,0 +1,66 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{{ code }}</title>
+        <style>
+            html{
+                height: 100%;
+                width: 100%;
+                overflow: hidden;
+            }
+            body {
+                font-family: 'Arial', sans-serif;
+                background-color: #f4f4f4;
+                text-align: center;
+                padding: 50px;
+                margin: 0;
+                user-select: none;
+                height: 100%;
+            }
+
+            h1 {
+                font-size: 150px;
+                background: -webkit-linear-gradient(#ff0000, #b40000);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin: 0;
+            }
+            
+            p {
+                font-size: 40px;
+                font-weight: 900;
+                color: #555;
+            }
+            
+            button{
+                margin: 10% 0;  
+                border-radius: 45px;
+                border-color: red;
+                background-color: #f4f4f4;
+                cursor: pointer;
+                padding: 10px;
+                position: absolute;
+                bottom: 0;
+                transform: translateX(-50%);
+            }
+
+            button:hover{
+                background-color: #d0d0d0;
+            }
+
+            button > span, button > img{
+                vertical-align: middle;
+                margin: 1px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>{{ code }}</h1>
+        <p>{{ message }}</p>
+        <button onclick="document.location = '/'">
+            <img src="{{ url_for('static', filename='images/home.svg')}}" alt="Retour Accueil"/>
+            <span>Accueil</span>
+        </button>
+    </body>
+</html>
