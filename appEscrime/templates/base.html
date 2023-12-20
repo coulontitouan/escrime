@@ -42,8 +42,8 @@
             {% endif %}
             {% endif %}
             <li id="search">
-                <form class="form-inline ">
-                    <input class="form-control form-control-sm mr-3" type="text" placeholder="Rechercher"aria-label="Rechercher">
+                <form method="POST" action="{{ url_for('search_compet') }}" class="form-inline " role="search">
+                    <input class="form-control form-control-sm mr-3" type="search" placeholder="Rechercher" aria-label="Rechercher" name="searched">
                     <i class="fas fa-search" aria-hidden="true"></i>
                 </form>
             </li>

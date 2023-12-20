@@ -1,7 +1,7 @@
 from .app import app ,db
 from flask import flash, render_template, redirect, url_for, request
 from flask_login import login_user , current_user, logout_user, login_required
-from wtforms import StringField , HiddenField, DateField , RadioField, PasswordField,SelectField
+from wtforms import StringField , HiddenField, DateField , RadioField, PasswordField,SelectField, SubmitField
 from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 from hashlib import sha256
@@ -21,6 +21,10 @@ with app.app_context():
         nom_arme = SelectField("Arme",coerce=str,default=1)
         nom_categorie = SelectField("Catégorie",coerce=str,default=1)
         next = HiddenField()
+
+class SearchForm(FlaskForm):
+    searched = StringField('Searched', validators=[DataRequired()])
+    submit = SubmitField("Submit", validators=[DataRequired()])
     
 @app.route("/")
 def home():
@@ -29,6 +33,22 @@ def home():
         "home.html",
         competitions = competitions
     )
+
+@app.route("/search_compet/", methods =("POST",))
+def search_compet():
+    f = SearchForm()
+    content_searched = f.searched.data
+    print(f.searched.data)
+    print(content_searched)
+    if content_searched == "":
+        return home()
+    competitions = Competition.query.filter(Competition.nom.like('%' + content_searched + '%')).order_by(Competition.nom).all()
+    return render_template (
+    "search.html",
+    form=f,
+    searched = content_searched,
+    title = "Search Page",
+    competitions = competitions)
 
 @app.route("/informations")
 def informations():

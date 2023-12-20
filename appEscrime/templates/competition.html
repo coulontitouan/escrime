@@ -56,11 +56,6 @@
             <div class="header-class">
                 <h2>Classements :</h2>
                 <button class="btn btn-primary" type="button" onclick="change()">Changer Classement</button>
-                <form id="test1" class="form-inline">
-                    <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Search"
-                    aria-label="Search">
-                    <i class="fas fa-search" aria-hidden="true"></i>
-                </form>
                 {% if current_user.is_authenticated %}
                 {% if current_user.peut_sinscrire(competition.id) %}
                 {% if not user %}
