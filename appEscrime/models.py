@@ -3,11 +3,10 @@
 
 from datetime import date
 import sqlalchemy
-from sqlalchemy import ForeignKeyConstraint, PrimaryKeyConstraint
+from sqlalchemy import ForeignKeyConstraint, PrimaryKeyConstraint, desc
 from flask_login import UserMixin
 import appEscrime.constants as cst
 from .app import db, login_manager
-
 
 class Lieu(db.Model):
     """Classe représentant un lieu acceuillant des compétitions."""
@@ -188,18 +187,6 @@ class Escrimeur(db.Model, UserMixin):
                 [self.num_licence,
                  self.mot_de_passe])
 
-    def to_csv(self):
-        """Retourne les données nécessaires à l'écriture de l'escrimeur dans un fichier csv."""
-        naissance = self.date_naissance.strftime(cst.TO_DATE)
-        return ([self.nom,
-                 self.prenom,
-                 naissance,
-                 self.num_licence,
-                 self.nationalite]
-                 + self.club.to_csv(),
-                [self.num_licence,
-                 self.mot_de_passe])
-
 class Classement(db.Model):
     """Classe représentant un classement d'un escrimeur dans une catégorie avec une arme."""
     __tablename__ = 'classement'
@@ -336,15 +323,6 @@ class Competition(db.Model):
         Returns:
             int: les points inscrits par le tireur à la compétition."""
         return Resultat.query.get((self.id,id_tireur)).points
-
-    def get_categorie(self):
-        return self.categorie
-
-    def get_arme(self):
-        return self.arme
-
-    def get_lieu(self):
-        return self.lieu
 
     def get_poules(self) :
         res = []
@@ -764,19 +742,6 @@ def get_compet_accueil():
 
 def get_competition(id):
     return Competition.query.get(id)
-
-def get_poule(id_competition: int, id_phase: int) -> Phase :
-    """Récupère une 'poule' (phase) en fonction de son ID et de l'ID de la compétition.
-
-    Args:
-        id_competition (int): L'ID de la compétition.
-        id_phase (int): L'ID de la phase.
-
-    Returns:
-        Optional[Phase]: La phase (poule) si trouvée, None sinon.
-    """
-    query = Phase.query.filter_by(id_competition = id_competition, id = id_phase, libelle = 'Poule')
-    return query.first()
 
 def get_all_competitions():
     return Competition.query.all()
