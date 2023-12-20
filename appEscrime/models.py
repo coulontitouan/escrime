@@ -608,8 +608,10 @@ class Match(db.Model):
         """Valide le résultat d'un match.
 
         Args:
-            vainqueur (Escrimeur): l'escrimeur vainqueur du match.
-            perdant (Escrimeur): l'escrimeur perdant du match.
+            vainqueur (tuple):
+                un tuple contenant le numéro de licence et le nombre de touches du vainqueur.
+            perdant (tuple):
+                un tuple contenant le numéro de licence et le nombre de touches du perdant.
         """
         num_vainqueur, touches_vainqueur = vainqueur[0], vainqueur[1]
         num_perdant, touches_perdant = perdant[0], perdant[1]
