@@ -92,8 +92,8 @@
                     </tr>
                     <tr>
                         <th>N°</th>
-                        <th>Nom</th>
                         <th>Prénom</th>
+                        <th>Nom</th>
                         <th>Club</th>
                         <th>Points</th>
                     </tr>
@@ -102,8 +102,8 @@
                     {% for tireur in competition.get_tireurs_order_by_pts() %}
                         <tr>
                             <td>{{ loop.index }}</td>
-                            <td>{{ tireur.nom }}</td>
                             <td>{{ tireur.prenom }}</td>
+                            <td>{{ tireur.nom }}</td>
                             <td>{{ tireur.club.nom }}</td>
                             {% if competition.get_points(tireur.num_licence) == -1 %}
                                 <td>0</td>

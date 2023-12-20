@@ -7,6 +7,7 @@ from sqlalchemy import ForeignKeyConstraint, PrimaryKeyConstraint
 from flask_login import UserMixin
 import appEscrime.constants as cst
 from .app import db, login_manager
+from collections import defaultdict
 
 
 class Lieu(db.Model):
@@ -413,7 +414,30 @@ class Competition(db.Model):
         if user is None :
             return False
         return True
+    def dico_victoire_tireur(self):
+        dico = defaultdict(lambda: defaultdict(int))
+        traites = set()
+        for participant1 in Participation.query.filter_by(id_competition = self.id).all():
+            #print((participant1.id_phase,participant1.id_match) not in traites)
+            if (participant1.id_phase,participant1.id_match) not in traites:
+                participants = (Participation.query
+                                .filter_by(id_competition = self.id,
+                                           id_match = participant1.id_match,
+                                           id_phase = participant1.id_phase)
+                                .all())
 
+                participant2 = [participant for participant in participants
+                                if participant.id_escrimeur != participant1.id_escrimeur][0]
+
+                print(participant1.id_escrimeur == participant2.id_escrimeur)
+                traites.add((participant1.id_phase, participant1.id_match))
+                if (participant1.statut != cst.MATCH_A_VENIR):
+                    dico[max([participant1, participant2], key=lambda p: p.touches).id_escrimeur]["victoires"]+=1
+                    for participant in [participant1,participant2]:
+                        dico[participant.id_escrimeur]["touches"]+=participant.touches
+                        dico[participant.id_escrimeur]["matchs"]+=1
+        print(dico)
+    #{'1000001': defaultdict(<class 'int'>, {'victoires': 1, 'touches': 5, 'matchs': 1}), '1000006': defaultdict(<class 'int'>, {'touches': 0, 'matchs': 1}), '1000007': defaultdict(<class 'int'>, {'victoires': 1, 'touches': 5, 'matchs': 1}), '1000012': defaultdict(<class 'int'>, {'touches': 0, 'matchs': 1}), '1000013': defaultdict(<class 'int'>, {'victoires': 1, 'touches': 5, 'matchs': 1}), '1000018': defaultdict(<class 'int'>, {'touches': 0, 'matchs': 1})}
     def to_titre_csv(self):
         """Retourne le format du titre du fichier csv de la compétition."""
         res = ''

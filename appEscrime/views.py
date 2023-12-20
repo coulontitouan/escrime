@@ -9,7 +9,7 @@ from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 import appEscrime.constants as cst
 from .app import app ,db
-from .models import Escrimeur, Club, Competition, Lieu
+from .models import Escrimeur, Club, Competition, Lieu, Participation, Match
 from . import requests as rq
 from .commands import newuser
 
@@ -167,6 +167,7 @@ def affiche_competition(id_compet):
         user = current_user.num_licence
     except AttributeError:
         user = -1
+    competition.dico_victoire_tireur()
     return render_template(
         "competition.html",
         competition = competition, form = form, user = competition.est_inscrit(user)
