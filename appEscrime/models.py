@@ -584,7 +584,7 @@ class Phase(db.Model):
                             id_competition = self.id_competition,
                             id_phase = self.id,
                             piste = self.id,
-                            etat = "A venir",
+                            etat = cst.MATCH_A_VENIR,
                             arbitre = arbitre)
             match.cree_participation(tireur1)
             match.cree_participation(tireur2)
@@ -670,7 +670,7 @@ class Match(db.Model):
                                         id_phase = self.id_phase,
                                         id_match = self.id,
                                         id_escrimeur = tireur.num_licence,
-                                        statut = "A venir",
+                                        statut = cst.MATCH_A_VENIR,
                                         touches = 0))
 
     def get_tireurs_match(self, id_poule : int) :
