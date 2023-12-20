@@ -70,11 +70,11 @@ main {
     background-color: gray;
     width: 10vw; 
   }
-  #matchsComming> ul{
+  #matchsComing> ul{
     padding: 0;
     width: 10vw;
   }
-  #matchsComming{
+  #matchsComing{
     display: flex;
   }
   #matchsGauche{

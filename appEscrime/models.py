@@ -411,6 +411,9 @@ class Phase(db.Model):
                 res.append(match)
         return res
 
+    def test(self):
+        return self.matchs
+        
     def to_csv(self):
         return [self.id, self.libelle]
 

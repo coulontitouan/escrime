@@ -33,13 +33,25 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <h3> Matchs à venir : </h3>
+                <ul id = "matchsComing">
+                    {% for match in poule.test() %}
+                    <li class = "match">
+                        <p class = "opposant "> {{ match.arbitre.prenom }} {{ match.arbitre.nom }}</p>
+                        <p class = "opposant "> {{ match.participations[0] }} {{ match.participations[1] }}</p>
+                        <p class = "opposant "> Poule A - Piste 1 </p>
+                    </li>
+                    {% endfor %}
+                </ul>
+
+
+
             {% endfor %}
             {% else %}
                 <p>Aucune poule créée</p>
             {% endif %}
            
-            <h3> Matchs à venir : </h3>
-            <div id = "matchsComming">
+            <div id = "matchsComing">
                 <ul id = 'matchsGauche'>
                     <li class = "match">
                         <p class = "matchTime">  14h30 </p>
@@ -202,6 +214,8 @@
         var pouleGlobal = document.getElementsByClassName('poule');
         var pouleAffiche = 0;
         var pouleDebut = pouleGlobal[pouleAffiche].style.display == "table";
+        var prochainsMatchs = pouleDebut.test()
+
         for (var i = pouleAffiche+1; i < pouleGlobal.length; i++) {
             pouleGlobal[i].style.display = "none";
         }
