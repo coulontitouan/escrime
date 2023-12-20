@@ -147,7 +147,7 @@ class Escrimeur(db.Model, UserMixin):
 
         Returns :
             bool : True si l'utilisateur est administrateur, False sinon."""
-        return self.id_club == 1
+        return self.id_club == cst.CLUB_ADMIN
 
     def peut_sinscrire(self, id_compet):
         """Vérifie si l'escrimeur à l'âge requis pour s'inscrie à une compétition donnée.
@@ -659,6 +659,10 @@ class Match(db.Model):
             Optional[Escrimeur]: L'arbitre du match s'il existe, sinon None.
         """
         return Escrimeur.query.get(self.num_arbitre)
+  
+    def set_en_cours(self):
+        """Met le match en cours."""
+        self.etat = cst.MATCH_EN_COURS
 
     def cree_participation(self, tireur):
         """Crée les participations des tireurs au match.
@@ -687,6 +691,30 @@ class Match(db.Model):
             if participation.id_phase == id_poule :
                 participants.append(participation)
         return participants
+    
+    def valide_resultat(self, vainqueur, perdant):
+        """Valide le résultat d'un match.
+
+        Args:
+            vainqueur (tuple):
+                un tuple contenant le numéro de licence et le nombre de touches du vainqueur.
+            perdant (tuple):
+                un tuple contenant le numéro de licence et le nombre de touches du perdant.
+        """
+        num_vainqueur, touches_vainqueur = vainqueur[0], vainqueur[1]
+        num_perdant, touches_perdant = perdant[0], perdant[1]
+        for participation in self.participations:
+            print(participation.id_escrimeur, num_vainqueur, num_perdant)
+            if participation.id_escrimeur == num_vainqueur:
+                participation.statut = cst.VAINQUEUR
+                participation.touches = touches_vainqueur
+            elif participation.id_escrimeur == num_perdant:
+                participation.statut = cst.PERDANT
+                participation.touches = touches_perdant
+            else:
+                print("Tireur inconnue wtf ?!")
+        self.etat = cst.MATCH_TERMINE
+        db.session.commit()
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture du match dans un fichier csv."""
