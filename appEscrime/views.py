@@ -25,13 +25,37 @@ with app.app_context():
 class SearchForm(FlaskForm):
     searched = StringField('Searched', validators=[DataRequired()])
     submit = SubmitField("Submit", validators=[DataRequired()])
+
+class HomeForm(FlaskForm):
+    categoriesField = SelectField("catégories",coerce=str,default=1, choices = [""])
+    armesField = SelectField("armes",coerce=str,default=1, choices = [""])
+    genresField = SelectField("genres",coerce=str,default=1, choices = ["","Homme", "Dames"])
+
     
-@app.route("/")
+@app.route("/", methods =("GET","POST",))
 def home():
-    competitions = get_all_competitions()
+    form = HomeForm()
+    for cat in get_all_categories():
+        form.categoriesField.choices.append(cat.libelle)
+    for arme in get_all_armes():
+        form.armesField.choices.append(arme.libelle)
+    competitions = Competition.query
+    print(form.categoriesField.data)
+    if form.categoriesField.data != "" and form.categoriesField.data != "1":
+        competitions = competitions.filter(
+                        Competition.id_categorie == get_categorie_par_libelle(form.categoriesField.data).id)
+    if form.armesField.data != "" and form.armesField.data != "1":
+        competitions = competitions.filter(
+                        Competition.id_arme == get_arme_par_libelle(form.armesField.data).id)
+    if form.genresField.data != "" and form.genresField.data != "1":
+        competitions = competitions.filter(
+                        Competition.sexe == form.genresField.data)
     return render_template(
         "home.html",
-        competitions = competitions
+        form = form,
+        competitions = competitions.all(),
+        categories = get_all_categories(),
+        armes = get_all_armes()
     )
 
 @app.route("/search_compet/", methods =("POST",))

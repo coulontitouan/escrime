@@ -13,6 +13,18 @@
 {% endfor %}
 <div id="body">
     <h1>Les compétitions :</h1>
+    <div id="FiltresBox">
+        <h2>Filtres:</h2>
+        <form action="{{ url_for('home') }}" method="post" role="form">
+              {{ form.categoriesField(class_="form-control1")}}
+              {{ form.armesField(class_="form-control1")}}
+              {{ form.genresField(class_="form-control1")}}
+              <button>Filtrer</button>
+              {% if form.categoriesField.data != "" and form.categoriesField.data != "1" or form.armesField.data != "" and form.armesField.data != "1" or form.genresField.data != "" and form.genresField.data != "1" %}
+                <a href="{{ url_for('home') }}">Enlever les filtres</a>
+              {% endif %}
+        </form>
+    </div>
     <table>
         <thead>
             <tr>

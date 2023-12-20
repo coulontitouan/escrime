@@ -8,6 +8,11 @@
   width: auto;
 }
 
+#FiltresBox{
+  display: flex;
+  align-items: center;
+}
+
 #intitule{
   white-space: nowrap;
   overflow: hidden;

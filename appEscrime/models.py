@@ -507,6 +507,10 @@ def get_arme(id):
     """Fonction qui permet de récupérer une arme dans la base de données"""
     return Arme.query.get(id)
 
+def get_arme_par_libelle(libelle):
+    """Fonction qui permet de récupérer une arme à partir de son libellé dans la base de données"""
+    return Arme.query.filter(Arme.libelle == libelle).first()
+
 def get_all_armes():
     """Fonction qui permet de récupérer toutes les armes dans la base de données"""
     return Arme.query.all()
@@ -517,6 +521,10 @@ def get_club(id):
 def get_categorie(id):
     """Fonction qui permet de récupérer une catégorie dans la base de données"""
     return Categorie.query.get(id)
+
+def get_categorie_par_libelle(libelle):
+    """Fonction qui permet de récupérer une catégorie à partir de son libellé dans la base de données"""
+    return Categorie.query.filter(Categorie.libelle == libelle).first()
 
 def get_all_categories():
     """Fonction qui permet de récupérer toutes les catégories dans la base de données"""
