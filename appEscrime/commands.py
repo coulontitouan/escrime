@@ -5,7 +5,7 @@ import os
 import click
 import appEscrime.constants as cst
 from .app import app , db
-from .models import TypePhase, Arme, Categorie, Club, Escrimeur, Competition
+from .models import Match, TypePhase, Arme, Categorie, Club, Escrimeur, Competition
 from .populates import load_competitions,load_connexion,load_escrimeurs,load_matchs,load_resultats
 from .populates import save_competitions, save_classements, save_connexions
 
@@ -142,3 +142,6 @@ def newadmin(prenom, nom, mot_de_passe ):
 def test(id_competition):
     """Commande test développeur"""
     Competition.query.get(int(id_competition)).programme_poules()
+    for mmatch in Match.query.filter_by(id_competition = id_competition).all():
+        print(mmatch)
+        print(mmatch.participations, '\n')
