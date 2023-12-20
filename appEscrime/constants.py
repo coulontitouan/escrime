@@ -18,4 +18,4 @@ TOUCHES_POULE = 5
 TOUCHES_BRACKET = 15
 
 CRYPTAGE = sha256()
-TO_DATE = '%d/%m/%Y'
+TO_DATE = '%d-%m-%Y'

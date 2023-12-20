@@ -9,7 +9,7 @@ from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 import appEscrime.constants as cst
 from .app import app ,db
-from .models import Escrimeur, Club, Competition, Lieu
+from .models import Escrimeur, Club, Competition, Lieu, get_competition
 from . import requests as rq
 from .commands import newuser
 
@@ -182,8 +182,8 @@ def competition_cree_poules(id_compet):
 @app.route("/competition/<int:id_compet>/poule/<int:id_poule>")
 def affiche_poule(id_compet, id_poule): # pylint: disable=unused-argument
     """Fonction qui permet d'afficher une poule"""
-    competition = get_competition(idC)
-    poule = competition.get_poules_id(idP)
+    competition = get_competition(id_compet)
+    poule = competition.get_poules_id(id_poule)
     return render_template(
         "poule.html",
         competition = competition,
