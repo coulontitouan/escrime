@@ -95,16 +95,16 @@ class Escrimeur(db.Model, UserMixin):
 
     def set_mdp(self, mdp):
         self.mot_de_passe = mdp
-    
+
     def get_club(self):
         return self.club.nom
-    
+
     def get_sexe(self):
         return self.sexe
-    
+
     def is_admin(self):
         return self.id_club == 1
-    
+
     def to_csv(self):
         naissance = self.date_naissance.strftime(TO_DATE)
         return ([self.nom, self.prenom, naissance, self.num_licence, self.nationalite] + self.club.to_csv(),
@@ -120,9 +120,25 @@ class Escrimeur(db.Model, UserMixin):
             if age <= agemax and (age <= 39 and "Vétérans" not in competition.categorie.libelle or age > 39 and "Vétérans" in competition.categorie.libelle) :
                     return True
         return False
-    
-    def get_classement(self, id_arme, id_categorie):
-        return Classement.query.get((self.num_licence, id_arme, id_categorie))
+
+    def get_classement(self, id_arme : int, id_categorie : int) :
+        """Récupère le classement d'un tireur pour une arme et une catégorie données.
+
+        Args:
+            id_arme (int): ID de l'arme
+            id_categorie (int): ID de la catégorie
+
+        Returns:
+            Classement: Le classement du tireur pour l'arme et la catégorie données.
+        """
+        points = Classement.query.get((self.num_licence, id_arme, id_categorie))
+        if points is None :
+            points = Classement(rang = 0,
+                                points = 0,
+                                num_licence = self.num_licence,
+                                id_arme = 0,
+                                id_categorie = 0)
+        return points
 
 class Classement(db.Model):
     __tablename__ = 'classement'
@@ -177,14 +193,14 @@ class Competition(db.Model):
 
     def get_tireurs(self):
         return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2)
-    
+
     def get_tireurs_order_by_pts(self):
         return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2).order_by(Resultat.points.desc())
     
     def get_tireurs_order_by_rang(self) :
         # participants = self.get_tireurs()
         return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id, Resultat.points != -2).outerjoin(Classement).filter((Classement.id_arme == self.id_arme) & (Classement.id_categorie == self.id_categorie)).order_by(Classement.rang)
-    
+
     def get_tireurs_sans_rang(self) :
         liste = self.get_tireurs_order_by_rang()
         liste2 = []
@@ -206,29 +222,43 @@ class Competition(db.Model):
             for p in participations:
                 joueurs.add(Escrimeur.query.get(p.id_escrimeur))
         return joueurs
-    
+
     def get_arbitres_phase(self, id_phase): # PAS BON, IL FAUT DONNER L'ID COMPET ET L'ID PHASE DANS LA REQUETE
         return Escrimeur.query.get(Match.query.filter_by(id_phase = (self.id,id_phase)).first().num_arbitre)
-    
+
     def get_points(self, id_tireur):
         return Resultat.query.get((self.id,id_tireur)).points
-    
+
     def get_categorie(self):
         return self.categorie
-    
+
     def get_arme(self):
         return self.arme
-    
+
     def get_lieu(self):
         return self.lieu
-    
+
     def get_poules(self) :
         res = []
         for phase in self.phases :
             if phase.libelle == 'Poule' :
                 res.append(phase)
         return res
-    
+
+    def get_poules_id(self, idp : int) :
+        """Récupère une poule en fonction de son ID
+
+        Args:
+            idp (int): ID de la poule
+
+        Returns:
+            Optional[Phase]: La poule si trouvée, None sinon.
+        """
+        for phase in self.phases :
+            if phase.libelle == 'Poule' and phase.id == idp :
+                return phase
+        return None
+
     def inscription(self, num_licence : int, arbitre : bool = False) :
         """Inscrit un tireur à une compétition
 
@@ -438,6 +468,14 @@ class Match(db.Model):
         {},
     )
 
+    def get_arbitre(self) -> Escrimeur :
+        """Récupère l'arbitre associé à ce match.
+
+        Returns:
+            Optional[Escrimeur]: L'arbitre du match s'il existe, sinon None.
+        """
+        return Escrimeur.query.get(self.num_arbitre)
+
     def cree_participation(self, tireur):
         #print(self.id_competition, self.id_phase, self.id, tireur.num_licence)
         db.session.add(Participation(id_competition = self.id_competition,
@@ -446,6 +484,21 @@ class Match(db.Model):
                                      id_escrimeur = tireur.num_licence,
                                      statut = "A venir",
                                      touches = 0))
+
+    def get_tireurs_match(self, id_poule : int) :
+        """Récupère les tireurs d'un match en fonction de l'ID de la poule.
+
+        Args:
+            id_poule (int): ID de la poule
+
+        Returns:
+            List[Participation]: Les participations des tireurs du match.
+        """
+        participants = []
+        for participation in self.participations:
+            if participation.id_phase == id_poule :
+                participants.append(participation)
+        return participants
 
     def to_csv(self):
         return [self.id, self.participations[0], self.participations[1], self.num_arbitre, self.piste, self.etat] + self.phase.to_csv()
@@ -474,6 +527,14 @@ class Participation(db.Model):
         PrimaryKeyConstraint(id_competition, id_phase, id_match, id_escrimeur),
         {},
     )
+
+    def get_escrimeur(self) -> Escrimeur :
+        """Récupère l'escrimeur associé à cette participation.
+
+        Returns:
+            Optional[Escrimeur]: L'escrimeur lié à cette participation, s'il existe.
+        """
+        return Escrimeur.query.get(self.id_escrimeur)
 
     def to_csv(self):
         return [self.tireur, self.touches]
@@ -533,6 +594,19 @@ def get_compet_accueil():
 
 def get_competition(id):
     return Competition.query.get(id)
+
+def get_poule(id_competition: int, id_phase: int) -> Phase :
+    """Récupère une 'poule' (phase) en fonction de son ID et de l'ID de la compétition.
+
+    Args:
+        id_competition (int): L'ID de la compétition.
+        id_phase (int): L'ID de la phase.
+
+    Returns:
+        Optional[Phase]: La phase (poule) si trouvée, None sinon.
+    """
+    query = Phase.query.filter_by(id_competition = id_competition, id = id_phase, libelle = 'Poule')
+    return query.first()
 
 def get_all_competitions():
     return Competition.query.all()

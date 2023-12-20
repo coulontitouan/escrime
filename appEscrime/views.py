@@ -172,8 +172,12 @@ def competitionCreatePoules(id):
 @app.route("/competition/<int:idC>/poule/<int:idP>")
 def poule(idC, idP):
     """Fonction qui permet d'afficher une poule"""
+    competition = get_competition(idC)
+    poule = competition.get_poules_id(idP)
     return render_template(
-        "poule.html"
+        "poule.html",
+        competition = competition,
+        poule = poule
     )
 
 @app.route("/deconnexion/")

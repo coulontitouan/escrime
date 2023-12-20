@@ -30,13 +30,13 @@ h1 {
 
 .petit > div {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     margin-left: 1vw;
     margin-right: 1vw;
 }
 
-.foot {
-    justify-content: center !important;
+.petit > div:not(.head,.foot) {
+    justify-content: space-between;
 }
 
 .head {
