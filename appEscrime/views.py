@@ -336,3 +336,8 @@ def deinscription_competition(id_compet : int) :
                            form=form,
                            competition=rq.get_competition(id_compet),
                            id=id_compet)
+  
+@app.errorhandler(Exception)
+def page_not_found(erreur):
+    """Fonction d'affichage de la page d'erreur."""
+    return render_template('erreur.html', code=erreur.code, message=erreur.__class__.__name__), erreur.code
