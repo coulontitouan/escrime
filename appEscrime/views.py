@@ -177,13 +177,17 @@ def competition_cree_poules(id_compet):
     """Fonction qui permet de répartir les poules d'une compétition et redirige sur la page de cette compétition"""
     competition = rq.get_competition(id_compet)
     competition.programme_poules()
-    return redirect(url_for("competition", id=id_compet))
+    return redirect(url_for("affiche_competition", id_compet=id_compet))
 
 @app.route("/competition/<int:id_compet>/poule/<int:id_poule>")
 def affiche_poule(id_compet, id_poule): # pylint: disable=unused-argument
     """Fonction qui permet d'afficher une poule"""
+    competition = rq.get_competition(id_compet)
+    poule = competition.get_poules_id(id_poule)
     return render_template(
-        "poule.html"
+        "poule.html",
+        competition = competition,
+        poule = poule
     )
 
 @app.route("/deconnexion/")

@@ -127,7 +127,7 @@ def newuser(num_licence, password, prenom, nom, sexe, ddn, club):
 def newadmin(prenom, nom, mot_de_passe ):
     """Ajoute un admin"""
     cst.CRYPTAGE.update(mot_de_passe.encode())
-    date_convert = datetime.strptime('01-01-0001', cst.TO_DATE).date()
+    date_convert = datetime.strptime('01-01-0001', '%d-%m-%Y').date()
     db.session.add(Escrimeur(num_licence=prenom,
                   prenom=prenom,
                   nom=nom,
