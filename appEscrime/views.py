@@ -51,9 +51,8 @@ class LoginForm(FlaskForm):
         user = Escrimeur.query.get(self.num_licence.data)
         if user is None:
             return None
-        caca = cst.CRYPTAGE
-        caca.update(self.mot_de_passe.data.encode())
-        passwd = caca.hexdigest()
+        cst.CRYPTAGE.update(self.mot_de_passe.data.encode())
+        passwd = cst.CRYPTAGE.hexdigest()
         return user if passwd == user.mot_de_passe else None
 
 
