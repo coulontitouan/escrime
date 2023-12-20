@@ -264,7 +264,7 @@ def inscription_competition(id) :
         return redirect(url_for('competition', id = id))
     return render_template('competition.html',form = form, competition = competition, id = id)
 
-@app.route("/home/suppr-competition/<int:id>")
+@app.route("/suppr-competition/<int:id>")
 def suppr_competition(id : int) :
     """Supprime une compétition.
 
@@ -296,3 +296,7 @@ def deinscription_competition(id : int) :
 
     return render_template('competition.html', form=form, competition=competition, id=id)
 
+@app.errorhandler(Exception)
+def page_not_found(e):
+    """Fonction d'affichage de la page d'erreur."""
+    return render_template('erreur.html', code=e.code, message=e.__class__.__name__), e.code
