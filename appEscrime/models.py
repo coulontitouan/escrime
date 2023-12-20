@@ -194,13 +194,13 @@ class Escrimeur(db.Model, UserMixin):
         """Retourne les données nécessaires à l'écriture de l'escrimeur dans un fichier csv."""
         naissance = self.date_naissance.strftime(cst.TO_DATE)
         return ([self.nom,
-                    self.prenom,
-                    naissance,
-                    self.num_licence,
-                    self.nationalite]
-                    + self.club.to_csv(),
-                    [self.num_licence,
-                    self.mot_de_passe])
+                 self.prenom,
+                 naissance,
+                 self.num_licence,
+                 self.nationalite]
+                 + self.club.to_csv(),
+                 [self.num_licence,
+                 self.mot_de_passe])
 
 class Classement(db.Model):
     """Classe représentant un classement d'un escrimeur dans une catégorie avec une arme."""
@@ -581,11 +581,11 @@ class Phase(db.Model):
         """
         if self.libelle == 'Poule':
             match = Match(id = id_match,
-                            id_competition = self.id_competition,
-                            id_phase = self.id,
-                            piste = self.id,
-                            etat = cst.MATCH_A_VENIR,
-                            arbitre = arbitre)
+                          id_competition = self.id_competition,
+                          id_phase = self.id,
+                          piste = self.id,
+                          etat = cst.MATCH_A_VENIR,
+                          arbitre = arbitre)
             match.cree_participation(tireur1)
             match.cree_participation(tireur2)
             db.session.add(match)
@@ -659,7 +659,7 @@ class Match(db.Model):
             Optional[Escrimeur]: L'arbitre du match s'il existe, sinon None.
         """
         return Escrimeur.query.get(self.num_arbitre)
-  
+
     def set_en_cours(self):
         """Met le match en cours."""
         self.etat = cst.MATCH_EN_COURS
@@ -671,11 +671,11 @@ class Match(db.Model):
             tireur (Escrimeur): un escrimeur participant au match.
         """
         db.session.add(Participation(id_competition = self.id_competition,
-                                        id_phase = self.id_phase,
-                                        id_match = self.id,
-                                        id_escrimeur = tireur.num_licence,
-                                        statut = cst.MATCH_A_VENIR,
-                                        touches = 0))
+                                     id_phase = self.id_phase,
+                                     id_match = self.id,
+                                     id_escrimeur = tireur.num_licence,
+                                     statut = cst.MATCH_A_VENIR,
+                                     touches = 0))
 
     def get_tireurs_match(self, id_poule : int) :
         """Récupère les tireurs d'un match en fonction de l'ID de la poule.
@@ -691,7 +691,7 @@ class Match(db.Model):
             if participation.id_phase == id_poule :
                 participants.append(participation)
         return participants
-    
+
     def valide_resultat(self, vainqueur, perdant):
         """Valide le résultat d'un match.
 
