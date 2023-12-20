@@ -302,8 +302,8 @@ class MatchForm(FlaskForm):
     touches2 = StringField('touches2',validators=[DataRequired()])
     next=HiddenField()
 
-@app.route("/competition/<int:id_compet>/poule/<int:id_phase>/match/<int:id_match>")
-def affiche_match(id_compet, id_phase, id_match):
+@app.route("/competition/<int:id_compet>/poule/<int:id_poule>/match/<int:id_match>")
+def affiche_match(id_compet, id_poule, id_match):
     """Fonction qui permet d'afficher un match"""
 
     competition, poule, match = [None, None, None]
