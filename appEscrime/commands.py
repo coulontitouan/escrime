@@ -1,13 +1,12 @@
 """Module contenant les commandes de l'application."""
 from datetime import datetime
 import csv
-from hashlib import sha256
 import os
 import click
-from sqlalchemy import desc
+import appEscrime.constants as cst
 from .app import app , db
 from .models import TypePhase, Arme, Categorie, Club, Escrimeur, Competition
-from .populates import load_competitions, load_connexion, load_escrimeurs, load_matchs, load_resultats
+from .populates import load_competitions,load_connexion,load_escrimeurs,load_matchs,load_resultats
 from .populates import save_competitions, save_classements, save_connexions
 
 DB_DIR = '../CEB.db'
@@ -29,15 +28,15 @@ def loadbd():
         db.session.add(arme)
 
     # création des 9 catégories possibles
-    categories = {'M13': Categorie(libelle = 'M13', age_maxi = 13),
-                  'M15': Categorie(libelle = 'M15', age_maxi = 15),
-                  'M17': Categorie(libelle = 'M17', age_maxi = 17),
-                  'M20': Categorie(libelle = 'M20', age_maxi = 20),
-                  'Seniors': Categorie(libelle = 'Seniors', age_maxi = 39),
-                  'Vétérans1': Categorie(libelle = 'Vétérans1', age_maxi = 49),
-                  'Vétérans2': Categorie(libelle = 'Vétérans2', age_maxi = 59),
-                  'Vétérans3': Categorie(libelle = 'Vétérans3', age_maxi = 69),
-                  'Vétérans4': Categorie(libelle = 'Vétérans4', age_maxi = -1)}
+    categories = {'M13': Categorie(libelle = 'M13', age_maxi = cst.AGE_MAX_M13),
+                  'M15': Categorie(libelle = 'M15', age_maxi = cst.AGE_MAX_M15),
+                  'M17': Categorie(libelle = 'M17', age_maxi = cst.AGE_MAX_M17),
+                  'M20': Categorie(libelle = 'M20', age_maxi = cst.AGE_MAX_M20),
+                  'Seniors': Categorie(libelle = 'Seniors', age_maxi = cst.AGE_MAX_SENIORS),
+                  'Vétérans1': Categorie(libelle = 'Vétérans1', age_maxi = cst.AGE_MAX_VETERANS1),
+                  'Vétérans2': Categorie(libelle = 'Vétérans2', age_maxi = cst.AGE_MAX_VETERANS2),
+                  'Vétérans3': Categorie(libelle = 'Vétérans3', age_maxi = cst.AGE_MAX_VETERANS3),
+                  'Vétérans4': Categorie(libelle = 'Vétérans4', age_maxi = cst.AGE_MAX_VETERANS4)}
     for categorie in categories.values():
         db.session.add(categorie)
 
@@ -48,7 +47,7 @@ def loadbd():
         db.session.add(club)
 
     # création du type de phase de poule
-    types_phase = {'Poule': TypePhase(libelle = 'Poule', touches_victoire = 5)}
+    types_phase = {'Poule': TypePhase(libelle = 'Poule', touches_victoire = cst.TOUCHES_POULE)}
     for type_phase in types_phase.values():
         db.session.add(type_phase)
 
@@ -80,7 +79,7 @@ def loadbd():
                     load_competitions(lecteur, armes, categories, competitions, lieux)
 
                 elif contenu[0] == 'matchs':
-                    load_matchs(contenu, lecteur, escrimeurs, competitions, types_phase, phases)
+                    load_matchs(contenu, lecteur, escrimeurs, competitions, phases, types_phase)
 
                 elif contenu[0] == 'resultats':
                     load_resultats(contenu, lecteur)
@@ -108,10 +107,16 @@ def savebd():
     save_connexions()
     save_competitions()
 
-def newuser(num_licence, password, prenom, nom, sexe,ddn,club):
-    m=sha256()
-    m.update(password.encode())
-    tireur = Escrimeur(num_licence = num_licence, mot_de_passe = m.hexdigest(), prenom = prenom, nom = nom, sexe = sexe, date_naissance = ddn, id_club = club )
+def newuser(num_licence, password, prenom, nom, sexe, ddn, club):
+    """Crée un nouvel utilisateur"""
+    cst.CRYPTAGE.update(password.encode())
+    tireur = Escrimeur(num_licence=num_licence,
+                       mot_de_passe=cst.CRYPTAGE.hexdigest(),
+                       prenom=prenom,
+                       nom=nom,
+                       sexe=sexe,
+                       date_naissance=ddn,
+                       id_club=club)
     db.session.add(tireur)
     db.session.commit()
 
@@ -121,15 +126,19 @@ def newuser(num_licence, password, prenom, nom, sexe,ddn,club):
 @click.argument('mot_de_passe')
 def newadmin(prenom, nom, mot_de_passe ):
     """Ajoute un admin"""
-    m = sha256()
-    m.update(mot_de_passe.encode())
-    date_convert = datetime.strptime('01-01-0001', '%d-%m-%Y').date()
-    u = Escrimeur(num_licence= prenom , prenom=prenom, nom=nom, sexe='admin', date_naissance=date_convert, id_club=1, mot_de_passe=m.hexdigest())
-    db.session.add(u)
+    cst.CRYPTAGE.update(mot_de_passe.encode())
+    date_convert = datetime.strptime('01-01-0001', cst.TO_DATE).date()
+    db.session.add(Escrimeur(num_licence=prenom,
+                  prenom=prenom,
+                  nom=nom,
+                  sexe="Admin",
+                  date_naissance=date_convert,
+                  id_club=cst.CLUB_ADMIN,
+                  mot_de_passe=cst.CRYPTAGE.hexdigest()))
     db.session.commit()
-
 
 @app.cli.command()
 @click.argument('id_competition')
 def test(id_competition):
+    """Commande test développeur"""
     Competition.query.get(int(id_competition)).programme_poules()
