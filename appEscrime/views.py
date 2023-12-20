@@ -41,18 +41,18 @@ class HomeForm(FlaskForm):
 @app.route("/", methods =("GET","POST",))
 def home():
     form = HomeForm()
-    for cat in get_all_categories():
+    for cat in rq.get_all_categories():
         form.categoriesField.choices.append(cat.libelle)
-    for arme in get_all_armes():
+    for arme in rq.get_all_armes():
         form.armesField.choices.append(arme.libelle)
     competitions = Competition.query
     print(form.categoriesField.data)
     if form.categoriesField.data != "" and form.categoriesField.data != "1":
         competitions = competitions.filter(
-                        Competition.id_categorie == get_categorie_par_libelle(form.categoriesField.data).id)
+                        Competition.id_categorie == rq.get_categorie_par_libelle(form.categoriesField.data).id)
     if form.armesField.data != "" and form.armesField.data != "1":
         competitions = competitions.filter(
-                        Competition.id_arme == get_arme_par_libelle(form.armesField.data).id)
+                        Competition.id_arme == rq.get_arme_par_libelle(form.armesField.data).id)
     if form.genresField.data != "" and form.genresField.data != "1":
         competitions = competitions.filter(
                         Competition.sexe == form.genresField.data)
@@ -60,8 +60,8 @@ def home():
         "home.html",
         form = form,
         competitions = competitions.all(),
-        categories = get_all_categories(),
-        armes = get_all_armes()
+        categories = rq.get_all_categories(),
+        armes = rq.get_all_armes()
     )
 
 @app.route("/search_compet/", methods =("POST",))

@@ -24,6 +24,14 @@ def get_arme(id_arme):
     """
     return Arme.query.get(id_arme)
 
+def get_arme_par_libelle(libelle):
+    """Fonction qui permet de récupérer une arme à partir de son libellé dans la base de données
+
+    Args:
+        libelle (str): le libellé d'une arme
+    """
+    return Arme.query.filter(Arme.libelle == libelle).first()
+
 def get_club(id_club):
     """Récupère un club dans la base de données à partir de son id
 
@@ -39,6 +47,14 @@ def get_categorie(id_cat):
         id_cat (int): l'id d'une catégorie
     """
     return Categorie.query.get(id_cat)
+
+def get_categorie_par_libelle(libelle):
+    """Fonction qui permet de récupérer une catégorie à partir de son libellé dans la base de données
+
+    Args:
+        libelle (str): le libellé d'une categorie
+    """
+    return Categorie.query.filter(Categorie.libelle == libelle).first()
 
 def get_competition(id_compet):
     """Récupère une compétition dans la base de données à partir de son id
