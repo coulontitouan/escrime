@@ -1,0 +1,139 @@
+* {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    display: flex;
+    padding: 1%;
+}
+
+body>* {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+#informations {
+    flex-basis: 10%;
+}
+
+#informations>*:not(span) {
+    margin: 2%;
+}
+
+.tireur {
+    flex-basis: 45%;
+}
+
+.tireur .points {
+    font-size: x-large;
+    cursor: pointer;
+}
+
+.tireur div p {
+    align-self: center;
+}
+
+.tireur div span {
+    font-size: 10vh;
+    align-self: flex-end;
+}
+
+.tireur .moins {
+    margin-bottom: 2vh;
+}
+
+.tireur>span {
+    font-size: 8vh;
+}
+
+.tireur div {
+    border-radius: 45px;
+    display: flex;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.tireur>div:first-of-type {
+    flex-basis: 60%;
+    background-color: #afe3ff;
+}
+
+.tireur>div:last-of-type {
+    flex-basis: 20%;
+    background-color: #ffafaf;
+}
+
+#informations>span {
+    border: 1px black solid;
+    flex-grow: 1;
+    align-self: center;
+}
+
+#informations>div {
+    display: flex;
+    flex-direction: column;
+}
+
+#informations>div:first-child {
+    height: 12vh;
+}
+
+.btnpause {
+    border: 0;
+    background: transparent;
+    box-sizing: border-box;
+    width: 0;
+    height: 32px;
+    border-color: transparent transparent transparent #202020;
+    transition: 100ms all ease;
+    cursor: pointer;
+    border-style: solid;
+    border-width: 16px 0 16px 25px;
+}
+
+.btnpause.paused {
+    border-style: double;
+    border-width: 0px 0 0px 25px;
+    border-color: transparent transparent transparent red;
+}
+
+#informations>div:last-of-type {
+    flex-direction: row-reverse;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.paused~#chrono,
+.paused~#chrono~a {
+    color: red;
+}
+
+#chrono {
+    font-size: large;
+    vertical-align: text-top;
+}
+
+#chrono~a {
+    font-size: 32px;
+}
+
+#message {
+    font-size: 20vh;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    display: none;
+}
+
+#chrono~button {}
