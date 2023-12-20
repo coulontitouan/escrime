@@ -624,7 +624,7 @@ class Match(db.Model):
                 participation.statut = cst.PERDANT
                 participation.touches = touches_perdant
             else:
-                print("Tireur inconnue wtf ?!")
+                print("Tireur inconnu wtf ?!")
         self.etat = cst.MATCH_TERMINE
         db.session.commit()    
 
