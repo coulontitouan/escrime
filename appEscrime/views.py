@@ -162,11 +162,9 @@ def competition(id):
 
 @app.route("/competition/<int:id>/createPoule")
 def competitionCreatePoules(id):
-    """Fonction qui permet d'afficher une compétition"""
-    print("deb de route")
+    """Fonction qui permet de répartir les poules d'une compétition et redirige sur la page de cette compétition"""
     competition = get_competition(id)
     competition.programme_poules()
-    print("fin de route")
     return redirect(url_for("competition", id=id))
 
 @app.route("/competition/<int:idC>/poule/<int:idP>")
