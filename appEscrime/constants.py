@@ -23,4 +23,4 @@ TOUCHES_BRACKET = 15
 VAINQUEUR = "Vainqueur"
 
 CRYPTAGE = sha256()
-TO_DATE = '%d-%m-%Y'
+TO_DATE = '%d/%m/%Y'
