@@ -38,7 +38,7 @@ h1 {
 
 .petit > div {
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     margin-left: 1vw;
     margin-right: 1vw;
 }
