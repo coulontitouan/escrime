@@ -221,13 +221,17 @@ def competition_cree_poules(id_compet):
     """Fonction qui permet de répartir les poules d'une compétition et redirige sur la page de cette compétition"""
     competition = rq.get_competition(id_compet)
     competition.programme_poules()
-    return redirect(url_for("competition", id=id_compet))
+    return redirect(url_for("affiche_competition", id_compet=id_compet))
 
 @app.route("/competition/<int:id_compet>/poule/<int:id_poule>")
 def affiche_poule(id_compet, id_poule): # pylint: disable=unused-argument
     """Fonction qui permet d'afficher une poule"""
+    competition = rq.get_competition(id_compet)
+    poule = competition.get_poules_id(id_poule)
     return render_template(
-        "poule.html"
+        "poule.html",
+        competition = competition,
+        poule = poule
     )
 
 @app.route("/deconnexion/")
@@ -298,8 +302,8 @@ class InscriptionForm(FlaskForm):
     role = RadioField('Role', choices = ['Arbitre','Tireur'])
     next = HiddenField()
 
-@app.route("/competition/<int:id>/inscription", methods=("GET", "POST"))
-def inscription_competition(id) :
+@app.route("/competition/<int:id_compet>/inscription", methods=("GET", "POST"))
+def inscription_competition(id_compet) :
     """Inscrit un utilisateur à une compétition spécifique.
 
     Args:
@@ -309,7 +313,7 @@ def inscription_competition(id) :
         flask.Response: Renvoie la page de la compétition
     """
     form = InscriptionForm()
-    competition = rq.get_competition(id)
+    competition = rq.get_competition(id_compet)
     inscrit = competition.est_inscrit(current_user.num_licence)
     if not form.is_submitted() :
         form.next.data = request.args.get("next")
@@ -317,14 +321,14 @@ def inscription_competition(id) :
         if form.role.data == "Arbitre" and not inscrit :
             competition.inscription(current_user.num_licence,True)
             flash('Vous êtes inscrit comme arbitre', 'success')
-            return redirect(url_for('competition',id = id))
+            return redirect(url_for('competition',id_compet = id_compet))
         if form.role.data == "Tireur" and not inscrit :
             competition.inscription(current_user.num_licence)
             flash('Vous êtes inscrit comme tireur', 'success')
-            return redirect(url_for('competition', id = id))
+            return redirect(url_for('competition', id_compet = id_compet))
         flash('Vous êtes déja inscrit', 'danger')
-        return redirect(url_for('competition', id = id))
-    return render_template('competition.html',form = form, competition = competition, id = id)
+        return redirect(url_for('competition', id_compet = id_compet))
+    return render_template('competition.html',form = form, competition = competition, id_compet = id_compet)
 
 @app.route("/suppr-competition/<int:id_compet>")
 def suppr_competition(id_compet : int) :
@@ -350,16 +354,17 @@ class MatchForm(FlaskForm):
 def affiche_match(id_compet, id_poule, id_match):
     """Fonction qui permet d'afficher un match"""
 
-    competition, poule, match = [None, None, None]
-    # competition = get_competition(idC)
-    # poule = get_poule(idC, idP)
-    # match = get_match(idC, idP, idM)
-
+    competition = rq.get_competition(id_compet)
+    poule = competition.get_poules_id(id_poule)
+    match = poule.get_match_id(id_match)
+    f = MatchForm()
     return render_template(
         "match.html",
         competition = competition, 
         poule = poule, 
-        match = match
+        match = match,
+        participations = match.get_tireurs_match(poule.id),
+        f = f
     )
 
 @app.route("/competition/<int:id_compet>/deinscription", methods=("GET", "POST"))
