@@ -259,6 +259,7 @@ class InscriptionForm(FlaskForm):
     next = HiddenField()
 
 @app.route("/competition/<int:id_compet>/inscription", methods=("GET", "POST"))
+@login_required
 def inscription_competition(id_compet) :
     """Inscrit un utilisateur à une compétition spécifique.
 
@@ -287,6 +288,7 @@ def inscription_competition(id_compet) :
     return render_template('competition.html',form = form, competition = competition, id_compet = id_compet)
 
 @app.route("/suppr-competition/<int:id_compet>")
+@login_required
 def suppr_competition(id_compet : int) :
     """Supprime une compétition.
 
@@ -307,6 +309,7 @@ class MatchForm(FlaskForm):
     next=HiddenField()
 
 @app.route("/competition/<int:id_compet>/poule/<int:id_poule>/match/<int:id_match>")
+@login_required
 def affiche_match(id_compet, id_poule, id_match):
     """Fonction qui permet d'afficher un match"""
 
