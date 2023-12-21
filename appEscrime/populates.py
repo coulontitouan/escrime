@@ -162,28 +162,19 @@ def load_matchs(contenu, lecteur, escrimeurs, competitions, phases, types_phase)
             for i in range(1,3):
                 escrimeur = escrimeurs[ligne['tireur' + i]]
                 nb_touches = int(ligne['touches' + i])
-                if ligne['etat'] == 'Termine':
+                if ligne['etat'] == cst.MATCH_TERMINE:
                     if nb_touches == types_phase[ligne['libelle phase']].touches_victoire:
-                        db.session.add(Participation(id_competition = mmatch.id_competition,
-                                                     id_phase = mmatch.id_phase,
-                                                     match = mmatch,
-                                                     tireur = escrimeur,
-                                                     touches = nb_touches,
-                                                     statut = "Vainqueur"))
+                        statut = cst.VAINQUEUR
                     else:
-                        db.session.add(Participation(id_competition = mmatch.id_competition,
-                                                     id_phase = mmatch.id_phase,
-                                                     match = mmatch,
-                                                     tireur = escrimeur,
-                                                     touches = nb_touches,
-                                                     statut = "Perdant"))
+                        statut = cst.PERDANT
                 else:
-                    db.session.add(Participation(id_competition = mmatch.id_competition,
-                                                 id_phase = mmatch.id_phase,
-                                                 match = mmatch,
-                                                 tireur = escrimeur,
-                                                 touches = nb_touches,
-                                                 statut = "A venir"))
+                    statut = cst.MATCH_A_VENIR
+                db.session.add(Participation(id_competition = mmatch.id_competition,
+                                             id_phase = mmatch.id_phase,
+                                             match = mmatch,
+                                             tireur = escrimeur,
+                                             touches = nb_touches,
+                                             statut = statut))
 
 
 def load_resultats(contenu, lecteur):
