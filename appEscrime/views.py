@@ -344,8 +344,9 @@ def suppr_competition(id_compet : int) :
     Returns:
         flask.Response: Renvoie la page d'accueil
     """
-    rq.delete_competition(id_compet)
-    flash('Compétition supprimée avec succès', 'warning')
+    if current_user.is_admin() :
+        rq.delete_competition(id_compet)
+        flash('Compétition supprimée avec succès', 'warning')
 
     return redirect(url_for('home'))
 
