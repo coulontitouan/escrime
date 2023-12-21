@@ -313,14 +313,14 @@ def affiche_match(id_compet, id_poule, id_match):
     competition = rq.get_competition(id_compet)
     poule = competition.get_poules_id(id_poule)
     match = poule.get_match_id(id_match)
-    f = MatchForm()
+    form = MatchForm()
     return render_template(
         "match.html",
         competition = competition, 
         poule = poule, 
         match = match,
         participations = match.get_tireurs_match(poule.id),
-        f = f
+        form = form
     )
 
 @app.route("/competition/<int:id_compet>/deinscription", methods=("GET", "POST"))
