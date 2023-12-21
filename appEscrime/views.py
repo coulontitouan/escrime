@@ -4,8 +4,8 @@ import os
 import signal
 from flask import request, redirect, url_for, flash, render_template, jsonify
 from flask_login import login_user , current_user, logout_user, login_required
-from wtforms import StringField , HiddenField, DateField , RadioField, PasswordField,SelectField
-from wtforms.validators import DataRequired
+from wtforms import StringField , HiddenField, DateField , RadioField, PasswordField, SelectField, IntegerField
+from wtforms.validators import DataRequired, NumberRange
 from flask_wtf import FlaskForm
 import appEscrime.constants as cst
 from .app import app ,db
@@ -187,7 +187,8 @@ def affiche_poule(id_compet, id_poule): # pylint: disable=unused-argument
     return render_template(
         "poule.html",
         competition = competition,
-        poule = poule
+        poule = poule,
+        constants = cst
     )
 
 @app.route("/deconnexion/")
@@ -303,27 +304,75 @@ def suppr_competition(id_compet : int) :
 
     return redirect(url_for('home'))
 
-class MatchForm(FlaskForm):
-    touches1 = StringField('touches1',validators=[DataRequired()])
-    touches2 = StringField('touches2',validators=[DataRequired()])
+class BracketForm(FlaskForm):
+    touches1 = IntegerField('touches1',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_BRACKET, min=0)])
+    touches2 = IntegerField('touches2',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_BRACKET, min=0)])
     next=HiddenField()
 
-@app.route("/competition/<int:id_compet>/poule/<int:id_poule>/match/<int:id_match>")
-@login_required
+class PouleForm(FlaskForm):
+    touches1 = IntegerField('touches1',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_POULE, min=0)])
+    touches2 = IntegerField('touches2',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_POULE, min=0)])
+    next=HiddenField()
+
+class StartForm(FlaskForm):
+    next=HiddenField()
+
+@app.route("/competition/<int:id_compet>/poule/<int:id_poule>/match/<int:id_match>", methods=("GET", "POST"))
 def affiche_match(id_compet, id_poule, id_match):
     """Fonction qui permet d'afficher un match"""
-
     competition = rq.get_competition(id_compet)
     poule = competition.get_poules_id(id_poule)
     match = poule.get_match_id(id_match)
-    f = MatchForm()
+    participations = match.get_tireurs_match(poule.id)
+    if match.id_phase == 1:
+        form_match = PouleForm()
+    else:
+        form_match = BracketForm()
+    form_start = StartForm()
+    if form_start.is_submitted():
+        form_start.next.data = request.args.get("next")
+        match.set_en_cours()
+    return render_template(
+        "match.html",
+        competition = competition, 
+        poule = poule, 
+        match = match,
+        participations = participations,
+        constants = cst,
+        form_match = form_match,
+        form_start = form_start
+    )
+
+@app.route("/competition/<int:id_compet>/poule/<int:id_poule>/match/<int:id_match>/valider", methods=("GET", "POST"))
+def valide_resultats(id_compet, id_poule, id_match):
+    """Fonction qui permet de valider les résultats d'un match"""
+    competition = rq.get_competition(id_compet)
+    poule = competition.get_poules_id(id_poule)
+    match = poule.get_match_id(id_match)
+    participations = match.get_tireurs_match(poule.id)
+    if match.id_phase == 1:
+        form_match = PouleForm()
+    else:
+        form_match = BracketForm()
+    if not form_match.is_submitted():
+        form_match.next.data = request.args.get("next")
+    else:
+        tireur1, tireur2 = (participations[0].id_escrimeur,form_match.touches1.data),(participations[1].id_escrimeur,form_match.touches2.data)
+
+        vainqueur = tireur1 if tireur1[1] > tireur2[1] else tireur2
+        perdant = tireur1 if tireur1[1] < tireur2[1] else tireur2
+
+        match.valide_resultat(vainqueur, perdant)
+        return redirect(url_for("affiche_poule", id_compet=id_compet, id_poule=id_poule))
+    form_start = StartForm()
     return render_template(
         "match.html",
         competition = competition, 
         poule = poule, 
         match = match,
         participations = match.get_tireurs_match(poule.id),
-        f = f
+        form_match = form_match,
+        form_start = form_start
     )
 
 @app.route("/competition/<int:id_compet>/deinscription", methods=("GET", "POST"))

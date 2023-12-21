@@ -21,8 +21,21 @@
 </head>
 
 <body>
-    <p>{{ competition.id }} {{ poule.id }} {{ match.id }}</p>
-    <span id="message" onclick="this.style.display = 'none'">Commencez d'abord le match !</span>
+    {% if match.etat == constants.MATCH_A_VENIR %}
+    <span id="message">
+        Le match n'a pas encore commencé.
+        <form action="{{ url_for('affiche_match', id_compet = competition.id , id_poule = poule.id, id_match = match.id) }}" method="post" role="form_start">
+            {{ form_start.hidden_tag() }}
+            <button class="btn btn-primary">Commencer le match</button>
+        </form>
+    </span>
+    <style style="display: none;">
+        body *:not(#message, #message *) {
+            pointer-events: none;
+            user-select: none;
+        }
+    </style>
+    {% endif %}
     {% for participation in participations %}
         <div class="tireur">
             {% with participant = participation.get_escrimeur() %}
@@ -41,24 +54,33 @@
                     {% with arbitre = poule.get_arbitre() %}
                     <span>{{ arbitre.nom[0] }}.{{ arbitre.prenom }}</span>
                     {% endwith %}
-                    <span>Poule {{ poule.id }}</span>
+                    <span>{{ match.phase.libelle }} {{ poule.id }}</span>
                     <span>Piste {{ match.piste }}</span>
-                    <span>5 touches maxi</span>
+                    <span><span id="touches-max">{{ match.phase.type.touches_victoire }}</span> touches maxi</span>
                 </div>
                 <span></span>
-                <div>
-                    <button class="btnpause" onclick="pause(this)"></button>
-                    <span id="chrono" onclick="pause(this)">00:00</span>
-                    <a onclick="reset()">&#8635;</a>
-                </div>
-                <button onclick="start(this)">Commencer</button>
-                <button onclick="" style="display: none;">Valider</button>
+                {% if match.etat != constants.MATCH_A_VENIR %}
+                    <button onclick="valider()" class="btn btn-success">Valider</button>
+                {% endif %}
             </div>
         {% endif %}
         {% endfor %}
-    <aside>
-        <form>
+    <aside id="valider">
+        <form action="{{ url_for('valide_resultats', id_compet = competition.id , id_poule = poule.id, id_match = match.id) }}" method="post" role="form_match">
+            {{ form_match.hidden_tag() }}
+            <div class="form-group">
+                {% with participant = participations[0].get_escrimeur() %}
+                {{ participant.nom }} {{ participant.prenom }} {{ form_match.touches1(onKeyUp="checkPoints()")}}
+                {% endwith %}
+            </div>
+            <div class="form-group">
+                {% with participant = participations[1].get_escrimeur() %}
+                {{ participant.nom }} {{ participant.prenom }} {{ form_match.touches2(onKeyUp="checkPoints()")}}
+                {% endwith %}
+            </div>
+            <button class="btn btn-success" id="bouton-valider">Valider</button>
         </form>
+        <button onclick="document.getElementById('valider').classList.remove('visible');" class="btn btn-secondary">Fermer</button>
     </aside>
     <script style="display: none;">
         var started = false;
@@ -71,69 +93,66 @@
             }, 2000);
         }
 
-        function start(elem) {
-            started = true;
-            elem.parentElement.querySelector('button:last-child').style.display = "unset";
-            elem.style.display = "none";
-        }
+        let touchesMax = document.getElementById('touches-max').innerHTML;
 
-        function reset() {  
-            if (started){
-                minutes = "00";
-                secondes = "00";
-                chrono.innerHTML = `${minutes}:${secondes}`;
-            }else{
-                showMessage()
-            }
-        }
-
-        var paused = false;
-        function pause(btn) {
-            if(started){
-                paused = !paused;
-                btn.parentElement.querySelector("button").classList.toggle("paused");
-            }else{
-                showMessage()
-            }
-        }
-        function ajoutpoints(elem) {
-            if (started) {
-                elem = elem.querySelector('span');
-                elem.innerHTML = parseInt(elem.innerHTML) + 1;
-            }else{
-                showMessage()
-            }
-        }
-        function retirepoints(elem) {
-            if (started){
-                elem = elem.previousElementSibling.querySelector('span')
-                if (parseInt(elem.innerHTML) > 0) {
-                    elem.innerHTML = parseInt(elem.innerHTML) - 1;
-                }
-            }else{
-                showMessage()
-            }
-        }
-
-        var chrono = document.getElementById('chrono');
-        var minutes = "00";
-        var secondes = "00";
-        var timer = setInterval(function () {
-            if (!paused && started) {
-                if (secondes == 59) {
-                    minutes++;
-                    if (minutes < 10) {
-                        minutes = "0" + minutes;
-                    }
-                    secondes = 0;
+        function valider() {
+            let points = document.querySelectorAll('.points');
+            let touches1 = 0;
+            let touches2 = 0;
+            for (let i = 0; i < points.length; i++) {
+                if (i % 2 == 0) {
+                    touches1 += parseInt(points[i].querySelector('span').innerHTML);
                 } else {
-                    secondes++;
+                    touches2 += parseInt(points[i].querySelector('span').innerHTML);
                 }
-                if (secondes < 10) {
-                    secondes = "0" + secondes;
-                }
-                chrono.innerHTML = `${minutes}:${secondes}`;
             }
-        }, 1000);
+            document.querySelector('input[name="touches1"]').value = touches1;
+            document.querySelector('input[name="touches2"]').value = touches2;
+            document.getElementById("valider").classList.add("visible")
+            let boutton = document.getElementById("bouton-valider");
+            if (touches1 == touches2 || touches1 + touches2 == 0 ) {
+                boutton.disabled = true;
+                boutton.innerHTML = "Le score ne peut pas être nul";
+            }
+            else if(touches1 > touchesMax || touches2 > touchesMax){
+                boutton.disabled = true;
+                boutton.innerHTML = "Le score ne peut pas être supérieur au nombre de touches maximum";
+            }
+            else{
+                boutton.disabled = false;
+                boutton.innerHTML = "Valider";
+            }
+        }
+
+        function checkPoints(){
+            let touches1 = document.querySelector('input[name="touches1"]').value;
+            let touches2 = document.querySelector('input[name="touches2"]').value;
+            let boutton = document.getElementById("bouton-valider");
+            if (touches1 == touches2 || touches1 + touches2 == 0 ) {
+                boutton.disabled = true;
+                boutton.innerHTML = "Le score ne peut pas être nul";
+            }
+            else if(touches1 > touchesMax || touches2 > touchesMax){
+                boutton.disabled = true;
+                boutton.innerHTML = "Le score ne peut pas être supérieur au nombre de touches maximum";
+            }
+            else{
+                boutton.disabled = false;
+                boutton.innerHTML = "Valider";
+            }
+        }
+
+        function ajoutpoints(elem) {
+            elem = elem.querySelector('span');
+            if (parseInt(elem.innerHTML) < touchesMax)
+                elem.innerHTML = parseInt(elem.innerHTML) + 1;
+        }
+
+        function retirepoints(elem) {
+            elem = elem.previousElementSibling.querySelector('span')
+            if (parseInt(elem.innerHTML) > 0) {
+                elem.innerHTML = parseInt(elem.innerHTML) - 1;
+            }
+        }
     </script>
 </body>
