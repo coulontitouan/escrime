@@ -4,7 +4,7 @@ import os
 import signal
 from flask import request, redirect, url_for, flash, render_template, jsonify
 from flask_login import login_user , current_user, logout_user, login_required
-from wtforms import StringField , HiddenField, DateField , RadioField, PasswordField,SelectField
+from wtforms import StringField , HiddenField, DateField , RadioField, PasswordField,SelectField, SubmitField
 from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 import appEscrime.constants as cst
@@ -29,13 +29,58 @@ with app.app_context():
         nom_categorie = SelectField("Catégorie", coerce=str, default=1)
         next = HiddenField()
 
-@app.route("/")
+class SearchForm(FlaskForm):
+    searched = StringField('Searched', validators=[DataRequired()])
+    submit = SubmitField("Submit", validators=[DataRequired()])
+
+class HomeForm(FlaskForm):
+    categoriesField = SelectField("catégories",coerce=str,default=1, choices = ["Catégorie"])
+    armesField = SelectField("armes",coerce=str,default=1, choices = ["Arme"])
+    genresField = SelectField("genres",coerce=str,default=1, choices = ["Genre","Homme", "Dames"])
+
+    
+@app.route("/", methods =("GET","POST",))
 def home():
-    competitions = rq.get_all_competitions()
+    form = HomeForm()
+    for cat in rq.get_all_categories():
+        form.categoriesField.choices.append(cat.libelle)
+    for arme in rq.get_all_armes():
+        form.armesField.choices.append(arme.libelle)
+    competitions = Competition.query
+    print(form.categoriesField.data)
+    if form.categoriesField.data != "Catégorie" and form.categoriesField.data != "1":
+        competitions = competitions.filter(
+                        Competition.id_categorie == rq.get_categorie_par_libelle(form.categoriesField.data).id)
+    if form.armesField.data != "Arme" and form.armesField.data != "1":
+        competitions = competitions.filter(
+                        Competition.id_arme == rq.get_arme_par_libelle(form.armesField.data).id)
+    if form.genresField.data != "Genre" and form.genresField.data != "1":
+        competitions = competitions.filter(
+                        Competition.sexe == form.genresField.data)
     return render_template(
         "home.html",
-        competitions = competitions
+        form = form,
+        competitions = competitions.all(),
+        categories = rq.get_all_categories(),
+        armes = rq.get_all_armes()
     )
+
+@app.route("/search_compet/", methods =("POST",))
+def search_compet():
+    form = SearchForm()
+    content_searched = form.searched.data
+    print(form.searched.data)
+    print(content_searched)
+    if content_searched == "":
+        return home()
+    competitions = (Competition.query.filter(Competition.nom.like('%' + content_searched + '%'))
+                    .order_by(Competition.nom).all())
+    return render_template (
+    "search.html",
+    form=form,
+    searched = content_searched,
+    title = "Search Page",
+    competitions = competitions)
 
 @app.route("/informations")
 def informations():
