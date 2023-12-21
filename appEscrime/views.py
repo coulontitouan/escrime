@@ -2,6 +2,7 @@
 
 import os
 import signal
+from hashlib import sha256
 from flask import request, redirect, url_for, flash, render_template, jsonify
 from flask_login import login_user , current_user, logout_user, login_required
 from wtforms import StringField , HiddenField, DateField , RadioField, PasswordField,SelectField, SubmitField
@@ -65,7 +66,6 @@ def home() :
     for arme in rq.get_all_armes():
         form.armesField.choices.append(arme.libelle)
     competitions = Competition.query
-    print(form.categoriesField.data)
     if form.categoriesField.data != "Catégorie" and form.categoriesField.data != "1":
         competitions = competitions.filter(
                         Competition.id_categorie == rq.get_categorie_par_libelle(form.categoriesField.data).id)
@@ -93,8 +93,6 @@ def search_compet() :
     """
     form = SearchForm()
     content_searched = form.searched.data
-    print(form.searched.data)
-    print(content_searched)
     if content_searched == "":
         return home()
     competitions = (Competition.query.filter(Competition.nom.like('%' + content_searched + '%'))
@@ -139,8 +137,8 @@ class LoginForm(FlaskForm) :
         user = Escrimeur.query.get(self.num_licence.data)
         if user is None:
             return None
-        cst.CRYPTAGE.update(self.mot_de_passe.data.encode())
-        passwd = cst.CRYPTAGE.hexdigest()
+        sha256().update(self.mot_de_passe.data.encode())
+        passwd = sha256().hexdigest()
         return user if passwd == user.mot_de_passe else None
 
 class SignUpForm(FlaskForm) :
@@ -173,8 +171,9 @@ class SignUpForm(FlaskForm) :
         user = Escrimeur.query.get(self.num_licence.data)
         if user is None:
             return None
-        cst.CRYPTAGE.update(self.mot_de_passe.data.encode())
-        passwd = cst.CRYPTAGE.hexdigest()
+        sha256().update(self.mot_de_passe.data.encode())
+        passwd = sha256().hexdigest()
+        print(passwd, user.mot_de_passe)
         return user if passwd == user.mot_de_passe else None
 
     def est_deja_inscrit_sans_mdp(self) :
@@ -192,8 +191,8 @@ class SignUpForm(FlaskForm) :
             check_prenom = user.prenom.upper() == self.prenom.data.upper()
             check_nom = user.nom.upper() == self.nom.data.upper()
             if check_sexe and check_prenom and check_nom:
-                cst.CRYPTAGE.update(self.mot_de_passe.data.encode())
-                passwd= cst.CRYPTAGE.hexdigest()
+                sha256().update(self.mot_de_passe.data.encode())
+                passwd= sha256().hexdigest()
                 user.set_mdp(passwd)
                 db.session.commit()
                 return True

@@ -8,6 +8,7 @@ from .app import app , db
 from .models import Match, TypePhase, Arme, Categorie, Club, Escrimeur, Competition
 from .populates import load_competitions,load_connexion,load_escrimeurs,load_matchs,load_resultats
 from .populates import save_competitions, save_classements, save_connexions
+from hashlib import sha256
 
 DB_DIR = '../CEB.db'
 
@@ -109,9 +110,9 @@ def savebd():
 
 def newuser(num_licence, password, prenom, nom, sexe, ddn, club):
     """Crée un nouvel utilisateur"""
-    cst.CRYPTAGE.update(password.encode())
+    sha256().update(password.encode())
     tireur = Escrimeur(num_licence=num_licence,
-                       mot_de_passe=cst.CRYPTAGE.hexdigest(),
+                       mot_de_passe=sha256().hexdigest(),
                        prenom=prenom,
                        nom=nom,
                        sexe=sexe,
@@ -126,7 +127,7 @@ def newuser(num_licence, password, prenom, nom, sexe, ddn, club):
 @click.argument('mot_de_passe')
 def newadmin(prenom, nom, mot_de_passe ):
     """Ajoute un admin"""
-    cst.CRYPTAGE.update(mot_de_passe.encode())
+    sha256().update(mot_de_passe.encode())
     date_convert = datetime.strptime('01/01/0001', cst.TO_DATE).date()
     db.session.add(Escrimeur(num_licence=prenom,
                   prenom=prenom,
@@ -134,7 +135,7 @@ def newadmin(prenom, nom, mot_de_passe ):
                   sexe="Admin",
                   date_naissance=date_convert,
                   id_club=cst.CLUB_ADMIN,
-                  mot_de_passe=cst.CRYPTAGE.hexdigest()))
+                  mot_de_passe=sha256().hexdigest()))
     db.session.commit()
 
 @app.cli.command()

@@ -1,7 +1,5 @@
 """Module contenant les constantes de l'application."""
 
-from hashlib import sha256
-
 AGE_MAX_M13 = 13
 AGE_MAX_M15 = 15
 AGE_MAX_M17 = 17
@@ -21,6 +19,4 @@ TIREUR = -1
 TOUCHES_POULE = 5
 TOUCHES_BRACKET = 15
 VAINQUEUR = "Vainqueur"
-
-CRYPTAGE = sha256()
 TO_DATE = '%d/%m/%Y'
