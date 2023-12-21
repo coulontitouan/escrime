@@ -14,16 +14,16 @@
                             <th id="intitule" colspan="3">Poule {{ poule.id }} - {{ poule.nb_tireurs() }} Tireurs - {{ poule.get_arbitre().prenom[0] }} {{ poule.get_arbitre().nom }}</th>
                         </tr>
                         <tr>
-                            <th>Nom</th>
                             <th>Prénom</th>
+                            <th>Nom</th>
                             <th>Points</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for tireur in poule.get_tireurs() %}
                             <tr>
-                                <td>{{ tireur.nom }}</td>
                                 <td>{{ tireur.prenom }}</td>
+                                <td>{{ tireur.nom }}</td>
                                 {% if competition.get_points(tireur.num_licence) == -1 %}
                                     <td>0</td>
                                 {% else %}
@@ -36,7 +36,7 @@
                 <div class = "matchesAffiche">
                     <h3 id = "h3match"> Matchs à venir : </h3>
                 <ul class = "matchsComing ">
-                    {% set matches = poule.test() %}
+                    {% set matches = poule.matchs[:4] %}
                     {% set moitie = matches|length // 2 %}
 
 
@@ -73,6 +73,7 @@
            
         </div>
         <div id="deux">
+            <div id="heure"></div>
             <table id="Cprovisoire" class = "scroll" style="display:table;">
                 <thead>
                     <tr>
@@ -80,115 +81,30 @@
                     </tr>
                     <tr>
                         <th>N°</th>
-                        <th>Nom</th>
                         <th>Prénom</th>
+                        <th>Nom</th>
                         <th>Club</th>
                         <th>Points</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for tireur in competition.get_tireurs_order_by_pts() %}
+                    {% set dico = competition.get_tireurs_classes() %}
+                    {% for num_tireur in dico.keys() %}
+                    {% set tireur = get_tireur(num_tireur)%}
                         <tr>
                             <td>{{ loop.index }}</td>
-                            <td>{{ tireur.nom }}</td>
                             <td>{{ tireur.prenom }}</td>
+                            <td>{{ tireur.nom }}</td>
                             <td>{{ tireur.club.nom }}</td>
-                            {% if competition.get_points(tireur.num_licence) == -1 %}
-                                <td>0</td>
-                            {% else %}
-                                <td>{{ competition.get_points(tireur.num_licence) }}</td>
-                            {% endif %}
+                            <td>{{  dico[num_tireur]["victoires"] }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            <table id="Cnational" class = "scroll" style="display:none;">
-                <thead>
-                    <tr>
-                        <th id="intitule" colspan="5">Tête de série <a href="https://openclassrooms.com/forum/sujet/scroll-vertical-sur-balise-table"><img id="info" src="../static/images/istockphoto-1140611970-612x612-removebg-preview(1).png" alt=""></a></th>
-                    </tr>
-                    <tr>
-                        <th>Rang</th>
-                        <th>Nom</th>
-                        <th>Prénom</th>
-                        <th>Club</th>
-                        <th>Points nationaux</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for tireur in competition.get_tireurs_order_by_rang() %}
-                        <tr>
-                            <td>{{ loop.index }}</td>
-                            <td>{{ tireur.nom }}</td>
-                            <td>{{ tireur.prenom }}</td>
-                            <td>{{ tireur.club.nom }}</td>
-                            <td>{{ tireur.get_classement(competition.id_arme, competition.id_categorie).points }}</td>
-                        </tr>
-                    {% endfor %}
-                    {% for tireur in competition.get_tireurs_sans_rang() %}
-                        <tr>
-                            <td>NC</td>
-                            <td>{{ tireur.nom }}</td>
-                            <td>{{ tireur.prenom }}</td>
-                            <td>{{ tireur.club.nom }}</td>
-                            <td>0</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <h3> Dernier matchs : </h3>
-                <ul id = 'matchsPasse'>
-                    <li class = "match">
-                        <div class = "resultat">
-                        <p class = "opposantt "> JUNIOR N.</p>
-                        <p class = "touche "> 3</p>
-                        </div>
-                        <div class = "resultat">
-                        <p class = "opposantt "> DUPONT X.</p>
-                        <p class = "touche "> 5</p>
-                        </div>
-                        <p class = "lieux "> Poule A - Piste 1 </p>
-                    </li>
-                    <li class = "match">
-                        <div class = "resultat">
-                        <p class = "opposantt "> JUNIOR N.</p>
-                        <p class = "touche "> 3</p>
-                        </div>
-                        <div class = "resultat">
-                        <p class = "opposantt "> DUPONT X.</p>
-                        <p class = "touche "> 5</p>
-                        </div>
-                        <p class = "lieux "> Poule A - Piste 1 </p>
-                    </li>
-                    <li class = "match">
-                        <div class = "resultat">
-                        <p class = "opposantt "> JUNIOR N.</p>
-                        <p class = "touche "> 3</p>
-                        </div>
-                        <div class = "resultat">
-                        <p class = "opposantt "> DUPONT X.</p>
-                        <p class = "touche "> 5</p>
-                        </div>
-                        <p class = "lieux "> Poule A - Piste 1 </p>
-                    </li>
-            </div>
         </div>
     </main>
     <script>
-        setInterval(changeClassement, 3000);
         setInterval(changePoule, 4000);
-        
-        function changeClassement() {
-            var x = document.querySelector("#Cprovisoire");
-            var y = document.querySelector("#Cnational");
-            if (x.style.display === "none") {
-                x.style.display = "table";
-                y.style.display = "none";
-            } else {
-                x.style.display = "none";
-                y.style.display = "table";
-            }
-        }
         var pouleGlobal = document.getElementsByClassName('poule');
         var pouleAffiche = 0;
         var pouleDebut = pouleGlobal[pouleAffiche].style.display == "table";
@@ -224,8 +140,23 @@
                 yy.style.display = "table"
                 
             }
+            function mettreAJourHeure() {
+                var date = new Date();
+                var heures = date.getHours();
+                var minutes = date.getMinutes();
+                var secondes = date.getSeconds();
             
+                heures = heures < 10 ? "0" + heures : heures;
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                secondes = secondes < 10 ? "0" + secondes : secondes;
             
+                var heureActuelle = heures + ":" + minutes + ":" + secondes;
+            
+                document.getElementById("heure").textContent = heureActuelle;
+            }
+            
+            setInterval(mettreAJourHeure, 1000);
+            mettreAJourHeure();
             
            
         }

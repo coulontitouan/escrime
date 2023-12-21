@@ -396,7 +396,7 @@ def affichage_grand_ecran(id_compet) :
     flash('Vous êtes désinscrit', 'warning')
 
     return render_template('affichageGE.html',
-                           competition=competition)
+                           competition=competition,get_tireur = get_tireur)
 
 @app.errorhandler(Exception)
 def page_not_found(erreur):
