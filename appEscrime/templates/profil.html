@@ -25,7 +25,7 @@
                 </li>
                 <li class="infoIndiv">
                     <h3>Naissance</h3>
-                    <p>{{ current_user.date_naissance }}</p>
+                    <p>{{ current_user.date_naissance.strftime(to_date) }}</p>
                 </li>
                 <li>
                     <h3>Mot de passe</h3>

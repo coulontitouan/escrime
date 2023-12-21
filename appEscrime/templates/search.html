@@ -12,19 +12,7 @@
 </div>
 {% endfor %}
 <div id="body">
-    <h1>Les compétitions :</h1>
-    <div id="filtresBox">
-        <h2>Filtres :</h2>
-        <form id="filtres" action="{{ url_for('home') }}" method="post" role="form">
-              {{ form.categoriesField(class="form-select" )}}
-              {{ form.armesField(class="form-select" )}}
-              {{ form.genresField(class="form-select" )}}
-              <button class="btn btn-outline-success">Filtrer</button>
-              {% if form.categoriesField.data != "Catégorie" and form.categoriesField.data != "1" or form.armesField.data != "Arme" and form.armesField.data != "1" or form.genresField.data != "Genre" and form.genresField.data != "1" %}
-                <a class="btn btn-outline-danger" href="{{ url_for('home') }}">Enlever les filtres</a>
-              {% endif %}
-        </form>
-    </div>
+    <h1>Résultats pour: {{ searched }}</h1>
     <table>
         <thead>
             <tr>
@@ -45,7 +33,7 @@
                 <td>{{ c.get_arme().libelle }}</td>
                 <td>{{ c.sexe }}</td>
                 <td>{{ c.get_lieu().nom }}</td>
-                <td>{{ c.date.strftime(to_date) }}</td>
+                <td>{{ c.date }}</td>
                 <td><a href="{{url_for('affiche_competition', id_compet=c.id)}}"><button class="favorite styled" type="button" >Voir plus</button></a></td>
                 {% if current_user.is_authenticated %}
                 {% if current_user.is_admin() %}

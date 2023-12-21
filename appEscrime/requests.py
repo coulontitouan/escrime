@@ -1,7 +1,7 @@
 """Module contenant les fonctions de requêtes à la base de données."""
 
 from sqlalchemy import desc
-from .models import Lieu, Competition, Phase, Match, Participation, Resultat, Club, TypePhase, Arme, Categorie # pylint: disable=line-too-long
+from .models import Lieu, Competition, Phase, Match, Participation, Resultat, Club, TypePhase, Arme, Categorie, Escrimeur # pylint: disable=line-too-long
 from .app import db
 
 def get_all_armes():
@@ -24,6 +24,14 @@ def get_arme(id_arme):
     """
     return Arme.query.get(id_arme)
 
+def get_arme_par_libelle(libelle):
+    """Fonction qui permet de récupérer une arme à partir de son libellé dans la base de données
+
+    Args:
+        libelle (str): le libellé d'une arme
+    """
+    return Arme.query.filter(Arme.libelle == libelle).first()
+
 def get_club(id_club):
     """Récupère un club dans la base de données à partir de son id
 
@@ -39,6 +47,14 @@ def get_categorie(id_cat):
         id_cat (int): l'id d'une catégorie
     """
     return Categorie.query.get(id_cat)
+
+def get_categorie_par_libelle(libelle):
+    """Fonction qui permet de récupérer une catégorie à partir de son libellé dans la base de données
+
+    Args:
+        libelle (str): le libellé d'une categorie
+    """
+    return Categorie.query.filter(Categorie.libelle == libelle).first()
 
 def get_competition(id_compet):
     """Récupère une compétition dans la base de données à partir de son id
@@ -56,6 +72,13 @@ def get_participation(id_part):
     """
     return Participation.query.get(id_part)
 
+def get_tireur(num_licence):
+    """Récupère un tireur dans la base de données à partir de son numéro de licence
+
+    Args:
+        id_part (num_licence): le numéro de licence d'un tireur
+    """
+    return Escrimeur.query.get(num_licence)
 def get_match(id_match):
     """Récupère un match dans la base de données à partir de son id
 
