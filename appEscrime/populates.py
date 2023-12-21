@@ -195,7 +195,7 @@ def load_resultats(contenu, lecteur):
 
 def save_competitions():
     """Sauvegarde les compétitions dans des fichiers csv"""
-    with open('../data/competitions_CEB.csv', 'w', encoding = 'utf-8') as fichier:
+    with open('./data/competitions_CEB.csv', 'w', encoding = 'utf-8') as fichier:
         print('competitions_CEB')
         writer = csv.writer(fichier, delimiter = ";")
         writer.writerow(
@@ -207,7 +207,7 @@ def save_competitions():
 
     for competition in Competition.query.all():
         titre = competition.to_titre_csv()
-        with open('../data/resultats_' + titre + '.csv',
+        with open('./data/resultats_' + titre + '.csv',
                   'w', encoding = 'utf-8') as fichier:
             print(titre)
             writer = csv.writer(fichier, delimiter = ";")
@@ -218,7 +218,7 @@ def save_competitions():
 
 def save_connexions():
     """Sauvegarde les informations de connexion dans un fichier csv"""
-    with open('../data/connexion.csv', 'w', encoding = 'utf-8') as fichier:
+    with open('./data/connexion.csv', 'w', encoding = 'utf-8') as fichier:
         print('connexion')
         writer = csv.writer(fichier, delimiter = ";")
         writer.writerow(['adherent','mdp'])
@@ -238,7 +238,7 @@ def save_classements():
                 nom_arme = arme.libelle
                 nom_cat = categorie.libelle
                 titre = nom_arme + '_' + sexe + '_' + nom_cat
-                with open('../data/classement_' + titre + '.csv',
+                with open('./data/classement_' + titre + '.csv',
                           'w', encoding = 'utf-8') as fichier:
                     print(titre)
                     writer = csv.writer(fichier, delimiter = ';')
@@ -248,8 +248,8 @@ def save_classements():
                 fichier.close()
 
     classement_none = Escrimeur.query.filter(Escrimeur.classements is None).all()
-    with open('../data/classement_none_Homme.csv', 'w', encoding = 'utf-8') as fichier_h:
-        with open('../data/classement_none_Dames.csv', 'w', encoding = 'utf-8') as fichier_f:
+    with open('./data/classement_none_Homme.csv', 'w', encoding = 'utf-8') as fichier_h:
+        with open('./data/classement_none_Dames.csv', 'w', encoding = 'utf-8') as fichier_f:
             writer_h = csv.writer(fichier_h, delimiter = ';')
             writer_f = csv.writer(fichier_f, delimiter = ';')
             ligne_1 = 'nom;prenom;date naissance;adherent;nation;comite regional;club'

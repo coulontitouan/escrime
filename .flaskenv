@@ -1,2 +1,2 @@
-FLASK_APP=app.py
+FLASK_APP=appEscrime
 FLASK_ENV=development
