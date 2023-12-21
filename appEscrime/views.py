@@ -12,6 +12,7 @@ from .app import app ,db
 from .models import Escrimeur, Club, Competition, Lieu
 from . import requests as rq
 from .commands import newuser
+from .requests import get_tireur
 
 with app.app_context():
     class CreeCompetitionForm(FlaskForm):
@@ -169,7 +170,7 @@ def affiche_competition(id_compet):
         user = -1
     return render_template(
         "competition.html",
-        competition = competition, form = form, user = competition.est_inscrit(user)
+        competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=get_tireur,
     )
 
 @app.route("/competition/<int:id_compet>/createPoule")

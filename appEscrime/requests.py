@@ -1,7 +1,7 @@
 """Module contenant les fonctions de requêtes à la base de données."""
 
 from sqlalchemy import desc
-from .models import Lieu, Competition, Phase, Match, Participation, Resultat, Club, TypePhase, Arme, Categorie # pylint: disable=line-too-long
+from .models import Lieu, Competition, Phase, Match, Participation, Resultat, Club, TypePhase, Arme, Categorie, Escrimeur # pylint: disable=line-too-long
 from .app import db
 
 def get_all_armes():
@@ -56,6 +56,13 @@ def get_participation(id_part):
     """
     return Participation.query.get(id_part)
 
+def get_tireur(num_licence):
+    """Récupère un tireur dans la base de données à partir de son numéro de licence
+
+    Args:
+        id_part (num_licence): le numéro de licence d'un tireur
+    """
+    return Escrimeur.query.get(num_licence)
 def get_match(id_match):
     """Récupère un match dans la base de données à partir de son id
 
