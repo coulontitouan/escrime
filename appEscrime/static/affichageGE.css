@@ -2,6 +2,7 @@ main {
     display: flex;
     margin-bottom: 15vh;
     margin-top: 5vh;
+    justify-content: space-around;
   }
   
   
@@ -32,13 +33,13 @@ main {
   }
   
   #un {
-    flex-basis: 35%;
-    margin-right: 5vw;
-    margin-left: 2vw;
+    flex-basis: 30%;
+
   }
   
   #deux {
-    width: 100%;
+    width: fit-content;
+    justify-content: end;
   }
   
   
@@ -67,19 +68,24 @@ main {
   }
   .match{
     list-style-type: none;
-    background-color: gray;
-    width: 10vw; 
+    border: 5px solid orange;
+    background-color: rgba(265, 165, 0, 0.238494462);
+    width: 10vw;
+    margin-bottom: 1vh;
   }
+
   #matchsComing> ul{
     padding: 0;
     width: 10vw;
   }
   .matchsComing{
     display: flex;
+    justify-content: space-around;
   }
   #matchsGauche{
     margin-right: 2vw;
   }
+
   .matchTime{
     text-align: center;
   }
@@ -118,6 +124,7 @@ h1{
   }
 h3{
     margin: 3vh;
+    width: fit-content;
 }
 
 .pic-ctn {
@@ -138,7 +145,17 @@ h3{
   .pic-ctn > img:nth-child(2) {
     animation-delay: 4s;
   }
-  
+
+  ul{
+    padding: 0;
+  }
+  .matchesAffiche{
+    width: 100%;
+  }
+  #h3match{
+    width: 100%;
+    text-align: center;
+  }
 @keyframes display {
     0%, 100% {
       opacity: 0;

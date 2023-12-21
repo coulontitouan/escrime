@@ -8,7 +8,23 @@
   width: auto;
 }
 
-#intitule{
+#filtresBox{
+  display: flex;
+  align-items: center;
+}
+
+#filtres{
+  margin-left: 2em;
+  display: flex;
+}
+#filtres > *{
+  margin-right: 1em;
+}
+.form-select{
+  width: unset !important;
+}
+
+ #intitule{
   white-space: nowrap;
   overflow: hidden;
   text-overflow: clip;

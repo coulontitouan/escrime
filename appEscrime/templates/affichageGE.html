@@ -34,7 +34,7 @@
                     </tbody>
                 </table>
                 <div class = "matchesAffiche">
-                    <h3> Matchs à venir : </h3>
+                    <h3 id = "h3match"> Matchs à venir : </h3>
                 <ul class = "matchsComing ">
                     {% set matches = poule.test() %}
                     {% set moitie = matches|length // 2 %}
