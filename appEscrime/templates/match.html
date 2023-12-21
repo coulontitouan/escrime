@@ -21,41 +21,41 @@
 </head>
 
 <body>
+    <p>{{ competition.id }} {{ poule.id }} {{ match.id }}</p>
     <span id="message" onclick="this.style.display = 'none'">Commencez d'abord le match !</span>
-    <div class="tireur">
-        <span class="nom">A.Gardelle</span>
-        <div class="points" onclick="ajoutpoints(this)">
-            <p><span>0</span> touche(s)</p>
+    {% for participation in participations %}
+        <div class="tireur">
+            {% with participant = participation.get_escrimeur() %}
+            <span class="nom">{{ participant.nom[0] }}.{{ participant.prenom }}</span>
+            <div class="points" onclick="ajoutpoints(this)">
+                <p><span>0</span> touche(s)</p>
+            </div>
+            <div class="moins" onclick="retirepoints(this)">
+                <p><span>-</span></p>
+            </div>
+            {% endwith %}
         </div>
-        <div class="moins" onclick="retirepoints(this)">
-            <p><span>-</span></p>
-        </div>
-    </div>
-    <div id="informations">
-        <div>
-            <span>G.Dutroux</span>
-            <span>Poule A</span>
-            <span>Piste 2</span>
-            <span>5 touches maxi</span>
-        </div>
-        <span></span>
-        <div>
-            <button class='btnpause' onclick="pause(this)"></button>
-            <span id="chrono" onclick="pause(this)">00:00</span>
-            <a onclick="reset()">&#8635;</a>
-        </div>
-        <button onclick="start(this)">Commencer</button>
-        <button onclick="" style="display: none;">Valider</button>
-    </div>
-    <div class="tireur">
-        <span class="nom">N.Doucet</span>
-        <div class="points" onclick="ajoutpoints(this)">
-            <p><span>0</span> touche(s)</p>
-        </div>
-        <div class="moins" onclick="retirepoints(this)">
-            <p><span>-</span></p>
-        </div>
-    </div>
+        {% if loop.first %}
+            <div id="informations">
+                <div>
+                    {% with arbitre = poule.get_arbitre() %}
+                    <span>{{ arbitre.nom[0] }}.{{ arbitre.prenom }}</span>
+                    {% endwith %}
+                    <span>Poule {{ poule.id }}</span>
+                    <span>Piste {{ match.piste }}</span>
+                    <span>5 touches maxi</span>
+                </div>
+                <span></span>
+                <div>
+                    <button class="btnpause" onclick="pause(this)"></button>
+                    <span id="chrono" onclick="pause(this)">00:00</span>
+                    <a onclick="reset()">&#8635;</a>
+                </div>
+                <button onclick="start(this)">Commencer</button>
+                <button onclick="" style="display: none;">Valider</button>
+            </div>
+        {% endif %}
+        {% endfor %}
     <aside>
         <form>
         </form>

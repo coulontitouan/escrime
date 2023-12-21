@@ -19,9 +19,21 @@ h1 {
     border: 5px solid orange;
     background-color: rgba(265, 165, 0, 0.238494462);
 }
-.petit {
+
+#gros > *{
     flex-basis: 45%;
     margin: 2%;
+    display: block;
+}
+
+#gros > a > div {
+    height: 100%;
+    width: 100%;
+    transition: all 0.5s ease-in-out;
+}
+
+#gros > a:hover > div {
+    border-radius: 45px;
 }
 
 .petit > p {

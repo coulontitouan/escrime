@@ -24,16 +24,16 @@
                             <th id="intitule" colspan="3">Poule {{ poule.id }} - {{ poule.nb_tireurs() }} Tireurs - {{ poule.get_arbitre().prenom[0] }} {{ poule.get_arbitre().nom }} <a href="{{url_for('affiche_poule', id_compet = competition.id , id_poule = loop.index)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
                         </tr>
                         <tr>
-                            <th>Nom</th>
                             <th>Prénom</th>
+                            <th>Nom</th>
                             <th>Points</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for tireur in poule.get_tireurs() %}
                             <tr>
-                                <td>{{ tireur.nom }}</td>
                                 <td>{{ tireur.prenom }}</td>
+                                <td>{{ tireur.nom }}</td>
                                 {% if competition.get_points(tireur.num_licence) == -1 %}
                                     <td>0</td>
                                 {% else %}
@@ -98,24 +98,22 @@
                     </tr>
                     <tr>
                         <th>N°</th>
-                        <th>Nom</th>
                         <th>Prénom</th>
+                        <th>Nom</th>
                         <th>Club</th>
                         <th>Points</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for tireur in competition.get_tireurs_order_by_pts() %}
+                    {% set dico = competition.get_tireurs_classes() %}
+                    {% for num_tireur in dico.keys() %}
+                    {% set tireur = get_tireur(num_tireur)%}
                         <tr>
                             <td>{{ loop.index }}</td>
-                            <td>{{ tireur.nom }}</td>
                             <td>{{ tireur.prenom }}</td>
+                            <td>{{ tireur.nom }}</td>
                             <td>{{ tireur.club.nom }}</td>
-                            {% if competition.get_points(tireur.num_licence) == -1 %}
-                                <td>0</td>
-                            {% else %}
-                                <td>{{ competition.get_points(tireur.num_licence) }}</td>
-                            {% endif %}
+                            <td>{{  dico[num_tireur]["victoires"] }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -127,8 +125,8 @@
                     </tr>
                     <tr>
                         <th>N°</th>
-                        <th>Nom</th>
                         <th>Prénom</th>
+                        <th>Nom</th>
                         <th>Club</th>
                         <th>Points nationaux</th>
                     </tr>
@@ -137,8 +135,8 @@
                     {% for tireur in competition.get_tireurs_order_by_rang() %}
                         <tr>
                             <td>{{ loop.index }}</td>
-                            <td>{{ tireur.nom }}</td>
                             <td>{{ tireur.prenom }}</td>
+                            <td>{{ tireur.nom }}</td>
                             <td>{{ tireur.club.nom }}</td>
                             <td>{{ tireur.get_classement(competition.id_arme, competition.id_categorie).points }}</td>
                         </tr>
@@ -146,8 +144,8 @@
                     {% for tireur in competition.get_tireurs_sans_rang() %}
                         <tr>
                             <td>NC</td>
-                            <td>{{ tireur.nom }}</td>
                             <td>{{ tireur.prenom }}</td>
+                            <td>{{ tireur.nom }}</td>
                             <td>{{ tireur.club.nom }}</td>
                             <td>0</td>
                         </tr>
