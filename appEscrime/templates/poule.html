@@ -37,11 +37,17 @@
                     <p>Piste {{ match.piste }}</p>
                 </div>
                 <div>
-                    <p>{{ match.get_tireurs_match(poule.id)[0].get_escrimeur().nom }} {{ match.get_tireurs_match(poule.id)[0].get_escrimeur().prenom }} . ( {{ match.get_tireurs_match(poule.id)[0].get_escrimeur().get_classement(competition.id_arme, competition.id_categorie).points }} )</p>
+                    {% with tireurs = match.get_tireurs_match(poule.id) %}
+                    {% with tireur1 = tireurs[0].get_escrimeur() %}
+                    <p>{{ tireur1.nom }} {{ tireur1.prenom }} . ( {{ tireur1.get_classement(competition.id_arme, competition.id_categorie).points }} )</p>
+                    {% endwith %}
                     {% if match.etat == "Termine" %}
                         <p>{{ match.participations[0].touches }} - {{ match.participations[1].touches }}</p>
                     {% endif %}
-                    <p>{{ match.get_tireurs_match(poule.id)[1].get_escrimeur().nom }} {{ match.get_tireurs_match(poule.id)[1].get_escrimeur().prenom }} . ( {{ match.get_tireurs_match(poule.id)[1].get_escrimeur().get_classement(competition.id_arme, competition.id_categorie).points }} )</p>
+                    {% with tireur2 = tireurs[1].get_escrimeur() %}
+                    <p>{{ tireur2.nom }} {{ tireur2.prenom }} . ( {{ tireur2.get_classement(competition.id_arme, competition.id_categorie).points }} )</p>
+                    {% endwith %}
+                    {% endwith %}
                 </div>
                 <div class="foot">
                     <p>Arbitré par {{ match.get_arbitre().prenom }}  {{ match.get_arbitre().nom }}</p>
