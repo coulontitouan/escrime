@@ -9,7 +9,7 @@ from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 import appEscrime.constants as cst
 from .app import app ,db
-from .models import Escrimeur, Club, Competition, Lieu, Participation, Match
+from .models import Escrimeur, Club, Competition, Lieu
 from . import requests as rq
 from .commands import newuser
 from .requests import get_tireur
