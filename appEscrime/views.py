@@ -306,16 +306,17 @@ class MatchForm(FlaskForm):
 def affiche_match(id_compet, id_poule, id_match):
     """Fonction qui permet d'afficher un match"""
 
-    competition, poule, match = [None, None, None]
-    # competition = get_competition(idC)
-    # poule = get_poule(idC, idP)
-    # match = get_match(idC, idP, idM)
-
+    competition = rq.get_competition(id_compet)
+    poule = competition.get_poules_id(id_poule)
+    match = poule.get_match_id(id_match)
+    f = MatchForm()
     return render_template(
         "match.html",
         competition = competition, 
         poule = poule, 
-        match = match
+        match = match,
+        participations = match.get_tireurs_match(poule.id),
+        f = f
     )
 
 @app.route("/competition/<int:id_compet>/deinscription", methods=("GET", "POST"))

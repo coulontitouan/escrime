@@ -134,6 +134,5 @@ body>* {
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
     display: none;
+    user-select: none;
 }
-
-#chrono~button {}

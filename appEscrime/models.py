@@ -558,6 +558,17 @@ class Phase(db.Model):
             for match in journee:
                 res.append(match)
         return res
+     
+    def get_match_id(self, id_match : int) :
+        """Récupère un match en fonction de son ID dans une poule
+
+        Args:
+            id_match (int): ID du match
+
+        Returns:
+            Match: Le match.
+        """
+        return Match.query.get((id_match, self.id, self.id_competition))
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de la phase dans un fichier csv."""

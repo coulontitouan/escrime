@@ -22,176 +22,34 @@
     </div>
 </div>
 <div id="gros">
-    <div class="petit avenir">
-        <div class="head">
-            <p>14h30</p>
-            <p>Lieux</p>
-            <p>Piste 1</p>
-        </div>
-        <div>
-            <p>JUNIOR N. (1980 pts)</p>
-            <p>0-5</p>
-            <p>DUPONT X. (1453 pts)</p>
-        </div>
-        <div class="foot">
-            <p>Arbitré par Arbitre</p>
-        </div>
-    </div>
-    <div class="petit encours">
-        <div class="head">
-            <p>14h30</p>
-            <p>Lieux</p>
-            <p>Piste 1</p>
-        </div>
-        <div>
-            <p>JUNIOR N. (1980 pts)</p>
-            <p>DUPONT X. (1453 pts)</p>
-        </div>
-        <div class="foot">
-            <p>Arbitré par Arbitre</p>
-        </div>
-    </div>
-    <div class="petit termine">
-        <div class="head">
-            <p>14h30</p>
-            <p>Lieux</p>
-            <p>Piste 1</p>
-        </div>
-        <div>
-            <p>JUNIOR N. (1980 pts)</p>
-            <p>DUPONT X. (1453 pts)</p>
-        </div>
-        <div class="foot">
-            <p>Arbitré par Arbitre</p>
-        </div>
-    </div>
-    <div class="petit avenir">
-        <div class="head">
-            <p>14h30</p>
-            <p>Lieux</p>
-            <p>Piste 1</p>
-        </div>
-        <div>
-            <p>JUNIOR N. (1980 pts)</p>
-            <p>DUPONT X. (1453 pts)</p>
-        </div>
-        <div class="foot">
-            <p>Arbitré par Arbitre</p>
-        </div>
-    </div>
-    <div class="petit avenir">
-        <div class="head">
-            <p>14h30</p>
-            <p>Lieux</p>
-            <p>Piste 1</p>
-        </div>
-        <div>
-            <p>JUNIOR N. (1980 pts)</p>
-            <p>0-5</p>
-            <p>DUPONT X. (1453 pts)</p>
-        </div>
-        <div class="foot">
-            <p>Arbitré par Arbitre</p>
-        </div>
-    </div>
-    <div class="petit encours">
-        <div class="head">
-            <p>14h30</p>
-            <p>Lieux</p>
-            <p>Piste 1</p>
-        </div>
-        <div>
-            <p>JUNIOR N. (1980 pts)</p>
-            <p>DUPONT X. (1453 pts)</p>
-        </div>
-        <div class="foot">
-            <p>Arbitré par Arbitre</p>
-        </div>
-    </div>
-    <div class="petit termine">
-        <div class="head">
-            <p>14h30</p>
-            <p>Lieux</p>
-            <p>Piste 1</p>
-        </div>
-        <div>
-            <p>JUNIOR N. (1980 pts)</p>
-            <p>DUPONT X. (1453 pts)</p>
-        </div>
-        <div class="foot">
-            <p>Arbitré par Arbitre</p>
-        </div>
-    </div>
-    <div class="petit avenir">
-        <div class="head">
-            <p>14h30</p>
-            <p>Lieux</p>
-            <p>Piste 1</p>
-        </div>
-        <div>
-            <p>JUNIOR N. (1980 pts)</p>
-            <p>DUPONT X. (1453 pts)</p>
-        </div>
-        <div class="foot">
-            <p>Arbitré par Arbitre</p>
-        </div>
-    </div>
-    <div class="petit avenir">
-        <div class="head">
-            <p>14h30</p>
-            <p>Lieux</p>
-            <p>Piste 1</p>
-        </div>
-        <div>
-            <p>JUNIOR N. (1980 pts)</p>
-            <p>0-5</p>
-            <p>DUPONT X. (1453 pts)</p>
-        </div>
-        <div class="foot">
-            <p>Arbitré par Arbitre</p>
-        </div>
-    </div>
-    <div class="petit encours">
-        <div class="head">
-            <p>14h30</p>
-            <p>Lieux</p>
-            <p>Piste 1</p>
-        </div>
-        <div>
-            <p>JUNIOR N. (1980 pts)</p>
-            <p>DUPONT X. (1453 pts)</p>
-        </div>
-        <div class="foot">
-            <p>Arbitré par Arbitre</p>
-        </div>
-    </div>
-    <div class="petit termine">
-        <div class="head">
-            <p>14h30</p>
-            <p>Lieux</p>
-            <p>Piste 1</p>
-        </div>
-        <div>
-            <p>JUNIOR N. (1980 pts)</p>
-            <p>DUPONT X. (1453 pts)</p>
-        </div>
-        <div class="foot">
-            <p>Arbitré par Arbitre</p>
-        </div>
-    </div>
-    <div class="petit avenir">
-        <div class="head">
-            <p>14h30</p>
-            <p>Lieux</p>
-            <p>Piste 1</p>
-        </div>
-        <div>
-            <p>JUNIOR N. (1980 pts)</p>
-            <p>DUPONT X. (1453 pts)</p>
-        </div>
-        <div class="foot">
-            <p>Arbitré par Arbitre</p>
-        </div>
-    </div>
+    {% for match in poule.matchs %}
+        {% if match.etat != "Termine" %}
+            <a href="{{url_for('affiche_match', id_compet = competition.id , id_poule = poule.id, id_match = match.id)}}">
+            {% if match.etat == "En cours" %}
+                <div class="petit encours">
+            {% else %}
+                <div class="petit avenir">
+            {% endif %}
+        {% else %}
+            <div class="petit termine">
+        {% endif %}
+                <div class="head">
+                    <p>Piste {{ match.piste }}</p>
+                </div>
+                <div>
+                    <p>{{ match.get_tireurs_match(poule.id)[0].get_escrimeur().nom }} {{ match.get_tireurs_match(poule.id)[0].get_escrimeur().prenom }} . ( {{ match.get_tireurs_match(poule.id)[0].get_escrimeur().get_classement(competition.id_arme, competition.id_categorie).points }} )</p>
+                    {% if match.etat == "Termine" %}
+                        <p>{{ match.participations[0].touches }} - {{ match.participations[1].touches }}</p>
+                    {% endif %}
+                    <p>{{ match.get_tireurs_match(poule.id)[1].get_escrimeur().nom }} {{ match.get_tireurs_match(poule.id)[1].get_escrimeur().prenom }} . ( {{ match.get_tireurs_match(poule.id)[1].get_escrimeur().get_classement(competition.id_arme, competition.id_categorie).points }} )</p>
+                </div>
+                <div class="foot">
+                    <p>Arbitré par {{ match.get_arbitre().prenom }}  {{ match.get_arbitre().nom }}</p>
+                </div>
+            </div>
+        {% if match.etat != "Termine" %}
+        </a>
+        {% endif %}
+    {% endfor %}
 </div>
 {% endblock %}
