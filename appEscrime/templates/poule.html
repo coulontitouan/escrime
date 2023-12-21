@@ -24,7 +24,9 @@
 <div id="gros">
     {% for match in poule.matchs %}
         {% if match.etat != "Termine" %}
+        {% if current_user.is_arbitre(competition.id)%}
             <a href="{{url_for('affiche_match', id_compet = competition.id , id_poule = poule.id, id_match = match.id)}}">
+        {% endif %}
             {% if match.etat == "En cours" %}
                 <div class="petit encours">
             {% else %}
