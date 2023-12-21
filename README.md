@@ -89,7 +89,7 @@ Dans le dossier <strong>Scénarios</strong>, sont stockés les différents scén
 
 Les outils que notre groupe a utilisé durant ce projet sont : 
 - VSCode en tant qu'IDE
-- GitHub pour partager les différentes avancées de chacun sur le code
+- GitHub pour partager les différentes avancées sur le code
 - [MoCoDo](https://www.mocodo.net/) pour la conception de la base de données
 - [Figma](https://www.figma.com/) pour la conception des maquettes de l'application
 
@@ -103,12 +103,12 @@ Notre utilisation de GitHub était de créer une branche pour chaque fonctionnal
 
 # Rapport Individuel
 
-## Ouzet Killian
+## Titouan COULON
 
-## Doucet Noam
+## Noam DOUCET
 
-## Gardelle Anthony
+## Anthony GARDELLE
 
-## Goudal Arthur
+## Arthur GOUDAL
 
-## Coulon Titouan
+## Killian OUZET
