@@ -5,8 +5,8 @@ import signal
 from hashlib import sha256
 from flask import request, redirect, url_for, flash, render_template, jsonify
 from flask_login import login_user , current_user, logout_user, login_required
-from wtforms import StringField , HiddenField, DateField , RadioField, PasswordField,SelectField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms import StringField , HiddenField, DateField , RadioField, PasswordField, SelectField, IntegerField, SubmitField
+from wtforms.validators import DataRequired, NumberRange
 from flask_wtf import FlaskForm
 import appEscrime.constants as cst
 from .app import app ,db
@@ -323,7 +323,8 @@ def affiche_poule(id_compet, id_poule) :
     return render_template(
         "poule.html",
         competition = competition,
-        poule = poule
+        poule = poule,
+        constants = cst
     )
 
 @app.route("/deconnexion/")
@@ -429,6 +430,7 @@ class InscriptionForm(FlaskForm) :
     next = HiddenField()
 
 @app.route("/competition/<int:id_compet>/inscription", methods=("GET", "POST"))
+@login_required
 def inscription_competition(id_compet) :
     """Fonction qui permet de gérer l'inscription d'un utilisateur à une compétition spécifique.
 
@@ -457,6 +459,7 @@ def inscription_competition(id_compet) :
     return render_template('competition.html',form = form, competition = competition, id_compet = id_compet)
 
 @app.route("/suppr-competition/<int:id_compet>")
+@login_required
 def suppr_competition(id_compet : int) :
     """Fonction qui permet de supprimer une compétition.
 
@@ -471,18 +474,36 @@ def suppr_competition(id_compet : int) :
         flash('Compétition supprimée avec succès', 'warning')
     return redirect(url_for('home'))
 
-class MatchForm(FlaskForm) :
-    """Classe formulaire pour la verification d'un match.
+class BracketForm(FlaskForm):
+    """Classe formulaire pour la verification d'un match à élimination.
 
     Args:
         FlaskForm (FlaskForm): Classe formulaire de Flask.
     """
-    touches1 = StringField('touches1',validators=[DataRequired()])
-    touches2 = StringField('touches2',validators=[DataRequired()])
+    touches1 = IntegerField('touches1',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_BRACKET, min=0)])
+    touches2 = IntegerField('touches2',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_BRACKET, min=0)])
     next=HiddenField()
 
-@app.route("/competition/<int:id_compet>/poule/<int:id_poule>/match/<int:id_match>")
-def affiche_match(id_compet, id_poule, id_match) :
+class PouleForm(FlaskForm):
+    """Classe formulaire pour la verification d'un match de poule.
+
+    Args:
+        FlaskForm (FlaskForm): Classe formulaire de Flask.
+    """
+    touches1 = IntegerField('touches1',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_POULE, min=0)])
+    touches2 = IntegerField('touches2',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_POULE, min=0)])
+    next=HiddenField()
+
+class StartForm(FlaskForm):
+    """Classe formulaire pour le début d'un match.
+
+    Args:
+        FlaskForm (FlaskForm): Classe formulaire de Flask.
+    """
+    next=HiddenField()
+
+@app.route("/competition/<int:id_compet>/poule/<int:id_poule>/match/<int:id_match>", methods=("GET", "POST"))
+def affiche_match(id_compet, id_poule, id_match):
     """Fonction qui permet d'afficher un match.
 
     Args:
@@ -496,14 +517,65 @@ def affiche_match(id_compet, id_poule, id_match) :
     competition = rq.get_competition(id_compet)
     poule = competition.get_poules_id(id_poule)
     match = poule.get_match_id(id_match)
-    form = MatchForm()
+    participations = match.get_tireurs_match(poule.id)
+    if match.id_phase == 1:
+        form_match = PouleForm()
+    else:
+        form_match = BracketForm()
+    form_start = StartForm()
+    if form_start.is_submitted():
+        form_start.next.data = request.args.get("next")
+        match.set_en_cours()
+    return render_template(
+        "match.html",
+        competition = competition, 
+        poule = poule, 
+        match = match,
+        participations = participations,
+        constants = cst,
+        form_match = form_match,
+        form_start = form_start
+    )
+
+@app.route("/competition/<int:id_compet>/poule/<int:id_poule>/match/<int:id_match>/valider", methods=("GET", "POST"))
+def valide_resultats(id_compet, id_poule, id_match):
+    """Fonction qui permet de valider les résultats d'un match.
+
+    Args:
+        id_compet (int): Identifiant unique de la compétition.
+        id_poule (int): Identifiant unique de la poule.
+        id_match (int): Identifiant unique du match.
+
+    Returns:
+        flask.Response: Renvoie la page du match ou de la compétition
+    """
+    competition = rq.get_competition(id_compet)
+    poule = competition.get_poules_id(id_poule)
+    match = poule.get_match_id(id_match)
+    participations = match.get_tireurs_match(poule.id)
+    if match.id_phase == 1:
+        form_match = PouleForm()
+    else:
+        form_match = BracketForm()
+    if not form_match.is_submitted():
+        form_match.next.data = request.args.get("next")
+    else:
+        tireur1, tireur2 = (participations[0].id_escrimeur,form_match.touches1.data),(participations[1].id_escrimeur,form_match.touches2.data)
+
+        vainqueur = tireur1 if tireur1[1] > tireur2[1] else tireur2
+        perdant = tireur1 if tireur1[1] < tireur2[1] else tireur2
+
+        match.valide_resultat(vainqueur, perdant)
+        return redirect(url_for("affiche_poule", id_compet=id_compet, id_poule=id_poule))
+    form_start = StartForm()
     return render_template(
         "match.html",
         competition = competition,
         poule = poule,
         match = match,
         participations = match.get_tireurs_match(poule.id),
-        form = form
+        form_match = form_match,
+        form_start = form_start
     )
 
 @app.route("/competition/<int:id_compet>/deinscription", methods=("GET", "POST"))

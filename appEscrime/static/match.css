@@ -82,57 +82,74 @@ body>* {
 #informations>div {
     display: flex;
     flex-direction: column;
-}
-
-#informations>div:first-child {
     height: 12vh;
+    background-color: antiquewhite;
+    border-radius: 10px;
+    justify-content: space-around;
 }
 
-.btnpause {
-    border: 0;
-    background: transparent;
-    box-sizing: border-box;
-    width: 0;
-    height: 32px;
-    border-color: transparent transparent transparent #202020;
-    transition: 100ms all ease;
-    cursor: pointer;
-    border-style: solid;
-    border-width: 16px 0 16px 25px;
-}
-
-.btnpause.paused {
-    border-style: double;
-    border-width: 0px 0 0px 25px;
-    border-color: transparent transparent transparent red;
-}
-
-#informations>div:last-of-type {
-    flex-direction: row-reverse;
-    justify-content: space-evenly;
-    align-items: center;
-}
-
-.paused~#chrono,
-.paused~#chrono~a {
-    color: red;
-}
-
-#chrono {
-    font-size: large;
-    vertical-align: text-top;
-}
-
-#chrono~a {
-    font-size: 32px;
-}
-
-#message {
-    font-size: 20vh;
+#message, aside{
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
-    display: none;
+    background: rgba(255, 255, 255, 0);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    padding: 5%;
+}
+
+#message {
+    font-size: 10vh;
     user-select: none;
+}
+#message button{
+    font-size: 7vh;
+}
+
+
+#message form, #message form *{
+    display: inline-block;
+}
+
+.btn-primary{
+    animation: shine 2s infinite;
+}
+
+aside{
+    display: none;
+    border: 2px solid black;
+}
+
+aside form{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 50%;
+    font-size: 3rem;
+    flex-basis: 100%;
+}
+
+aside .form-group{
+    margin-bottom: 2rem;
+}
+
+aside input{
+    width: 100%;
+}
+
+aside > * button{
+    height: 4rem;
+}
+
+aside > button{
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+aside.visible{
+    display: unset;
 }
