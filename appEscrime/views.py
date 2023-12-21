@@ -67,16 +67,17 @@ def home():
 
 @app.route("/search_compet/", methods =("POST",))
 def search_compet():
-    f = SearchForm()
-    content_searched = f.searched.data
-    print(f.searched.data)
+    form = SearchForm()
+    content_searched = form.searched.data
+    print(form.searched.data)
     print(content_searched)
     if content_searched == "":
         return home()
-    competitions = Competition.query.filter(Competition.nom.like('%' + content_searched + '%')).order_by(Competition.nom).all()
+    competitions = (Competition.query.filter(Competition.nom.like('%' + content_searched + '%'))
+                    .order_by(Competition.nom).all())
     return render_template (
     "search.html",
-    form=f,
+    form=form,
     searched = content_searched,
     title = "Search Page",
     competitions = competitions)
