@@ -59,7 +59,7 @@
                 <button class="btn btn-primary" type="button" onclick="change()">Changer Classement</button>
                 {% if current_user.is_authenticated %}
                 {% if current_user.is_admin %}
-                <form action="{{ url_for('affichage_grand_ecran', id = competition.id) }}" method="get" target="_blank">
+                <form action="{{ url_for('affichage_grand_ecran', id_compet = competition.id) }}" method="get" target="_blank">
                     <button id="affichageGE" type="submit" class="btn btn-success">affichage grand ecran</button>
                 </form>
                 {% endif %}

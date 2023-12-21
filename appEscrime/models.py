@@ -685,7 +685,7 @@ class Phase(db.Model):
         return Match.query.get((id_match, self.id, self.id_competition))
 
     def test(self):
-        return self.matchs
+        return self.matchs[:6]
         
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de la phase dans un fichier csv."""
