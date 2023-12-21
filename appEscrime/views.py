@@ -62,7 +62,8 @@ def home():
         form = form,
         competitions = competitions.all(),
         categories = rq.get_all_categories(),
-        armes = rq.get_all_armes()
+        armes = rq.get_all_armes(),
+        to_date = cst.TO_DATE
     )
 
 @app.route("/search_compet/", methods =("POST",))
@@ -283,7 +284,8 @@ def creation_competition():
 @app.route("/profil")
 def profil():
     return render_template(
-        "profil.html"
+        "profil.html",
+        to_date = cst.TO_DATE
     )
 
 class ChangerMdpForm(FlaskForm):
