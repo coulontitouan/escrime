@@ -290,7 +290,7 @@ def affiche_competition(id_compet) :
         user = -1
     return render_template(
         "competition.html",
-        competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=get_tireur,
+        competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=get_tireur,dico = competition.get_tireurs_classes()
     )
 
 @app.route("/competition/<int:id_compet>/createPoule")
@@ -319,7 +319,7 @@ def affiche_poule(id_compet, id_poule) :
         flask.Response: Renvoie la page de la poule
     """
     competition = rq.get_competition(id_compet)
-    poule = competition.get_poules_id(id_poule)
+    poule = competition.phases[id_poule-1]
     return render_template(
         "poule.html",
         competition = competition,
