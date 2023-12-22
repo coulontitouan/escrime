@@ -831,8 +831,7 @@ class Phase(db.Model):
     def verrouille_resultats(self):
         """Valide les résultats de la phase et gère la création de la suivante."""
         if self.est_terminee() and self.libelle != 'Finale' and self.libelle != 'Poule':
-            self.competition.programme_tableau()
-                
+            self.competition.programme_tableau()      
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de la phase dans un fichier csv."""

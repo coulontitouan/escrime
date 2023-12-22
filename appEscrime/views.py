@@ -597,6 +597,14 @@ def deinscription_competition(id_compet : int) :
                            competition=rq.get_competition(id_compet),
                            id=id_compet)
 
+@app.route("/competition/<int:id_compet>/affichage-grand-ecran", methods=("GET", "POST"))
+def affichage_grand_ecran(id_compet) :
+    competition = rq.get_competition(id_compet)
+    flash('Vous êtes désinscrit', 'warning')
+
+    return render_template('affichageGE.html',
+                           competition=competition,get_tireur = get_tireur)
+
 @app.errorhandler(Exception)
 def page_not_found(erreur) :
     """Fonction qui permet de gérer les erreurs.

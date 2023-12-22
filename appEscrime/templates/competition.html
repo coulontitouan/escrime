@@ -11,8 +11,9 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% endfor %}
+    
     <h1>{{ competition.nom }}</h1>
-    <div id="body">
+    <div id="body">  
         <div id="un">
             <h2>Poules :</h2>
             {% if competition.nb_phases() != 0 %}
@@ -80,7 +81,17 @@
                 <h2>Classements :</h2>
                 <button class="btn btn-primary" type="button" onclick="changeClassement()">Changer Classement</button>
                 {% if current_user.is_authenticated %}
+                {% if current_user.is_admin %}
+                <form action="{{ url_for('affichage_grand_ecran', id_compet = competition.id) }}" method="get" target="_blank">
+                    <button id="affichageGE" type="submit" class="btn btn-success">affichage grand ecran</button>
+                </form>
+                {% endif %}
                 {% if current_user.peut_sinscrire(competition.id) %}
+                <form id="test1" class="form-inline">
+                    <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Search"
+                    aria-label="Search">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                </form>
                 {% if not user %}
                 <button id = "openbtn" type="button" class="btn btn-success">S'inscrire</button>
                 <dialog id = "dialog" class="shadow p-3 mb-5 bg-body rounded">

@@ -1,0 +1,180 @@
+main {
+    display: flex;
+    margin-bottom: 15vh;
+    margin-top: 5vh;
+    justify-content: space-around;
+  }
+  
+  
+  #un table thead {
+    display:block;
+  }
+  
+  #un table tbody {
+    width: 100%;
+    display:block;
+    overflow-y:auto;
+  }
+  
+  #un table td, th {
+    width: 10vw;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+  }
+  
+  #intitule{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+    border-top: 0;
+    background-color: rgba(255, 0, 0, 0.9);
+    color: white;
+  }
+  
+  #un {
+    flex-basis: 30%;
+
+  }
+  
+  #deux {
+    width: fit-content;
+  }
+  
+  
+  #deux table td, th {
+    width: 10vw;
+    text-align: center;
+  }
+  
+  #deux table {
+    border: 1px solid black;
+    width: 60%;
+  }
+  
+.scroll {
+    border: 1px solid black;
+    height: 15vh;
+  }
+  
+  #deux table thead > tr {
+    border-bottom: 1px solid black;
+  }
+  
+  
+  tbody tr:nth-child(even) {
+    background-color: rgba(255, 0, 0, 0.2);
+  }
+  .match{
+    list-style-type: none;
+    border: 5px solid grey;
+    background-color: lightgrey;
+    width: 10vw;
+    margin-bottom: 1vh;
+  }
+
+  #matchsComing> ul{
+    padding: 0;
+    width: 10vw;
+  }
+  .matchsComing{
+    display: flex;
+    justify-content: space-around;
+  }
+  #matchsGauche{
+    margin-right: 2vw;
+  }
+
+  .matchTime{
+    text-align: center;
+  }
+  .opposant{
+    padding-left: 0.5vw;
+  }
+h1{
+    text-align: center;
+}
+#matchsPasse{
+    display: flex;
+    padding: 0;
+    width: 40vw;
+    justify-content: space-between;
+}
+
+#deux>.scroll{
+    width: 40vw;
+}
+#matchsPasse>.match{
+    display: flex;
+    flex-wrap: wrap;
+}
+.resultat{
+    flex-basis: 50%;
+}
+.lieux{
+    flex-basis: 100%;
+}
+.touche, .lieux{
+    text-align: center;
+}
+.opposantt{
+    padding-left: 0.5vw;
+    margin-bottom: 0.3;
+  }
+h3{
+    margin: 3vh;
+    width: fit-content;
+}
+
+.pic-ctn {
+    position: relative;
+    margin-top: 15vh;
+    overflow: hidden;
+  }
+  
+  .pic-ctn > img {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    animation: display 12s infinite linear;
+  }
+  
+  .pic-ctn > img:nth-child(2) {
+    animation-delay: 4s;
+  }
+
+  ul{
+    padding: 0;
+  }
+  .matchesAffiche{
+    width: 100%;
+  }
+  #h3match{
+    width: 100%;
+    text-align: center;
+  }
+
+  #heure{
+    width:fit-content;
+    font-size: 5vh;
+    font-weight: bold;
+   margin-bottom: 5vh;
+    margin-left: 75%;}
+
+@keyframes display {
+    0%, 100% {
+      opacity: 0;
+    }
+    8.33%, 25% {
+      opacity: 1;
+    }
+    33.33%, 41.66% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 0;
+    }
+  }
+  

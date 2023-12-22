@@ -1,0 +1,166 @@
+{% block styles %}
+{{ bootstrap.load_css() }}
+    <link rel="stylesheet" href="{{url_for('static', filename='affichageGE.css')}}">
+{% endblock %}
+{% block content %}        
+    <h1>{{ competition.nom }}</h1>
+    <main>  
+        <div id="un" >
+            {% if competition.nb_phases() != 0 %}
+            {% for poule in competition.get_poules() %}
+                <table class="scroll poule">
+                    <thead>
+                        <tr>
+                            <th id="intitule" colspan="3">Poule {{ poule.id }} - {{ poule.nb_tireurs() }} Tireurs - {{ poule.get_arbitre().prenom[0] }} {{ poule.get_arbitre().nom }}</th>
+                        </tr>
+                        <tr>
+                            <th>Prénom</th>
+                            <th>Nom</th>
+                            <th>Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tireur in poule.get_tireurs() %}
+                            <tr>
+                                <td>{{ tireur.prenom }}</td>
+                                <td>{{ tireur.nom }}</td>
+                                {% if competition.get_points(tireur.num_licence) == -1 %}
+                                    <td>0</td>
+                                {% else %}
+                                    <td>{{ competition.get_points(tireur.num_licence) }}</td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class = "matchesAffiche">
+                    <h3 id = "h3match"> Matchs à venir : </h3>
+                <ul class = "matchsComing ">
+                    {% set matches = poule.matchs[:4] %}
+                    {% set moitie = matches|length // 2 %}
+
+
+                        <ul id="matchsGauche">
+                            {% for match in matches[:moitie] %}
+                                <li class = "match">
+                                    <p class="opposant">{{ match.arbitre.prenom }} {{ match.arbitre.nom }}</p>
+                                    <p class="opposant">{{ match.participations[0].get_escrimeur().prenom }} {{ match.participations[0].get_escrimeur().nom }}</p>
+                                    <p class="opposant">{{ match.participations[1].get_escrimeur().prenom }} {{ match.participations[1].get_escrimeur().nom }}</p>
+                                    <p class="opposant">Poule A - Piste 1</p>
+                                </li>
+                            {% endfor %}
+                        </ul>
+
+                        <ul id="matchsDroite">
+                            {% for match in matches[moitie:] %}
+                                <li class = "match">
+                                    
+                                    <p class="opposant">{{ match.arbitre.prenom }} {{ match.arbitre.nom }}</p>
+                                    <p class="opposant">{{ match.participations[0].get_escrimeur().prenom }} {{ match.participations[0].get_escrimeur().nom }}</p>
+                                    <p class="opposant">{{ match.participations[1].get_escrimeur().prenom }} {{ match.participations[1].get_escrimeur().nom }}</p>
+                                    <p class="opposant">Poule A - Piste 1</p>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                </ul>
+            </div>
+
+
+            {% endfor %}
+            {% else %}
+                <p>Aucune poule créée</p>
+            {% endif %}
+           
+        </div>
+        <div id="deux">
+            <div id="heure"></div>
+            <table id="Cprovisoire" class = "scroll" style="display:table;">
+                <thead>
+                    <tr>
+                        <th id="intitule" colspan="5">Classement provisoire <a href="https://openclassrooms.com/forum/sujet/scroll-vertical-sur-balise-table"><img id="info" src="../static/images/istockphoto-1140611970-612x612-removebg-preview(1).png" alt=""></a></th>
+                    </tr>
+                    <tr>
+                        <th>N°</th>
+                        <th>Prénom</th>
+                        <th>Nom</th>
+                        <th>Club</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set dico = competition.get_tireurs_classes() %}
+                    {% for num_tireur in dico.keys() %}
+                    {% set tireur = get_tireur(num_tireur)%}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ tireur.prenom }}</td>
+                            <td>{{ tireur.nom }}</td>
+                            <td>{{ tireur.club.nom }}</td>
+                            <td>{{  dico[num_tireur]["victoires"] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <script>
+        setInterval(changePoule, 4000);
+        var pouleGlobal = document.getElementsByClassName('poule');
+        var pouleAffiche = 0;
+        var pouleDebut = pouleGlobal[pouleAffiche].style.display == "table";
+        var matchesGlobal = document.getElementsByClassName('matchesAffiche');
+        var matchesDebut = matchesGlobal[pouleAffiche].style.display == "flex";
+        
+        for (var i = pouleAffiche+1; i < pouleGlobal.length; i++) {
+            pouleGlobal[i].style.display = "none";
+            matchesGlobal[i].style.display = "none";
+        }
+
+        function changePoule(){
+            var x = pouleGlobal[pouleAffiche];
+            var xx = matchesGlobal[pouleAffiche];
+            if (pouleAffiche+1 == pouleGlobal.length){
+                pouleAffiche = 0
+                
+            }
+            else{
+                pouleAffiche +=1
+            }
+            var y = pouleGlobal[pouleAffiche]
+            var yy = matchesGlobal[pouleAffiche];
+            if (x.style.display === "none") {
+                x.style.display = "none";
+                xx.style.display = "none";
+                y.style.display = "table";
+                yy.style.display = "table"
+            } else {
+                x.style.display = "none";
+                xx.style.display = "none";
+                y.style.display = "table";
+                yy.style.display = "table"
+                
+            }
+            function mettreAJourHeure() {
+                var date = new Date();
+                var heures = date.getHours();
+                var minutes = date.getMinutes();
+                var secondes = date.getSeconds();
+            
+                heures = heures < 10 ? "0" + heures : heures;
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                secondes = secondes < 10 ? "0" + secondes : secondes;
+            
+                var heureActuelle = heures + ":" + minutes + ":" + secondes;
+            
+                document.getElementById("heure").textContent = heureActuelle;
+            }
+            
+            setInterval(mettreAJourHeure, 1000);
+            mettreAJourHeure();
+            
+           
+        }
+    </script>
+    {% endblock %}
+
+
