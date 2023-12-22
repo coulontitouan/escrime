@@ -16,8 +16,35 @@
         <div id="un">
             <h2>Poules :</h2>
             {% if competition.nb_phases() != 0 %}
+            {%if competition.nb_poules() < competition.nb_phases()%}
+            {%for phase in competition.get_phases_tableau() %}
+            <table class="scroll">
+                <thead>
+                    <tr>
+                        {% set id_phase = loop.index + competition.nb_poules() %}
+                        <th id="intitule" colspan="3"> {{phase.libelle}} - {{ phase.nb_tireurs() }} Tireurs <a href="{{url_for('affiche_poule', id_compet = competition.id , id_poule = id_phase )}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
+                    </tr>
+                    <tr>
+                        <th>Prénom</th>
+                        <th>Nom</th>
+                        <th>Match</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tireur in phase.get_tireurs() %}
+                        <tr>
+                            <td>{{ tireur.prenom }}</td>
+                            <td>{{ tireur.nom }}</td>
+                            <td> {{tireur.get_id_match(competition.id, phase.id)}} </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {%endfor%}
+            {%endif%}
+            {% set dico = competition.get_tireurs_classes() %}
             {% for poule in competition.get_poules() %}
-                <table class="scroll">
+                <table class="scroll" style="display:table;">
                     <thead>
                         <tr>
                             <th id="intitule" colspan="3">Poule {{ poule.id }} - {{ poule.nb_tireurs() }} Tireurs - {{ poule.get_arbitre().prenom[0] }} {{ poule.get_arbitre().nom }} <a href="{{url_for('affiche_poule', id_compet = competition.id , id_poule = loop.index)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
@@ -33,11 +60,8 @@
                             <tr>
                                 <td>{{ tireur.prenom }}</td>
                                 <td>{{ tireur.nom }}</td>
-                                {% if competition.get_points(tireur.num_licence) == -1 %}
-                                    <td>0</td>
-                                {% else %}
-                                    <td>{{ competition.get_points(tireur.num_licence) }}</td>
-                                {% endif %}
+                                <td>{{ dico[tireur.num_licence]["touches"] }}</td>
+
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -55,7 +79,7 @@
         <div id="deux">
             <div class="header-class">
                 <h2>Classements :</h2>
-                <button class="btn btn-primary" type="button" onclick="change()">Changer Classement</button>
+                <button class="btn btn-primary" type="button" onclick="changeClassement()">Changer Classement</button>
                 {% if current_user.is_authenticated %}
                 {% if current_user.peut_sinscrire(competition.id) %}
                 {% if not user %}
@@ -144,7 +168,7 @@
         </div>
     </div>
     <script>
-        function change() {
+        function changeClassement() {
             var x = document.querySelector("#Cprovisoire");
             var y = document.querySelector("#Cnational");
             if (x.style.display === "none") {
@@ -155,5 +179,6 @@
                 y.style.display = "table";
             }
         }
+
     </script>
     {% endblock %}

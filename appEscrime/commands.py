@@ -143,7 +143,8 @@ def newadmin():
 @click.argument('id_competition')
 def test(id_competition):
     """Commande test développeur"""
-    Competition.query.get(int(id_competition)).programme_poules()
-    for mmatch in Match.query.filter_by(id_competition = id_competition).all():
-        print(mmatch)
-        print(mmatch.participations, '\n')
+    compet = Competition.query.get(int(id_competition))
+    #for mmatch in Match.query.filter_by(id_competition = id_competition).all():
+    #    print(mmatch)
+    #    print(mmatch.participations, '\n')
+    print(compet.genere_tableau())

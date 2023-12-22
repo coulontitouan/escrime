@@ -203,6 +203,21 @@ class Escrimeur(db.Model, UserMixin):
                                 id_arme = 0,
                                 id_categorie = 0)
         return points
+    
+    def get_id_match(self, id_compet, id_phase):
+        """Récupère l'id du match d'un escrimeur dans une phase donnée
+
+        Args:
+            id_compet (int): l'identifiant de la compétition contenant la phase
+            id_phase (int): l'identifiant de la phase
+
+        Returns:
+            int: l'identifiant du match de l'escrimeur dans la phase donnée
+        """
+        return (Participation.query.filter(Participation.id_competition == id_compet,
+                                          Participation.id_phase == id_phase,
+                                          Participation.id_escrimeur == self.num_licence)
+                                          .first().id_match)
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de l'escrimeur dans un fichier csv."""
@@ -291,13 +306,22 @@ class Competition(db.Model):
         """
         return self.lieu
     
-    def nb_phases(self) :
+    def nb_phases(self):
         """Retourne le nombre de phases de la compétition.
 
         Returns:
             int: le nombre de phases de la compétition.
         """
         return len(self.phases)
+    
+    def nb_poules(self):
+        """Retourne le nombre de poules de la compétition.
+
+        Returns:
+            int: le nombre de poules de la compétition.
+        """
+        res = [phase for phase in self.phases if phase.libelle == 'Poule']
+        return len(res)
 
     def get_tireurs(self):
         """Retourne les tireurs inscrits à la compétition.
@@ -365,11 +389,23 @@ class Competition(db.Model):
             int: les points inscrits par le tireur à la compétition."""
         return Resultat.query.get((self.id,id_tireur)).points
     
+    def get_phases_tableau(self) -> list :
+        """Récupère les phases du tableau de la compétition
+
+        Returns:
+            list[Phase]: Les phases du tableau de la compétition
+        """
+        res = []
+        for phase in self.phases :
+            if phase.libelle != 'Poule' :
+                res.append(phase)
+        return res
+    
     def get_poules(self) -> list :
         """Récupère les poules de la compétition
 
         Returns:
-            List[Phase]: Les poules de la compétition
+            list[Phase]: Les poules de la compétition
         """
         res = []
         for phase in self.phases :

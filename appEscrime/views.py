@@ -319,7 +319,7 @@ def affiche_poule(id_compet, id_poule) :
         flask.Response: Renvoie la page de la poule
     """
     competition = rq.get_competition(id_compet)
-    poule = competition.get_poules_id(id_poule)
+    poule = competition.phases[id_poule-1]
     return render_template(
         "poule.html",
         competition = competition,
