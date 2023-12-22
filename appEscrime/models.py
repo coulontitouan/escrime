@@ -522,12 +522,9 @@ class Competition(db.Model):
             list: la liste des tireurs participant au prochain tour.
         """
         nb_tireurs = len(tireurs)
-        if bin(nb_tireurs).count("1") > 1:
-            puissance_proche = puissance_de_deux_proches(nb_tireurs)
-            if puissance_proche < nb_tireurs:
-                tireurs = tireurs[puissance_proche - (nb_tireurs % 2 + 2):]
-            else:
-                tireurs = tireurs[- (puissance_proche - nb_tireurs - (nb_tireurs % 2)):]
+        puissance_proche = puissance_de_deux_proches(nb_tireurs)
+        nb_matchs = (nb_tireurs - puissance_proche)
+        tireurs = tireurs[-nb_matchs*2:]
         return tireurs
     
     def programme_tableau(self):
@@ -548,12 +545,11 @@ class Competition(db.Model):
         else:
             tour = str(len(tireurs)) + "ème de finale"
         
-        #tireurs = self.reduction_tableau(tireurs)
-        print(tireurs)
+        if bin(len(tireurs)).count("1") > 1:
+            tireurs = self.reduction_tableau(tireurs)
+            tour = "Barrages"
         self.ajoute_tour_tableau(tour)
         phase = self.phases[-1]
-        print(phase)
-        print(list(arbitres))
         phase.cree_matchs(list(arbitres), tireurs)
         db.session.commit()
 
@@ -1026,8 +1022,5 @@ def puissance_de_deux_proches(n):
     while temp_n > 0:
         temp_n >>= 1
         position_bit_significatif += 1
-    puissance_superieure = 1 << position_bit_significatif
     puissance_inferieure = 1 if n == 0 else 1 << (position_bit_significatif - 1)
-    if puissance_superieure - n < n - puissance_inferieure:
-        return puissance_superieure
     return puissance_inferieure
