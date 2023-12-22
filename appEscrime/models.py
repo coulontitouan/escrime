@@ -150,7 +150,18 @@ class Escrimeur(db.Model, UserMixin):
         Returns :
             bool : True si l'utilisateur est administrateur, False sinon."""
         return self.id_club == cst.CLUB_ADMIN
+    
+    def is_arbitre(self,id_compet):
+        """Retourne si l'utilisateur est inscrit en tant qu'arbitre.
 
+        Returns :
+            bool : True si l'utilisateur est administrateur, False sinon."""
+        resultats =  self.resultats
+        for resultat in resultats:
+            if resultat.id_competition == id_compet and resultat.points == -2:
+                return True
+        return False
+    
     def peut_sinscrire(self, id_compet):
         """Vérifie si l'escrimeur à l'âge requis pour s'inscrie à une compétition donnée.
 
@@ -723,6 +734,7 @@ class Match(db.Model):
     def set_en_cours(self):
         """Met le match en cours."""
         self.etat = cst.MATCH_EN_COURS
+        db.session.commit()
 
     def cree_participation(self, tireur):
         """Crée les participations des tireurs au match.
@@ -759,7 +771,7 @@ class Match(db.Model):
             else:
                 print("Tireur inconnu wtf ?!")
         self.etat = cst.MATCH_TERMINE
-        db.session.commit()   
+        db.session.commit()
 
     def get_tireurs_match(self, id_poule : int) :
         """Récupère les tireurs d'un match en fonction de l'ID de la poule.
@@ -775,7 +787,6 @@ class Match(db.Model):
             if participation.id_phase == id_poule :
                 participants.append(participation)
         return participants
- 
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture du match dans un fichier csv."""
@@ -840,7 +851,6 @@ class Resultat(db.Model):
         PrimaryKeyConstraint(id_competition, id_escrimeur),
         {},
     )
-
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture du résultat dans un fichier csv."""
         return [self.rang, self.id_escrimeur, self.points]

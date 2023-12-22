@@ -99,7 +99,7 @@ def get_max_competition_id():
     """Récupère l'id de la dernière compétition créée"""
     if Competition.query.count() == 0:
         return 0
-    return Competition.query.order_by(desc(Competition.id)).first().ids
+    return Competition.query.order_by(desc(Competition.id)).first().id
 
 def get_lieu(nom, adresse, ville):
     """Récupère un lieu dans la base de données à partir de son nom, son adresse et sa ville

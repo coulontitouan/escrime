@@ -9,23 +9,23 @@
     <div class="status">
         <svg width="100" height="15" id="codeCouleur">
             <circle cx="7.5" cy="7.5" r="3.75" fill="orange"/>
-            <text x="25" y="7.5" dominant-baseline="middle">A Venir</text>
+            <text x="25" y="7.5" dominant-baseline="middle">{{ constants.MATCH_A_VENIR }}</text>
         </svg>
         <svg width="100" height="15" id="codeCouleur">
             <circle cx="7.5" cy="7.5" r="3.75" fill="green"/>
-            <text x="25" y="7.5" dominant-baseline="middle">En cours</text>
+            <text x="25" y="7.5" dominant-baseline="middle">{{ constants.MATCH_EN_COURS }}</text>
         </svg>
         <svg width="100" height="15" id="codeCouleur">
             <circle cx="7.5" cy="7.5" r="3.75" fill="cornflowerblue"/>
-            <text x="25" y="7.5" dominant-baseline="middle">Terminé</text>
+            <text x="25" y="7.5" dominant-baseline="middle">{{ constants.MATCH_TERMINE }}</text>
         </svg>
     </div>
 </div>
 <div id="gros">
     {% for match in poule.matchs %}
-        {% if match.etat != "Termine" %}
+        {% if match.etat != constants.MATCH_TERMINE %}
             <a href="{{url_for('affiche_match', id_compet = competition.id , id_poule = poule.id, id_match = match.id)}}">
-            {% if match.etat == "En cours" %}
+            {% if match.etat == constants.MATCH_EN_COURS %}
                 <div class="petit encours">
             {% else %}
                 <div class="petit avenir">
@@ -39,13 +39,13 @@
                 <div>
                     {% with tireurs = match.get_tireurs_match(poule.id) %}
                     {% with tireur1 = tireurs[0].get_escrimeur() %}
-                    <p>{{ tireur1.nom }} {{ tireur1.prenom }} ( {{ tireur1.get_classement(competition.id_arme, competition.id_categorie).points }} pts )</p>
+                    <p>{{ tireur1.nom }}.{{ tireur1.prenom[0] }} ( {{ tireur1.get_classement(competition.id_arme, competition.id_categorie).points }} )</p>
                     {% endwith %}
-                    {% if match.etat == "Termine" %}
+                    {% if match.etat == constants.MATCH_TERMINE %}
                         <p>{{ match.participations[0].touches }} - {{ match.participations[1].touches }}</p>
                     {% endif %}
                     {% with tireur2 = tireurs[1].get_escrimeur() %}
-                    <p>( {{ tireur2.get_classement(competition.id_arme, competition.id_categorie).points }} pts ) {{ tireur2.nom }} {{ tireur2.prenom }}</p>
+                    <p>{{ tireur2.nom }}.{{ tireur2.prenom[0] }} ( {{ tireur2.get_classement(competition.id_arme, competition.id_categorie).points }} )</p>
                     {% endwith %}
                     {% endwith %}
                 </div>
@@ -53,7 +53,7 @@
                     <p>Arbitré par {{ match.get_arbitre().prenom }}  {{ match.get_arbitre().nom }}</p>
                 </div>
             </div>
-        {% if match.etat != "Termine" %}
+        {% if match.etat != constants.MATCH_TERMINE %}
         </a>
         {% endif %}
     {% endfor %}

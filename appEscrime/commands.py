@@ -4,12 +4,14 @@ import csv
 import os
 import click
 import appEscrime.constants as cst
+import getpass
 from .app import app , db
 from .models import Match, TypePhase, Arme, Categorie, Club, Escrimeur, Competition
 from .populates import load_competitions,load_connexion,load_escrimeurs,load_matchs,load_resultats
 from .populates import save_competitions, save_classements, save_connexions
+from hashlib import sha256
 
-DB_DIR = '../CEB.db'
+DB_DIR = './CEB.db'
 
 @app.cli.command()
 def loadbd():
@@ -59,11 +61,11 @@ def loadbd():
     phases = {}
 
     # chargement de toutes les données
-    les_fichiers = os.listdir('../data') # Éxecution dans appEscrime
+    les_fichiers = os.listdir('./data') # Éxecution dans appEscrime
     les_fichiers.sort()
     for nom_fichier in les_fichiers:
         if os.path.splitext(nom_fichier)[1] == '.csv':
-            with open('../data/' + nom_fichier, 'r', newline = '', encoding = 'utf-8') as fichier:
+            with open('./data/' + nom_fichier, 'r', newline = '', encoding = 'utf-8') as fichier:
                 nom_fichier = nom_fichier[:-4]
                 print(nom_fichier)
                 lecteur = csv.DictReader(fichier, delimiter = ';')
@@ -100,18 +102,18 @@ def deletebd():
 @app.cli.command()
 def savebd():
     """Sauvegarde la base de données dans des fichiers csv"""
-    for nom_fichier in os.listdir('../data'):
+    for nom_fichier in os.listdir('./data'):
         if os.path.splitext(nom_fichier)[1] == '.csv':
-            os.remove('../data/' + nom_fichier)
+            os.remove('./data/' + nom_fichier)
     save_classements()
     save_connexions()
     save_competitions()
 
 def newuser(num_licence, password, prenom, nom, sexe, ddn, club):
     """Crée un nouvel utilisateur"""
-    cst.CRYPTAGE.update(password.encode())
+    sha256().update(password.encode())
     tireur = Escrimeur(num_licence=num_licence,
-                       mot_de_passe=cst.CRYPTAGE.hexdigest(),
+                       mot_de_passe=sha256().hexdigest(),
                        prenom=prenom,
                        nom=nom,
                        sexe=sexe,
@@ -121,12 +123,12 @@ def newuser(num_licence, password, prenom, nom, sexe, ddn, club):
     db.session.commit()
 
 @app.cli.command()
-@click.argument('prenom')
-@click.argument('nom')
-@click.argument('mot_de_passe')
-def newadmin(prenom, nom, mot_de_passe ):
+def newadmin():
     """Ajoute un admin"""
-    cst.CRYPTAGE.update(mot_de_passe.encode())
+    prenom = input("Prénom : ")
+    nom = input("Nom : ")
+    mot_de_passe = getpass.getpass("Mot de passe : ")
+    sha256().update(mot_de_passe.encode())
     date_convert = datetime.strptime('01/01/0001', cst.TO_DATE).date()
     db.session.add(Escrimeur(num_licence=prenom,
                   prenom=prenom,
@@ -134,7 +136,7 @@ def newadmin(prenom, nom, mot_de_passe ):
                   sexe="Admin",
                   date_naissance=date_convert,
                   id_club=cst.CLUB_ADMIN,
-                  mot_de_passe=cst.CRYPTAGE.hexdigest()))
+                  mot_de_passe=sha256().hexdigest()))
     db.session.commit()
 
 @app.cli.command()
