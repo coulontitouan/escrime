@@ -114,3 +114,12 @@ Pendant la première semaine, j'ai participé avec Titouan au maquettage des dif
 ## Arthur GOUDAL
 
 ## Killian OUZET
+<p style="text-align:justify;">
+Durant cette SAE escrime, j'ai principalement travaillé sur les pages de l'application et le fonctionnement avec le FrameWork Flask. Durant la première semaine de ce projet, en plus des diagrammes, je me suis occupé de l'arborescence de l'application ainsi que de la page de connexion et d'inscription. J'ai travaillé sur cette page avec mon camarade Noam et nous avons donc implémenté la fonctionnalité d'inscription et de connexion pour les escrimeurs déjà présents ainsi que pour des nouveaux. 
+<p style="text-align:justify;">
+Lors de la deuxième semaine, j'ai été chargé de développer le module administrateur de la plateforme. Pour ce module il fallait la présence d'admins sur l'application, j'ai donc rajouté une commande flask afin d'en créer un. Après la création d'un utilisateur admin, je me suis occupé de ce que celui-ci pouvait faire sur l'application d'escrime. J'ai commencé par ajouter à la page , faite par mes camarades, de création de compétition une certification administratrice, ensuite j'ai ajouté la fonctionnalité de suppression de compétition sur la page d'accueil. Et pour finir il fallait un moyen à l'admin de pouvoir éteindre l'application, j'ai donc terminé par positionner un bouton qui à l'appui arrête tout.  
+<p style="text-align:justify;">
+Pour la dernière semaine, mon rôle a été d'ajouter des fonctionnements à l'application afin de la rendre plus agréable d'utilisation par les escrimeurs. Pour cela j'ai rajouté, une searchBar dans la nav pour rechercher des compétitions existentes. Puis quelques filtres dans la page d'accueil pour l'affichage des compétitions d'escrime. De plus j'ai aussi participé à la page d'une compétition avec Anthony afin d'afficher les différentes poules ainsi que le classement de cette compétition.  
+<p style="text-align:justify;">
+Cette SAE m'a permis de développer grandement mes compétences et mes connaissances dans le FrameWork Flask ainsi que celui de sqlAlchemy. J'ai pu encore une fois mettre en pratique mon esprit d'équipe et encore plus l'approfondir.
+</p>
