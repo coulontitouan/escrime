@@ -83,7 +83,14 @@ Dans le dossier <strong>Scénarios</strong>, sont stockés les différents scén
 
 #### Rôles
 
-# A COMPLETER AVANT FIN DU PROJET IAHGZIUVCSGVQ GGDVSGYGVCFIGYGYQVCFYYGFTYUHIVGGY8UHIOUGVGYUHIGVIYOUHIUG
+Globalement les rôles étaient :
+- Arthur Goudal : Base de données + lecture .csv + répartition poules
+- Noam Doucet : Gestion connexion/inscription dans Flask + Page informations + Page affichage grand écran
+- Killian Ouzet : Module Admin + Login + filtres + search bar 
+- Anthony Gardelle : Design + Page Competition + Page Poule
+- Titouan Coulon : Design + Page Match
+
+Evidemment nous n'étions pas restreints à ces rôles et nous nous sommes entraidés sur la plupart des fonctionnalités.
 
 #### Outils
 
@@ -97,33 +104,38 @@ Notre utilisation de GitHub était de créer une branche pour chaque fonctionnal
 
 #### Résultats 
 
-# A COMPLETER AVANT FIN DU PROJET IAHGZIUVCSGVQ GGDVSGYGVCFIGYGYQVCFYYGFTYUHIVGGY8UHIOUGVGYUHIGVIYOUHIUG
+L'application permet de charger les classements nationaux des tireurs, de créer des compétitions, répartir les joueurs qui s'y inscrivent dans des poules en respectant les règles de l'escrime, de renseigner les points pour les arbitres, de s'inscrire ou de créer son compte pour les tireurs et à la fermeture de l'application, de sauvegarder toutes les compétitions faites et de renvoyer un fichier.csv avec les classements actualisés.
 
 ---
 
-# Rapport Individuel
+# Rapports Individuels
 
 ## Titouan COULON
+
+Durant la première semaine de SAE, j'ai réalise les maquettes des différentes pages web du site avec Anthony pour permettre une avancée plus rapide au developpement. J'ai également réalise les diagrammes d’activité du 1er rendu et une partie de la page d'accueil.  
+Durant la 2ème semaine, j'ai réalise une partie de la page competition et de la page poule et améliorer le design global du site en le rendant "responsive" ( tablette, pc ).  
+Durant cette dernière semaine de SAE, j'ai réalisé la page match et finalisé la page poule.  
+Durant ce projet, j'ai pu m'améliorer en python, en design web et en flask ( dans la comprehension global du framework ).
 
 ## Noam DOUCET
 
 Première semaine :
 
-En collaboration avec Killian, nous avons fait la création de la page de connexion et d'inscription, ainsi que la page "informations" ainsi que le diagramme des cas d'utilisations.
+En collaboration avec Killian, nous avons fait la création de la page de connexion et d'inscription, ainsi que la page "informations" ainsi que le diagramme de cas d'utilisation.
 
 Deuxième semaine :
 
-Pendant la 2e semaine, j'ai travaillé sur les formulaires flask afin de mieux comprendre le Frameworks Flask. J'ai aussi aidé Anthony pour la page compétition et sa gestion des données.
+Pendant la 2e semaine, j'ai travaillé sur les formulaires flask afin de mieux comprendre le Framework Flask. J'ai aussi aidé Anthony pour la page compétition et sa gestion des données.
 
 Dernière semaine :
 
-J'ai principalement créé la page Afficher Grand Écran et aider notamment à la conception de la page "Poule".
+J'ai principalement créé la page Afficher Grand Écran et aidé notamment à la conception de la page "Poule".
 
-Cette SAE a été bien enrichissante, car elle a permis de vraiment se plonger dans un framework vu qu'on apprends beaucoup de langage en cours, mais moins de framework pour l'instant. Elle nous a aussi permis de voir comment marche un projet en groupe sur une période plus longue et avec de plus grandes ambitions et demandes.
+Cette SAE a été bien enrichissante, car elle a permis de vraiment se plonger dans un framework contrairement aux cours où l'on apprend principalement des langages, mais peu de framework pour l'instant. Elle nous a aussi permis de voir comment marche un projet en groupe sur une période plus longue et avec de plus grandes ambitions et demandes.
 
 ## Anthony GARDELLE
 
-Pendant la première semaine, j'ai participé avec Titouan au maquettage des différentes pages du site, j'ai aussi participé à la description de certains cas d'utilisation. J'ai réalisé avec Titouan les différents scripts de lancement de l'application utile pour l'administrateur ayant aussi commencé quelques pages de façon générique. Lors de la deuxième semaine, j'ai fait évoluer le design des quelques pages dans lequel je suis intervenu. Enfin, la dernière semaine, j'ai pu mettre à jour quelque page pour qu'elle affiche de vraie donnée. Les pages devaient être bien construites et adaptées pour l'utilisation de l'application sur tablettes. Cette SAE m'a beaucoup apporté au niveau des compétences, le travail en équipe était fluide et si on avait une difficulté ou un détail à régler chaque membre de l'équipe était présent pour aider.
+Pendant la première semaine, j'ai participé avec Titouan au maquettage des différentes pages du site, j'ai aussi participé à la description de certains cas d'utilisation. J'ai réalisé avec Titouan les différents scripts de lancement de l'application utile pour l'administrateur ayant aussi commencé quelques pages de façon générique. Lors de la deuxième semaine, j'ai fait évoluer le design des quelques pages dans lequel je suis intervenu. Enfin, la dernière semaine, j'ai pu mettre à jour quelques pages pour qu'elles affichent de vraies données depuis la BD. Les pages devaient être bien construites et adaptées pour l'utilisation de l'application sur tablette. Cette SAE m'a beaucoup apporté au niveau des compétences, le travail en équipe était fluide et si on avait une difficulté ou un détail à régler chaque membre de l'équipe était présent pour aider.
 
 ## Arthur GOUDAL
 
@@ -133,7 +145,7 @@ Durant cette SAE escrime, j'ai principalement travaillé sur les pages de l'appl
 <p style="text-align:justify;">
 Lors de la deuxième semaine, j'ai été chargé de développer le module administrateur de la plateforme. Pour ce module il fallait la présence d'admins sur l'application, j'ai donc rajouté une commande flask afin d'en créer un. Après la création d'un utilisateur admin, je me suis occupé de ce que celui-ci pouvait faire sur l'application d'escrime. J'ai commencé par ajouter à la page , faite par mes camarades, de création de compétition une certification administratrice, ensuite j'ai ajouté la fonctionnalité de suppression de compétition sur la page d'accueil. Et pour finir il fallait un moyen à l'admin de pouvoir éteindre l'application, j'ai donc terminé par positionner un bouton qui à l'appui arrête tout.  
 <p style="text-align:justify;">
-Pour la dernière semaine, mon rôle a été d'ajouter des fonctionnements à l'application afin de la rendre plus agréable d'utilisation par les escrimeurs. Pour cela j'ai rajouté, une searchBar dans la nav pour rechercher des compétitions existentes. Puis quelques filtres dans la page d'accueil pour l'affichage des compétitions d'escrime. De plus j'ai aussi participé à la page d'une compétition avec Anthony afin d'afficher les différentes poules ainsi que le classement de cette compétition.  
+Pour la dernière semaine, mon rôle a été d'ajouter des fonctionnalités à l'application afin de la rendre plus agréable d'utilisation par les escrimeurs. Pour cela j'ai rajouté, une searchBar dans la nav pour rechercher des compétitions existantes. Puis quelques filtres dans la page d'accueil pour l'affichage des compétitions d'escrime. De plus j'ai aussi participé à la page d'une compétition avec Anthony afin d'afficher les différentes poules ainsi que le classement de cette compétition.  
 <p style="text-align:justify;">
 Cette SAE m'a permis de développer grandement mes compétences et mes connaissances dans le FrameWork Flask ainsi que celui de sqlAlchemy. J'ai pu encore une fois mettre en pratique mon esprit d'équipe et encore plus l'approfondir.
 </p>
