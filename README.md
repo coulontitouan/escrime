@@ -109,6 +109,8 @@ Notre utilisation de GitHub était de créer une branche pour chaque fonctionnal
 
 ## Anthony GARDELLE
 
+Pendant la première semaine, j'ai participé avec Titouan au maquettage des différentes pages du site, j'ai aussi participé à la description de certains cas d'utilisation. J'ai réalisé avec Titouan les différents scripts de lancement de l'application utile pour l'administrateur ayant aussi commencé quelques pages de façon générique. Lors de la deuxième semaine, j'ai fait évoluer le design des quelques pages dans lequel je suis intervenu. Enfin, la dernière semaine, j'ai pu mettre à jour quelque page pour qu'elle affiche de vraie donnée. Les pages devaient être bien construites et adaptées pour l'utilisation de l'application sur tablettes. Cette SAE m'a beaucoup apporté au niveau des compétences, le travail en équipe était fluide et si on avait une difficulté ou un détail à régler chaque membre de l'équipe était présent pour aider.
+
 ## Arthur GOUDAL
 
 ## Killian OUZET
