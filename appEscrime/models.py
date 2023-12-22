@@ -694,7 +694,7 @@ class Phase(db.Model):
             Match: Le match.
         """
         return Match.query.get((id_match, self.id, self.id_competition))
-
+        
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de la phase dans un fichier csv."""
         return [self.id, self.libelle]
