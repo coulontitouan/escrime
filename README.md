@@ -107,6 +107,20 @@ Notre utilisation de GitHub était de créer une branche pour chaque fonctionnal
 
 ## Noam DOUCET
 
+Première semaine :
+
+En collaboration avec Killian, nous avons fait la création de la page de connexion et d'inscription, ainsi que la page "informations" ainsi que le diagramme des cas d'utilisations.
+
+Deuxième semaine :
+
+Pendant la 2e semaine, j'ai travaillé sur les formulaires flask afin de mieux comprendre le Frameworks Flask. J'ai aussi aidé Anthony pour la page compétition et sa gestion des données.
+
+Dernière semaine :
+
+J'ai principalement créé la page Afficher Grand Écran et aider notamment à la conception de la page "Poule".
+
+Cette SAE a été bien enrichissante, car elle a permis de vraiment se plonger dans un framework vu qu'on apprends beaucoup de langage en cours, mais moins de framework pour l'instant. Elle nous a aussi permis de voir comment marche un projet en groupe sur une période plus longue et avec de plus grandes ambitions et demandes.
+
 ## Anthony GARDELLE
 
 Pendant la première semaine, j'ai participé avec Titouan au maquettage des différentes pages du site, j'ai aussi participé à la description de certains cas d'utilisation. J'ai réalisé avec Titouan les différents scripts de lancement de l'application utile pour l'administrateur ayant aussi commencé quelques pages de façon générique. Lors de la deuxième semaine, j'ai fait évoluer le design des quelques pages dans lequel je suis intervenu. Enfin, la dernière semaine, j'ai pu mettre à jour quelque page pour qu'elle affiche de vraie donnée. Les pages devaient être bien construites et adaptées pour l'utilisation de l'application sur tablettes. Cette SAE m'a beaucoup apporté au niveau des compétences, le travail en équipe était fluide et si on avait une difficulté ou un détail à régler chaque membre de l'équipe était présent pour aider.
