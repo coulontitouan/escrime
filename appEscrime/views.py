@@ -2,10 +2,11 @@
 
 import os
 import signal
+from hashlib import sha256
 from flask import request, redirect, url_for, flash, render_template, jsonify
 from flask_login import login_user , current_user, logout_user, login_required
-from wtforms import StringField , HiddenField, DateField , RadioField, PasswordField,SelectField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms import StringField , HiddenField, DateField , RadioField, PasswordField, SelectField, IntegerField, SubmitField
+from wtforms.validators import DataRequired, NumberRange
 from flask_wtf import FlaskForm
 import appEscrime.constants as cst
 from .app import app ,db
@@ -14,9 +15,13 @@ from . import requests as rq
 from .commands import newuser
 from .requests import get_tireur
 
-with app.app_context():
-    class CreeCompetitionForm(FlaskForm):
-        """Classe qui permet de créer une compétition"""
+with app.app_context() :
+    class CreeCompetitionForm(FlaskForm) :
+        """Classe formulaire pour la création d'une compétition.
+
+        Args:
+            FlaskForm (FlaskForm): Classe formulaire de Flask.
+        """
         nom_lieu = StringField('Nom lieu', validators=[DataRequired()])
         adresse_lieu = StringField('Adresse lieu', validators=[DataRequired()])
         ville_lieu = StringField('Ville lieu', validators=[DataRequired()])
@@ -29,25 +34,38 @@ with app.app_context():
         nom_categorie = SelectField("Catégorie", coerce=str, default=1)
         next = HiddenField()
 
-class SearchForm(FlaskForm):
+class SearchForm(FlaskForm) :
+    """Classe formulaire pour la recherche d'une compétition.
+
+    Args:
+        FlaskForm (FlaskForm): Classe formulaire de Flask.
+    """
     searched = StringField('Searched', validators=[DataRequired()])
     submit = SubmitField("Submit", validators=[DataRequired()])
 
-class HomeForm(FlaskForm):
+class HomeForm(FlaskForm) :
+    """Classe formulaire pour le filtre de recherche d'une compétition.
+
+    Args:
+        FlaskForm (FlaskForm): Classe formulaire de Flask.
+    """
     categoriesField = SelectField("catégories",coerce=str,default=1, choices = ["Catégorie"])
     armesField = SelectField("armes",coerce=str,default=1, choices = ["Arme"])
     genresField = SelectField("genres",coerce=str,default=1, choices = ["Genre","Homme", "Dames"])
 
-    
 @app.route("/", methods =("GET","POST",))
-def home():
+def home() :
+    """Fonction qui permet d'afficher la page d'accueil
+
+    Returns:
+        flask.Response: Renvoie la page d'accueil
+    """
     form = HomeForm()
     for cat in rq.get_all_categories():
         form.categoriesField.choices.append(cat.libelle)
     for arme in rq.get_all_armes():
         form.armesField.choices.append(arme.libelle)
     competitions = Competition.query
-    print(form.categoriesField.data)
     if form.categoriesField.data != "Catégorie" and form.categoriesField.data != "1":
         competitions = competitions.filter(
                         Competition.id_categorie == rq.get_categorie_par_libelle(form.categoriesField.data).id)
@@ -62,15 +80,19 @@ def home():
         form = form,
         competitions = competitions.all(),
         categories = rq.get_all_categories(),
-        armes = rq.get_all_armes()
+        armes = rq.get_all_armes(),
+        to_date = cst.TO_DATE
     )
 
 @app.route("/search_compet/", methods =("POST",))
-def search_compet():
+def search_compet() :
+    """Fonction qui permet d'afficher la page de recherche d'une compétition
+
+    Returns:
+        flask.Response: Renvoie la page de recherche d'une compétition
+    """
     form = SearchForm()
     content_searched = form.searched.data
-    print(form.searched.data)
-    print(content_searched)
     if content_searched == "":
         return home()
     competitions = (Competition.query.filter(Competition.nom.like('%' + content_searched + '%'))
@@ -83,26 +105,51 @@ def search_compet():
     competitions = competitions)
 
 @app.route("/informations")
-def informations():
+def informations() :
+    """Fonction qui permet d'afficher la page d'informations
+
+    Returns:
+        flask.Response: Renvoie la page d'informations
+    """
     return render_template(
         "informations.html"
     )
 
-class LoginForm(FlaskForm):
+class LoginForm(FlaskForm) :
+    """Classe formulaire pour la connexion d'un utilisateur.
+
+    Args:
+        FlaskForm (FlaskForm): Classe formulaire de Flask.
+
+    Returns:
+        flask.Response: Renvoie la page de connexion
+    """
     num_licence = StringField('num_licence', validators=[DataRequired()])
     mot_de_passe = PasswordField("Password", validators=[DataRequired()])
     next = HiddenField()
 
-    def get_authenticated_user(self):
+    def get_authenticated_user(self) :
+        """Fonction qui permet de récupérer un utilisateur authentifié.
+
+        Returns:
+            Escrimeur: Renvoie un utilisateur authentifié
+        """
         user = Escrimeur.query.get(self.num_licence.data)
         if user is None:
             return None
-        cst.CRYPTAGE.update(self.mot_de_passe.data.encode())
-        passwd = cst.CRYPTAGE.hexdigest()
+        sha256().update(self.mot_de_passe.data.encode())
+        passwd = sha256().hexdigest()
         return user if passwd == user.mot_de_passe else None
 
+class SignUpForm(FlaskForm) :
+    """Classe formulaire pour l'inscription d'un utilisateur.
 
-class SignUpForm(FlaskForm):
+    Args:
+        FlaskForm (FlaskForm): Classe formulaire de Flask.
+
+    Returns:
+        flask.Response: Renvoie la page d'inscription
+    """
     num_licence = StringField('num_licence', validators=[DataRequired()])
     mot_de_passe = PasswordField("Password", validators=[DataRequired()])
     prenom = StringField('prenom', validators=[DataRequired()])
@@ -115,15 +162,26 @@ class SignUpForm(FlaskForm):
                        choices = [(1,""),(2,""),(3,""),(4,""),(5,"")])
     next = HiddenField()
 
-    def get_authenticated_user(self):
+    def get_authenticated_user(self) :
+        """Fonction qui permet de récupérer un utilisateur authentifié.
+
+        Returns:
+            Escrimeur: Renvoie un utilisateur authentifié
+        """
         user = Escrimeur.query.get(self.num_licence.data)
         if user is None:
             return None
-        cst.CRYPTAGE.update(self.mot_de_passe.data.encode())
-        passwd = cst.CRYPTAGE.hexdigest()
+        sha256().update(self.mot_de_passe.data.encode())
+        passwd = sha256().hexdigest()
+        print(passwd, user.mot_de_passe)
         return user if passwd == user.mot_de_passe else None
 
-    def est_deja_inscrit_sans_mdp(self):
+    def est_deja_inscrit_sans_mdp(self) :
+        """Fonction qui permet de vérifier si un utilisateur est déjà inscrit sans mot de passe.
+
+        Returns:
+            bool: Renvoie True si l'utilisateur est déjà inscrit sans mot de passe, False sinon
+        """
         user = Escrimeur.query.get(self.num_licence.data)
         sexe = "Homme"
         if user is not None:
@@ -133,8 +191,8 @@ class SignUpForm(FlaskForm):
             check_prenom = user.prenom.upper() == self.prenom.data.upper()
             check_nom = user.nom.upper() == self.nom.data.upper()
             if check_sexe and check_prenom and check_nom:
-                cst.CRYPTAGE.update(self.mot_de_passe.data.encode())
-                passwd= cst.CRYPTAGE.hexdigest()
+                sha256().update(self.mot_de_passe.data.encode())
+                passwd= sha256().hexdigest()
                 user.set_mdp(passwd)
                 db.session.commit()
                 return True
@@ -142,7 +200,12 @@ class SignUpForm(FlaskForm):
         return None
 
 @app.route("/connexion/", methods=("GET", "POST"))
-def connexion():
+def connexion() :
+    """Fonction qui permet de gérer la connexion d'un utilisateur.
+
+    Returns:
+        flask.Response: Renvoie la page de connexion
+    """
     form = LoginForm()
     form2 = SignUpForm()
     selection_club = []
@@ -166,7 +229,12 @@ def connexion():
         )
 
 @app.route("/connexion/inscription", methods=("GET", "POST"))
-def inscription():
+def inscription() :
+    """Fonction qui permet de gérer l'inscription d'un utilisateur.
+
+    Returns:
+        flask.Response: Renvoie la page d'inscription
+    """
     form = LoginForm()
     form2 = SignUpForm()
     selection_club = []
@@ -205,8 +273,15 @@ def inscription():
                            formsignup = form2)
 
 @app.route("/competition/<int:id_compet>")
-def affiche_competition(id_compet):
-    """Fonction qui permet d'afficher une compétition"""
+def affiche_competition(id_compet) :
+    """Fonction qui permet d'afficher une compétition
+
+    Args:
+        id_compet (int): Identifiant unique de la compétition.
+
+    Returns:
+        flask.Response: Renvoie la page de la compétition
+    """
     form = InscriptionForm()
     competition = rq.get_competition(id_compet)
     try :
@@ -219,33 +294,57 @@ def affiche_competition(id_compet):
     )
 
 @app.route("/competition/<int:id_compet>/createPoule")
-def competition_cree_poules(id_compet):
-    """Fonction qui permet de répartir les poules d'une compétition et redirige sur la page de cette compétition"""
+def competition_cree_poules(id_compet) :
+    """Fonction qui permet de créer les poules d'une compétition
+
+    Args:
+        id_compet (int): Identifiant unique de la compétition.
+
+    Returns:
+        flask.Response: Renvoie la page de la compétition
+    """
     competition = rq.get_competition(id_compet)
     competition.programme_poules()
     return redirect(url_for("affiche_competition", id_compet=id_compet))
 
 @app.route("/competition/<int:id_compet>/poule/<int:id_poule>")
-def affiche_poule(id_compet, id_poule): # pylint: disable=unused-argument
-    """Fonction qui permet d'afficher une poule"""
+def affiche_poule(id_compet, id_poule) :
+    """Fonction qui permet d'afficher une poule
+
+    Args:
+        id_compet (int): Identifiant unique de la compétition.
+        id_poule (int): Identifiant unique de la poule.
+
+    Returns:
+        flask.Response: Renvoie la page de la poule
+    """
     competition = rq.get_competition(id_compet)
     poule = competition.get_poules_id(id_poule)
     return render_template(
         "poule.html",
         competition = competition,
-        poule = poule
+        poule = poule,
+        constants = cst
     )
 
 @app.route("/deconnexion/")
-def deconnexion():
-    """Déconnecte un utilisateur"""
+def deconnexion() :
+    """Fonction qui permet de gérer la déconnexion d'un utilisateur.
+
+    Returns:
+        flask.Response: Renvoie la page d'accueil
+    """
     logout_user()
     return redirect(url_for("home"))
 
 @app.route('/cree/competition', methods=("GET", "POST"))
 @login_required
-def creation_competition():
-    """Fonction qui permet de créer une compétition"""
+def creation_competition() :
+    """Fonction qui permet de créer une compétition.
+
+    Returns:
+        flask.Response: Renvoie la page de création d'une compétition
+    """
     form = CreeCompetitionForm()
     form.nom_arme.choices = rq.cree_liste_nom_objet(rq.get_all_armes())
     form.nom_categorie.choices = rq.cree_liste_nom_objet(rq.get_all_categories())
@@ -281,35 +380,62 @@ def creation_competition():
     return render_template('cree-competition.html', form=form)
 
 @app.route("/profil")
-def profil():
+def profil() :
+    """Fonction qui permet d'afficher le profil d'un utilisateur.
+
+    Returns:
+        flask.Response: Renvoie la page du profil
+    """
     return render_template(
-        "profil.html"
+        "profil.html",
+        to_date = cst.TO_DATE
     )
 
-class ChangerMdpForm(FlaskForm):
+class ChangerMdpForm(FlaskForm) :
+    """Classe formulaire pour le changement de mot de passe d'un utilisateur.
+
+    Args:
+        FlaskForm (FlaskForm): Classe formulaire de Flask.
+    """
     new_mdp = PasswordField("Password",validators=[DataRequired()])
     next = HiddenField()
 
 @app.route("/profil/changer-mdp", methods=("POST",))
-def changer_mdp():
+def changer_mdp() :
+    """Fonction qui permet de gérer le changement de mot de passe d'un utilisateur.
+
+    Returns:
+        flask.Response: Renvoie la page du profil
+    """
     form =ChangerMdpForm()
     return render_template("changer-mdp.html", form=form)
 
 @app.route("/shutdown", methods=['GET'])
-def shutdown():
+def shutdown() :
+    """Fonction qui permet d'arrêter le serveur.
+
+    Returns:
+        flask.Response: Renvoie un message de confirmation
+    """
     os.kill(os.getpid(), signal.SIGINT)
     return jsonify({"success": True, "message": "Server is shutting down..."})
 
-class InscriptionForm(FlaskForm):
+class InscriptionForm(FlaskForm) :
+    """Classe formulaire pour l'inscription d'un utilisateur à une compétition.
+
+    Args:
+        FlaskForm (FlaskForm): Classe formulaire de Flask.
+    """
     role = RadioField('Role', choices = ['Arbitre','Tireur'])
     next = HiddenField()
 
 @app.route("/competition/<int:id_compet>/inscription", methods=("GET", "POST"))
+@login_required
 def inscription_competition(id_compet) :
-    """Inscrit un utilisateur à une compétition spécifique.
+    """Fonction qui permet de gérer l'inscription d'un utilisateur à une compétition spécifique.
 
     Args:
-        id (int): Identifiant unique de la compétition.
+        id_compet (int): Identifiant unique de la compétition.
 
     Returns:
         flask.Response: Renvoie la page de la compétition
@@ -333,8 +459,9 @@ def inscription_competition(id_compet) :
     return render_template('competition.html',form = form, competition = competition, id_compet = id_compet)
 
 @app.route("/suppr-competition/<int:id_compet>")
+@login_required
 def suppr_competition(id_compet : int) :
-    """Supprime une compétition.
+    """Fonction qui permet de supprimer une compétition.
 
     Args:
         id_compet (int): Identifiant unique de la compétition.
@@ -342,39 +469,121 @@ def suppr_competition(id_compet : int) :
     Returns:
         flask.Response: Renvoie la page d'accueil
     """
-    rq.delete_competition(id_compet)
-    flash('Compétition supprimée avec succès', 'warning')
-
+    if current_user.is_admin() :
+        rq.delete_competition(id_compet)
+        flash('Compétition supprimée avec succès', 'warning')
     return redirect(url_for('home'))
 
-class MatchForm(FlaskForm):
-    touches1 = StringField('touches1',validators=[DataRequired()])
-    touches2 = StringField('touches2',validators=[DataRequired()])
+class BracketForm(FlaskForm):
+    """Classe formulaire pour la verification d'un match à élimination.
+
+    Args:
+        FlaskForm (FlaskForm): Classe formulaire de Flask.
+    """
+    touches1 = IntegerField('touches1',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_BRACKET, min=0)])
+    touches2 = IntegerField('touches2',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_BRACKET, min=0)])
     next=HiddenField()
 
-@app.route("/competition/<int:id_compet>/poule/<int:id_poule>/match/<int:id_match>")
-def affiche_match(id_compet, id_poule, id_match):
-    """Fonction qui permet d'afficher un match"""
+class PouleForm(FlaskForm):
+    """Classe formulaire pour la verification d'un match de poule.
 
+    Args:
+        FlaskForm (FlaskForm): Classe formulaire de Flask.
+    """
+    touches1 = IntegerField('touches1',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_POULE, min=0)])
+    touches2 = IntegerField('touches2',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_POULE, min=0)])
+    next=HiddenField()
+
+class StartForm(FlaskForm):
+    """Classe formulaire pour le début d'un match.
+
+    Args:
+        FlaskForm (FlaskForm): Classe formulaire de Flask.
+    """
+    next=HiddenField()
+
+@app.route("/competition/<int:id_compet>/poule/<int:id_poule>/match/<int:id_match>", methods=("GET", "POST"))
+def affiche_match(id_compet, id_poule, id_match):
+    """Fonction qui permet d'afficher un match.
+
+    Args:
+        id_compet (int): Identifiant unique de la compétition.
+        id_poule (int): Identifiant unique de la poule.
+        id_match (int): Identifiant unique du match.
+
+    Returns:
+        flask.Response: Renvoie la page du match
+    """
     competition = rq.get_competition(id_compet)
     poule = competition.get_poules_id(id_poule)
     match = poule.get_match_id(id_match)
-    f = MatchForm()
+    participations = match.get_tireurs_match(poule.id)
+    if match.id_phase == 1:
+        form_match = PouleForm()
+    else:
+        form_match = BracketForm()
+    form_start = StartForm()
+    if form_start.is_submitted():
+        form_start.next.data = request.args.get("next")
+        match.set_en_cours()
     return render_template(
         "match.html",
         competition = competition, 
         poule = poule, 
         match = match,
+        participations = participations,
+        constants = cst,
+        form_match = form_match,
+        form_start = form_start
+    )
+
+@app.route("/competition/<int:id_compet>/poule/<int:id_poule>/match/<int:id_match>/valider", methods=("GET", "POST"))
+def valide_resultats(id_compet, id_poule, id_match):
+    """Fonction qui permet de valider les résultats d'un match.
+
+    Args:
+        id_compet (int): Identifiant unique de la compétition.
+        id_poule (int): Identifiant unique de la poule.
+        id_match (int): Identifiant unique du match.
+
+    Returns:
+        flask.Response: Renvoie la page du match ou de la compétition
+    """
+    competition = rq.get_competition(id_compet)
+    poule = competition.get_poules_id(id_poule)
+    match = poule.get_match_id(id_match)
+    participations = match.get_tireurs_match(poule.id)
+    if match.id_phase == 1:
+        form_match = PouleForm()
+    else:
+        form_match = BracketForm()
+    if not form_match.is_submitted():
+        form_match.next.data = request.args.get("next")
+    else:
+        tireur1, tireur2 = (participations[0].id_escrimeur,form_match.touches1.data),(participations[1].id_escrimeur,form_match.touches2.data)
+
+        vainqueur = tireur1 if tireur1[1] > tireur2[1] else tireur2
+        perdant = tireur1 if tireur1[1] < tireur2[1] else tireur2
+
+        match.valide_resultat(vainqueur, perdant)
+        return redirect(url_for("affiche_poule", id_compet=id_compet, id_poule=id_poule))
+    form_start = StartForm()
+    return render_template(
+        "match.html",
+        competition = competition,
+        poule = poule,
+        match = match,
         participations = match.get_tireurs_match(poule.id),
-        f = f
+        form_match = form_match,
+        form_start = form_start
     )
 
 @app.route("/competition/<int:id_compet>/deinscription", methods=("GET", "POST"))
 def deinscription_competition(id_compet : int) :
-    """Gère la désinscription d'un utilisateur à une compétition spécifique.
+    """Fonction qui permet de gérer la désinscription d'un utilisateur à une compétition spécifique
 
     Args:
-        id (int): Identifiant unique de la compétition.
+        id_compet (int): Identifiant unique de la compétition.
 
     Returns:
         flask.Response: Renvoie la page de la compétition
@@ -387,8 +596,15 @@ def deinscription_competition(id_compet : int) :
                            form=form,
                            competition=rq.get_competition(id_compet),
                            id=id_compet)
-  
+
 @app.errorhandler(Exception)
-def page_not_found(erreur):
-    """Fonction d'affichage de la page d'erreur."""
+def page_not_found(erreur) :
+    """Fonction qui permet de gérer les erreurs.
+
+    Args:
+        erreur (Exception): Erreur qui est levée.
+
+    Returns:
+        flask.Response: Renvoie la page d'erreur
+    """
     return render_template('erreur.html', code=erreur.code, message=erreur.__class__.__name__), erreur.code

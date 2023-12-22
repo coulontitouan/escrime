@@ -45,7 +45,7 @@
                 <td>{{ c.get_arme().libelle }}</td>
                 <td>{{ c.sexe }}</td>
                 <td>{{ c.get_lieu().nom }}</td>
-                <td>{{ c.date }}</td>
+                <td>{{ c.date.strftime(to_date) }}</td>
                 <td><a href="{{url_for('affiche_competition', id_compet=c.id)}}"><button class="favorite styled" type="button" >Voir plus</button></a></td>
                 {% if current_user.is_authenticated %}
                 {% if current_user.is_admin() %}
@@ -62,7 +62,7 @@
         let texte =  "Vous êtes sur le point de supprimer la compétition " +
                     "êtes-vous sûr(e) ?"
         if(confirm(texte) == true){
-            location.href = "/home/suppr-competition/" + id.toString()
+            location.href = "/suppr-competition/" + id.toString()
         }
     }
 </script>

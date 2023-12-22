@@ -36,19 +36,15 @@ h1 {
     border-radius: 45px;
 }
 
-.petit > p {
-    margin-left: 1vw;
-}
-
 .petit > div {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     margin-left: 1vw;
     margin-right: 1vw;
 }
 
-.foot {
-    justify-content: center !important;
+.petit > div:not(.head,.foot) {
+    justify-content: space-between;
 }
 
 .head {
@@ -57,6 +53,7 @@ h1 {
 
 p {
     margin-top: 1rem;
+    font-size: 1.5rem;
 }
 
 #gros {
