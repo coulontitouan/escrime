@@ -1,22 +1,22 @@
-# Create a Python virtual environment
+# Création de l'environnement virtuel
 python -m venv venv
 
-# Activate the virtual environment
-venv\Scripts\Activate
+# Activation de l'environnement virtuel
+. .\venv\Scripts\Activate
 
-# Run the check.py script
+# Exécution du script check.py
 python check.py
 
-# Check the exit code of check.py
-if ($LASTEXITCODE -eq 0) {
-    # Install Python dependencies from requirements.txt
+# Vérification du code de retour et installation des dépendances si le code de retour est 0
+if ($LastExitCode -eq 0) {
     pip install -r requirements.txt
 }
 
-# Change directory to appEscrime
-Set-Location -Path .\appEscrime
+# Chargement de la base de données Flask
+flask loadbd
 
-# Start the Flask application
+# Exécution de l'application Flask
 flask run -h 0.0.0.0 -p 8080
 
-exit
+# Désactivation de l'environnement virtuel
+deactivate
