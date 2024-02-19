@@ -23,7 +23,7 @@
 <body>
     <header id="header">
         <!-- Fixed navbar -->
-        <a onclick="escrimeur()" class="logo"><img src="{{ url_for('static', filename='images/escrimeurNav.png')}}" alt="un escrimeur qui pointe son épée"></a>
+        <a onclick="escrimeur()" class="logo"><img id="img" src="{{ url_for('static', filename='images/escrimeurNav.png')}}" alt="un escrimeur qui pointe son épée"></a>
         <input class="menu-btn" type="checkbox" id="menu-btn" />
         <label class="menu-icon" for="menu-btn"><span class="navicon"></span></label>
         <h2 id="titre">{{ request.path }}</h2>
@@ -139,6 +139,18 @@
     <!-- Optional JavaScript -->
     {{ bootstrap.load_js() }}
     <script>
+
+        let elem = document.getElementById("img");
+        let a = document.getElementsByClassName("logo")[0];
+        coords = elem.getBoundingClientRect()
+        console.log(coords)
+        let barre = document.createElement('span')
+        barre.setAttribute("id", "barre");
+        barre.style.cssText = "position:fixed; z-index: 5";
+        barre.style.left = -41 + coords.width + "px";
+        barre.style.top = 2+ coords.top + "px";
+        document.body.append(barre);
+        console.log(barre.getBoundingClientRect())
     
     function shutdown() {
         let texte =  "Vous êtes sur le point de fermer l'application.\r\n" +
@@ -150,15 +162,36 @@
             location.href = "/shutdown"
         }
     }
-    function escrimeur() {
-        let elem = document.getElementsByClassName("logo")[0];
-        if (elem.classList.contains("clicked")){
-            elem.classList.add("notclicked")
-            elem.classList.remove("clicked")
-        }else{
-            elem.classList.remove("notclicked")
-            elem.classList.add("clicked")
+
+
+    function animate({duration, draw, timing}) {
+
+        let start = performance.now();
+
+        requestAnimationFrame(function animate(time) {
+        let timeFraction = (time - start) / duration;
+        if (timeFraction > 1) timeFraction = 1;
+
+        let progress = timing(timeFraction)
+
+        draw(progress);
+
+        if (timeFraction < 1) {
+            requestAnimationFrame(animate);
         }
+
+        });
+    }
+    function escrimeur() {
+        animate({
+        duration: 2000,
+        timing: function(timeFraction) {
+          return timeFraction;
+        },
+        draw: function(progress) {
+          barre.style.width = progress * 95 + '%';
+        }
+      });
     }
     
       let upArrow = document.querySelector('#backTop');
