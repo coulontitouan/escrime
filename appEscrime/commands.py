@@ -111,9 +111,9 @@ def savebd():
 
 def newuser(num_licence, password, prenom, nom, sexe, ddn, club):
     """Crée un nouvel utilisateur"""
-    sha256().update(password.encode())
+    mot_de_passe =sha256(password.encode()).hexdigest()
     tireur = Escrimeur(num_licence=num_licence,
-                       mot_de_passe=sha256().hexdigest(),
+                       mot_de_passe=mot_de_passe,
                        prenom=prenom,
                        nom=nom,
                        sexe=sexe,
@@ -128,16 +128,20 @@ def newadmin():
     prenom = input("Prénom : ")
     nom = input("Nom : ")
     mot_de_passe = getpass.getpass("Mot de passe : ")
-    sha256().update(mot_de_passe.encode())
+    mot_de_passe =sha256(mot_de_passe.encode()).hexdigest()
     date_convert = datetime.strptime('01/01/0001', cst.TO_DATE).date()
-    db.session.add(Escrimeur(num_licence=prenom,
-                  prenom=prenom,
-                  nom=nom,
-                  sexe="Admin",
-                  date_naissance=date_convert,
-                  id_club=cst.CLUB_ADMIN,
-                  mot_de_passe=sha256().hexdigest()))
-    db.session.commit()
+    user = Escrimeur.query.get(prenom)
+    if (not user):
+        db.session.add(Escrimeur(num_licence=prenom,
+                    prenom=prenom,
+                    nom=nom,
+                    sexe="Admin",
+                    date_naissance=date_convert,
+                    id_club=cst.CLUB_ADMIN,
+                    mot_de_passe=mot_de_passe))
+        db.session.commit()
+    else:
+        print("ce prenom est deja pris")
 
 @app.cli.command()
 @click.argument('id_competition')

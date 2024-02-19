@@ -137,8 +137,7 @@ class LoginForm(FlaskForm) :
         user = Escrimeur.query.get(self.num_licence.data)
         if user is None:
             return None
-        sha256().update(self.mot_de_passe.data.encode())
-        passwd = sha256().hexdigest()
+        passwd =sha256(self.mot_de_passe.data.encode()).hexdigest()
         return user if passwd == user.mot_de_passe else None
 
 class SignUpForm(FlaskForm) :
@@ -171,9 +170,7 @@ class SignUpForm(FlaskForm) :
         user = Escrimeur.query.get(self.num_licence.data)
         if user is None:
             return None
-        sha256().update(self.mot_de_passe.data.encode())
-        passwd = sha256().hexdigest()
-        print(passwd, user.mot_de_passe)
+        passwd =sha256(self.mot_de_passe.data.encode()).hexdigest()
         return user if passwd == user.mot_de_passe else None
 
     def est_deja_inscrit_sans_mdp(self) :
@@ -219,7 +216,9 @@ def connexion() :
         form.next.data = request.args.get("next")
 
     elif form.validate_on_submit():
+        print('test')
         user = form.get_authenticated_user()
+        print(user)
         if user:
             login_user(user)
             prochaine_page = form.next.data or url_for("home")
