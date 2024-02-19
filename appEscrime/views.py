@@ -3,7 +3,7 @@
 import os
 import signal
 from hashlib import sha256
-from flask import request, redirect, url_for, flash, render_template, jsonify
+from flask import abort, request, redirect, url_for, flash, render_template, jsonify
 from flask_login import login_user , current_user, logout_user, login_required
 from wtforms import StringField , HiddenField, DateField , RadioField, PasswordField, SelectField, IntegerField, SubmitField
 from wtforms.validators import DataRequired, NumberRange
@@ -502,6 +502,7 @@ class StartForm(FlaskForm):
     next=HiddenField()
 
 @app.route("/competition/<int:id_compet>/poule/<int:id_poule>/match/<int:id_match>", methods=("GET", "POST"))
+@login_required
 def affiche_match(id_compet, id_poule, id_match):
     """Fonction qui permet d'afficher un match.
 
@@ -513,28 +514,33 @@ def affiche_match(id_compet, id_poule, id_match):
     Returns:
         flask.Response: Renvoie la page du match
     """
+    
     competition = rq.get_competition(id_compet)
     poule = competition.get_poules_id(id_poule)
-    match = poule.get_match_id(id_match)
-    participations = match.get_tireurs_match(poule.id)
-    if match.id_phase == 1:
-        form_match = PouleForm()
+
+    if current_user.is_arbitre(id_compet) :
+        match = poule.get_match_id(id_match)
+        participations = match.get_tireurs_match(poule.id)
+        if match.id_phase == 1:
+            form_match = PouleForm()
+        else:
+            form_match = BracketForm()
+        form_start = StartForm()
+        if form_start.is_submitted():
+            form_start.next.data = request.args.get("next")
+            match.set_en_cours()
+        return render_template(
+            "match.html",
+            competition = competition, 
+            poule = poule, 
+            match = match,
+            participations = participations,
+            constants = cst,
+            form_match = form_match,
+            form_start = form_start
+        )
     else:
-        form_match = BracketForm()
-    form_start = StartForm()
-    if form_start.is_submitted():
-        form_start.next.data = request.args.get("next")
-        match.set_en_cours()
-    return render_template(
-        "match.html",
-        competition = competition, 
-        poule = poule, 
-        match = match,
-        participations = participations,
-        constants = cst,
-        form_match = form_match,
-        form_start = form_start
-    )
+        return abort(401)
 
 @app.route("/competition/<int:id_compet>/poule/<int:id_poule>/match/<int:id_match>/valider", methods=("GET", "POST"))
 def valide_resultats(id_compet, id_poule, id_match):
