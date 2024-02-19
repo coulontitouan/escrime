@@ -149,7 +149,7 @@
         barre.style.cssText = "position:fixed; z-index: 5";
         barre.style.left = -41 + coords.width + "px";
         barre.style.top = 2+ coords.top + "px";
-        document.body.append(barre);
+        document.querySelector('header').appendChild(barre)
         console.log(barre.getBoundingClientRect())
     
     function shutdown() {
