@@ -6,78 +6,101 @@
 {% block content %}
 <div class="titre">
     <h1>Poule A</h1>
-    <div id = "pouleNorme">
-        <table>
+    <div id="pouleNorme">
+        <table style="text-align: center;">
             <thead>
-              <tr>
-                <th>Nom</th>
-                <th>Club</th>
-                <th></th>
-                <th>1</th>
-                <th>2</th>
-                <th>3</th>
-                <th>4</th>
-                <th>5</th>
-                <th>6</th>
-                <th>7</th>
-                <th>Place</th>
-              </tr>
+                <tr>
+                    <th>Nom</th>
+                    <th>Club</th>
+                    <th></th>
+                    {% for i in range(1, poule.nb_tireurs() + 1) %}
+                    <th>{{i}}</th>
+                    {% endfor %}
+                </tr>
             </thead>
             <tbody>
-                {}
+                {% for tireur in poule.get_tireurs() %}
+                <tr>
+                    <td>{{tireur.nom}}</td>
+                    <td>{{tireur.get_club()}}</td>
+                    <td>{{loop.index}}</td>
+                    {% for match in poule.get_matchs_tireur(tireur.num_licence) %}
+                    <td>{{ match.get_participation(tireur.num_licence).touches }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="3">TOUCHES RECUES</td>
+                    {% for tireur in poule.get_tireurs() %}
+                    <td>{{poule.get_total_touches_recues_tireur(tireur.num_licence)}}</td>
+                    {% endfor %}
+                </tr>
             </tbody>
-          </table>
+        </table>
+        <script>
+            var table = document.querySelector('#pouleNorme table tbody');
+            var rows = table.rows;
+            let counter = 0
+            for (row of rows) {
+                var cells = row.children;
+                td = row.insertCell(counter + 3);
+                td.style.backgroundColor = "black";
+                counter++;
+            }
+        </script>
     </div>
     <div class="status">
         <svg width="100" height="15" id="codeCouleur">
-            <circle cx="7.5" cy="7.5" r="3.75" fill="orange"/>
+            <circle cx="7.5" cy="7.5" r="3.75" fill="orange" />
             <text x="25" y="7.5" dominant-baseline="middle">{{ constants.MATCH_A_VENIR }}</text>
         </svg>
         <svg width="100" height="15" id="codeCouleur">
-            <circle cx="7.5" cy="7.5" r="3.75" fill="green"/>
+            <circle cx="7.5" cy="7.5" r="3.75" fill="green" />
             <text x="25" y="7.5" dominant-baseline="middle">{{ constants.MATCH_EN_COURS }}</text>
         </svg>
         <svg width="100" height="15" id="codeCouleur">
-            <circle cx="7.5" cy="7.5" r="3.75" fill="cornflowerblue"/>
+            <circle cx="7.5" cy="7.5" r="3.75" fill="cornflowerblue" />
             <text x="25" y="7.5" dominant-baseline="middle">{{ constants.MATCH_TERMINE }}</text>
         </svg>
     </div>
 </div>
 <div id="gros">
     {% for match in poule.matchs %}
-        {% if match.etat != constants.MATCH_TERMINE %}
-            <a href="{{url_for('affiche_match', id_compet = competition.id , id_poule = poule.id, id_match = match.id)}}">
-            {% if match.etat == constants.MATCH_EN_COURS %}
-                <div class="petit encours">
+    {% if match.etat != constants.MATCH_TERMINE %}
+    <a href="{{url_for('affiche_match', id_compet = competition.id , id_poule = poule.id, id_match = match.id)}}">
+        {% if match.etat == constants.MATCH_EN_COURS %}
+        <div class="petit encours">
             {% else %}
-                <div class="petit avenir">
-            {% endif %}
-        {% else %}
-            <div class="petit termine">
-        {% endif %}
-                <div class="head">
-                    <p>Piste {{ match.piste }}</p>
-                </div>
-                <div>
-                    {% with tireurs = match.get_tireurs_match(poule.id) %}
-                    {% with tireur1 = tireurs[0].get_escrimeur() %}
-                    <p>{{ tireur1.nom }}.{{ tireur1.prenom[0] }} ( {{ tireur1.get_classement(competition.id_arme, competition.id_categorie).points }} )</p>
-                    {% endwith %}
-                    {% if match.etat == constants.MATCH_TERMINE %}
-                        <p>{{ match.participations[0].touches }} - {{ match.participations[1].touches }}</p>
+            <div class="petit avenir">
+                {% endif %}
+                {% else %}
+                <div class="petit termine">
                     {% endif %}
-                    {% with tireur2 = tireurs[1].get_escrimeur() %}
-                    <p>{{ tireur2.nom }}.{{ tireur2.prenom[0] }} ( {{ tireur2.get_classement(competition.id_arme, competition.id_categorie).points }} )</p>
-                    {% endwith %}
-                    {% endwith %}
+                    <div class="head">
+                        <p>Piste {{ match.piste }}</p>
+                    </div>
+                    <div>
+                        {% with tireurs = match.get_tireurs_match(poule.id) %}
+                        {% with tireur1 = tireurs[0].get_escrimeur() %}
+                        <p>{{ tireur1.nom }}.{{ tireur1.prenom[0] }} ( {{ tireur1.get_classement(competition.id_arme,
+                            competition.id_categorie).points }} )</p>
+                        {% endwith %}
+                        {% if match.etat == constants.MATCH_TERMINE %}
+                        <p>{{ match.participations[0].touches }} - {{ match.participations[1].touches }}</p>
+                        {% endif %}
+                        {% with tireur2 = tireurs[1].get_escrimeur() %}
+                        <p>{{ tireur2.nom }}.{{ tireur2.prenom[0] }} ( {{ tireur2.get_classement(competition.id_arme,
+                            competition.id_categorie).points }} )</p>
+                        {% endwith %}
+                        {% endwith %}
+                    </div>
+                    <div class="foot">
+                        <p>Arbitré par {{ match.get_arbitre().prenom }} {{ match.get_arbitre().nom }}</p>
+                    </div>
                 </div>
-                <div class="foot">
-                    <p>Arbitré par {{ match.get_arbitre().prenom }}  {{ match.get_arbitre().nom }}</p>
-                </div>
-            </div>
-        {% if match.etat != constants.MATCH_TERMINE %}
-        </a>
-        {% endif %}
+                {% if match.etat != constants.MATCH_TERMINE %}
+    </a>
+    {% endif %}
     {% endfor %}
 </div>
 {% endblock %}
