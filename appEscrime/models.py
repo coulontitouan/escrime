@@ -425,6 +425,7 @@ class Competition(db.Model):
         for phase in self.phases :
             if phase.libelle == 'Poule' and phase.id == idp :
                 return phase
+        print("Poule pas trouvée")
         return None
     
     def inscription(self, num_licence : int, arbitre : bool = False) :
@@ -466,6 +467,7 @@ class Competition(db.Model):
         while nb_poules > nb_arbitres:
             len_poules += 1
             if len_poules == 10:
+                print("Rep poules")
                 return None
             nb_poules = tireurs.count() // len_poules
         for i in range(1, nb_poules + 1):
@@ -501,6 +503,7 @@ class Competition(db.Model):
         Args:
             libelle (string): le libellé du tour de tableau.
         """
+        print("Ajoute tour tableau")
         try:
             db.session.add(TypePhase(libelle = libelle,
                                      touches_victoire = cst.TOUCHES_BRACKET))
@@ -511,6 +514,7 @@ class Competition(db.Model):
                              competition = self,
                              libelle = libelle))
         db.session.commit()
+        print("Ajoute tour tableau OK")
     
     def reduction_tableau(self, tireurs):
         """Réduit si nécessaire le nombre de tireurs participant à un tour du tableau.
@@ -521,20 +525,23 @@ class Competition(db.Model):
         Returns:
             list: la liste des tireurs participant au prochain tour.
         """
+        print("Réduction tableau")
         nb_tireurs = len(tireurs)
         puissance_proche = puissance_de_deux_proches(nb_tireurs)
         nb_matchs = (nb_tireurs - puissance_proche)
         tireurs = tireurs[-nb_matchs*2:]
+        print("Réduction tableau OK")
         return tireurs
     
     def programme_tableau(self):
         """Crée les matchs du tableau de la compétition."""
+        print("Programme tableau")
         arbitres = self.get_arbitres()
         classement = self.get_tireurs_classes()
         self.maj_resultat(classement)
         en_lice = Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id,
-                                           Resultat.rang == "",
-                                           Resultat.points != cst.ARBITRE).all()
+                                                        Resultat.rang == "",
+                                                        Resultat.points != cst.ARBITRE).all()
         tireurs = [res for res in en_lice]
         if len(tireurs) == 2:
             tour = "Finale"
@@ -552,6 +559,7 @@ class Competition(db.Model):
         phase = self.phases[-1]
         phase.cree_matchs(list(arbitres), tireurs)
         db.session.commit()
+        print("Programme tableau OK")
 
     def maj_resultat(self, classement : dict):
         """Met à jour le résultat de la compétition."""
@@ -572,9 +580,22 @@ class Competition(db.Model):
     def genere_tableau(self):
         """Génère le premier tour du tableau de la compétition."""
         for phase in self.phases:
-            if not phase.est_terminee():
+            if phase.libelle == 'Poule' and not phase.est_terminee():
+                print("Phase pas finie : ", phase.id)
                 return None
         self.programme_tableau()
+
+    def tour_suivant(self):
+        """Génère le tour suivant de la compétition"""
+        print("Tour suivant")
+        if self.phases[-1].libelle == 'Poule':
+            self.genere_tableau()
+        else:
+            arbitres = self.get_arbitres()
+            participants = self.phases[-1].get_vainqueurs()
+            
+        db.session.commit()
+        print("Tour suivant OK")
 
     def desinscription(self, num_licence):
         """Désinscrit un escrimeur de la compétition.
@@ -816,6 +837,19 @@ class Phase(db.Model):
             Match: Le match.
         """
         return Match.query.get((id_match, self.id, self.id_competition))
+    
+    def get_vainqueurs(self) :
+        """Récupère les vainqueurs de la phase.
+
+        Returns:
+            List[Participation]: Les participations des vainqueurs de la phase.
+        """
+        res = []
+        for match in self.matchs :
+            for participation in match.participations :
+                if participation.statut == cst.VAINQUEUR :
+                    res.append(participation.tireur)
+        return res
     
     def est_terminee(self) -> bool :
         """Vérifie que la phase est terminée.
