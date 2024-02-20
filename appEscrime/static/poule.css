@@ -77,4 +77,17 @@ td {
 
 table {
     margin-bottom: 2%;
+    text-align: center;
+}
+
+th:last-child {
+    font-weight: normal;
+}
+tr:not(:last-child) td:nth-child(3){
+    font-weight: bold;
+}
+
+a button:before{
+    content: "\2B05 \FE0F";
+    margin-right: 5px;
 }
