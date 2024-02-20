@@ -49,6 +49,20 @@ h1 {
     justify-content: space-between;
 }
 
+.petit>div:not(.head, .foot) p:first-child,
+.petit>div:not(.head, .foot) p:last-child {
+    width: 30%;
+    overflow-wrap: break-word;
+}
+
+.petit>div:not(.head, .foot) p:first-child {
+    text-align: left;
+}
+
+.petit>div:not(.head, .foot) p:last-child {
+    text-align: right;
+}
+
 .head {
     border-bottom: 1px solid gray;
 }
@@ -71,8 +85,11 @@ p {
 
 th,
 td {
-    border: solid black 1px;
     padding: 5px;
+}
+
+tr:not(:last-of-type) td:last-of-type {
+    width: 10%;
 }
 
 table {
@@ -83,13 +100,26 @@ table {
 th:last-child {
     font-weight: normal;
 }
-tr:not(:last-child) td:nth-child(3){
+
+tr:not(:last-child) td:nth-child(3) {
     font-weight: bold;
 }
 
 main a:first-child button:before{
     content: "\2B05 \FE0F";
     margin-right: 5px;
+}
+
+.gagnant {
+    font-weight: bold;
+}
+
+p:first-of-type.gagnant::before {
+    content: "\01F3C5";
+}
+
+p:last-of-type.gagnant::after {
+    content: "\01F3C5";
 }
 
 #gros>a:has(>.petit.dontshow){
