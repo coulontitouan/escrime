@@ -289,7 +289,7 @@ def affiche_competition(id_compet) :
         user = -1
     return render_template(
         "competition.html",
-        competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=get_tireur,dico = competition.get_tireurs_classes()
+        competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
     )
 
 @app.route("/competition/<int:id_compet>/createPoule")
