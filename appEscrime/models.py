@@ -869,6 +869,7 @@ class Phase(db.Model):
         return sorted(
             [match for match in self.matchs if id_tireur in [participation.id_escrimeur for participation in match.participations]],
             key=lambda match: [participation.id_escrimeur for participation in match.participations if participation.id_escrimeur != id_tireur][0])
+        
     
     def get_total_touches_recues_tireur(self, id_tireur : int) :
         """Récupère le total des touches reçues par un tireur dans la phase.
