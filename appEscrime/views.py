@@ -514,7 +514,6 @@ def affiche_match(id_compet, id_poule, id_match):
     Returns:
         flask.Response: Renvoie la page du match
     """
-    
     competition = rq.get_competition(id_compet)
     poule = competition.get_poules_id(id_poule)
 
@@ -555,7 +554,7 @@ def valide_resultats(id_compet, id_poule, id_match):
         flask.Response: Renvoie la page du match ou de la compétition
     """
     competition = rq.get_competition(id_compet)
-    poule = competition.get_poules_id(id_poule)
+    poule = competition.get_phases_id(id_poule)
     match = poule.get_match_id(id_match)
     participations = match.get_tireurs_match(poule.id)
     if match.id_phase == 1:
