@@ -515,9 +515,9 @@ def affiche_match(id_compet, id_poule, id_match):
         flask.Response: Renvoie la page du match
     """
     competition = rq.get_competition(id_compet)
-    poule = competition.get_poules_id(id_poule)
+    poule = competition.get_phases_id(id_poule)
 
-    if current_user.is_arbitre(id_compet) :
+    if current_user.is_arbitre(id_compet) or current_user.is_admin() :
         match = poule.get_match_id(id_match)
         participations = match.get_tireurs_match(poule.id)
         if match.id_phase == 1:

@@ -79,6 +79,7 @@ def get_tireur(num_licence):
         id_part (num_licence): le numéro de licence d'un tireur
     """
     return Escrimeur.query.get(num_licence)
+
 def get_match(id_match):
     """Récupère un match dans la base de données à partir de son id
 

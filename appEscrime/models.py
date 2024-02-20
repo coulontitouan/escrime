@@ -655,9 +655,7 @@ class Competition(db.Model):
         traites = set()
         for phase in Phase.query.filter_by(id_competition = self.id).all():
             if phase.libelle == "Poule":
-                
                 for participant1 in Participation.query.filter_by(id_competition = self.id,id_phase = phase.id).all():
-                    print(traites)
                     if (participant1.id_phase,participant1.id_match) not in traites:
                         participants = (Participation.query
                                         .filter_by(id_competition = self.id,
@@ -673,6 +671,15 @@ class Competition(db.Model):
                             for participant in [participant1,participant2]:
                                 dico[participant.id_escrimeur]["touches"]+=participant.touches
                                 dico[participant.id_escrimeur]["matchs"]+=1
+                        
+                        else:
+                            for participant in [participant1,participant2]:
+                                if dico[participant.id_escrimeur]["matchs"] == 0:
+                                    dico[participant.id_escrimeur]["victoires"]=0
+                                    dico[participant.id_escrimeur]["touches"] = 0
+                                    dico[participant.id_escrimeur]["matchs"]+=1
+
+
         return dico
     
     def get_tireurs_classes(self):
@@ -702,7 +709,6 @@ class Competition(db.Model):
         dico = self.dico_victoire_tireur_poule()
         def cle_tri(cle):
             return (
-                dico[cle]["rang"],
                 dico[cle]["victoires"] / dico[cle]["matchs"],  
                 dico[cle]["touches"] 
             )
