@@ -628,7 +628,6 @@ class Competition(db.Model):
                                            id_match = participant1.id_match,
                                            id_phase = participant1.id_phase)
                                 .all())
-
                 participant2 = [participant for participant in participants
                                 if participant.id_escrimeur != participant1.id_escrimeur][0]
 
@@ -638,6 +637,42 @@ class Competition(db.Model):
                     for participant in [participant1,participant2]:
                         dico[participant.id_escrimeur]["touches"]+=participant.touches
                         dico[participant.id_escrimeur]["matchs"]+=1
+
+        for resultat in Resultat.query.filter_by(id_competition = self.id).all():
+            if resultat.rang != "" and resultat.points != cst.ARBITRE:
+                dico[resultat.id_escrimeur]["rang"] = -resultat.rang
+        return dico
+    
+    def dico_victoire_tireur_poule(self):
+        """renvoie le dictionnaire des performances de la competition, non trié
+        dico[num_licence]["victoires"]
+                         ["matchs"]
+                         ["touches"]
+        Returns:
+            dict: dico[num_licence][str]
+        """
+        dico = defaultdict(lambda: defaultdict(int))
+        traites = set()
+        for phase in Phase.query.filter_by(id_competition = self.id).all():
+            if phase.libelle == "Poule":
+                
+                for participant1 in Participation.query.filter_by(id_competition = self.id,id_phase = phase.id).all():
+                    print(traites)
+                    if (participant1.id_phase,participant1.id_match) not in traites:
+                        participants = (Participation.query
+                                        .filter_by(id_competition = self.id,
+                                                id_match = participant1.id_match,
+                                                id_phase = participant1.id_phase)
+                                        .all())
+                        participant2 = [participant for participant in participants
+                                        if participant.id_escrimeur != participant1.id_escrimeur][0]
+
+                        traites.add((participant1.id_phase, participant1.id_match))
+                        if (participant1.statut != cst.MATCH_A_VENIR):
+                            dico[max([participant1, participant2], key=lambda p: p.touches).id_escrimeur]["victoires"]+=1
+                            for participant in [participant1,participant2]:
+                                dico[participant.id_escrimeur]["touches"]+=participant.touches
+                                dico[participant.id_escrimeur]["matchs"]+=1
         return dico
     
     def get_tireurs_classes(self):
@@ -650,6 +685,24 @@ class Competition(db.Model):
         dico = self.dico_victoire_tireur()
         def cle_tri(cle):
             return (
+                dico[cle]["rang"],
+                dico[cle]["victoires"] / dico[cle]["matchs"],  
+                dico[cle]["touches"] 
+            )
+        dico_trie = dict(sorted(dico.items(), key=lambda x: cle_tri(x[0]), reverse=True))
+        return dico_trie
+    
+    def get_tireurs_classes_poule(self):
+        """renvoie le dictionnaire des performances de la competition 
+        trié par ratio victoires/matchs et ensuite par touches si égalité
+
+        Returns:
+            _type_: dico[num_licence][str]
+        """
+        dico = self.dico_victoire_tireur_poule()
+        def cle_tri(cle):
+            return (
+                dico[cle]["rang"],
                 dico[cle]["victoires"] / dico[cle]["matchs"],  
                 dico[cle]["touches"] 
             )
@@ -856,6 +909,20 @@ class Phase(db.Model):
         """Valide les résultats de la phase et gère la création de la suivante."""
         if self.est_terminee() and self.libelle != 'Finale' and self.libelle != 'Poule':
             self.competition.programme_tableau()
+    
+    def get_matchs_tireur(self, id_tireur : int) :
+        """Récupère les matchs d'un tireur dans la phase
+
+        Args:
+            id_tireur (int): ID du tireur
+
+        Returns:
+            List[Match]: Les matchs du tireur.
+        """
+        return sorted(
+            [match for match in self.matchs if id_tireur in [participation.id_escrimeur for participation in match.participations]],
+            key=lambda match: [participation.id_escrimeur for participation in match.participations if participation.id_escrimeur != id_tireur][0])
+        
     
     def get_total_touches_recues_tireur(self, id_tireur : int) :
         """Récupère le total des touches reçues par un tireur dans la phase.
