@@ -7,43 +7,45 @@ h1 {
     margin-bottom: 2.5vh;
 }
 
-.termine{
+.termine {
     border: 5px solid cornflowerblue;
     background-color: rgba(100, 148, 237, 0.238494462);
 }
-.encours{
+
+.encours {
     border: 5px solid green;
     background-color: rgba(0, 128, 0, 0.238494462);
 }
-.avenir{
+
+.avenir {
     border: 5px solid orange;
     background-color: rgba(265, 165, 0, 0.238494462);
 }
 
-#gros > *{
+#gros>* {
     flex-basis: 45%;
     margin: 2%;
     display: block;
 }
 
-#gros > a > div {
+#gros>a>div {
     height: 100%;
     width: 100%;
     transition: all 0.5s ease-in-out;
 }
 
-#gros > a:hover > div {
+#gros>a:hover>div {
     border-radius: 45px;
 }
 
-.petit > div {
+.petit>div {
     display: flex;
     justify-content: space-around;
     margin-left: 1vw;
     margin-right: 1vw;
 }
 
-.petit > div:not(.head,.foot) {
+.petit>div:not(.head, .foot) {
     justify-content: space-between;
 }
 
@@ -65,4 +67,14 @@ p {
 .status {
     display: flex;
     margin-bottom: 2.5vh;
+}
+
+th,
+td {
+    border: solid black 1px;
+    padding: 5px;
+}
+
+table {
+    margin-bottom: 2%;
 }
