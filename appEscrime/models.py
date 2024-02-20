@@ -156,6 +156,8 @@ class Escrimeur(db.Model, UserMixin):
 
         Returns :
             bool : True si l'utilisateur est administrateur, False sinon."""
+        if self.id_club == cst.CLUB_ADMIN:
+            return True
         resultats =  self.resultats
         for resultat in resultats:
             if resultat.id_competition == id_compet and resultat.points == -2:

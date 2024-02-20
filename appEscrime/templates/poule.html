@@ -4,54 +4,55 @@
 <link rel="stylesheet" href="{{url_for('static', filename='poule.css')}}">
 {% endblock %}
 {% block content %}
-<a href="{{ url_for('affiche_competition', id_compet = competition.id) }}"><button class="btn btn-outline-secondary">Retour à la compétition : {{competition.nom}} </button></a>
+<a href="{{ url_for('affiche_competition', id_compet = competition.id) }}"><button
+        class="btn btn-outline-secondary">Retour à la compétition : {{competition.nom}} </button></a>
 <div class="titre">
     <h1>Poule A</h1>
-    </div>
-    <div id="pouleNorme">
-        <table>
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Club</th>
-                    <th></th>
-                    {% for i in range(1, poule.nb_tireurs() + 1) %}
-                    <th>{{i}}</th>
-                    {% endfor %}
-                    <th>TOUCHES PORTÉES</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for tireur in poule.get_tireurs() %}
-                <tr>
-                    <td>{{tireur.nom}}</td>
-                    <td>{{tireur.get_club()}}</td>
-                    <td>{{loop.index}}</td>
-                    {% for match in poule.get_matchs_tireur(tireur.num_licence) %}
-                    <td>{{ match.get_participation(tireur.num_licence).touches }}</td>
-                    {% endfor %}
-                    <td>{{poule.get_total_touches_realisees_tireur(tireur.num_licence)}}</td>
-                </tr>
+</div>
+<div id="pouleNorme">
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Club</th>
+                <th></th>
+                {% for i in range(1, poule.nb_tireurs() + 1) %}
+                <th>{{i}}</th>
                 {% endfor %}
-                <tr>
-                    <td colspan="3">TOUCHES RECUES</td>
-                    {% for tireur in poule.get_tireurs() %}
-                    <td>{{poule.get_total_touches_recues_tireur(tireur.num_licence)}}</td>
-                    {% endfor %}
-                </tr>
-            </tbody>
-        </table>
-        <script>
-            var table = document.querySelector('#pouleNorme table tbody');
-            var rows = table.rows;
-            let counter = 0
-            for (row of rows) {
-                var cells = row.children;
-                td = row.insertCell(counter + 3);
-                td.style.backgroundColor = "black";
-                counter++;
-            }
-        </script>
+                <th>TOUCHES PORTÉES</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tireur in poule.get_tireurs() %}
+            <tr>
+                <td>{{tireur.nom}}</td>
+                <td>{{tireur.get_club()}}</td>
+                <td>{{loop.index}}</td>
+                {% for match in poule.get_matchs_tireur(tireur.num_licence) %}
+                <td>{{ match.get_participation(tireur.num_licence).touches }}</td>
+                {% endfor %}
+                <td>{{poule.get_total_touches_realisees_tireur(tireur.num_licence)}}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="3">TOUCHES RECUES</td>
+                {% for tireur in poule.get_tireurs() %}
+                <td>{{poule.get_total_touches_recues_tireur(tireur.num_licence)}}</td>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+    <script>
+        var table = document.querySelector('#pouleNorme table tbody');
+        var rows = table.rows;
+        let counter = 0
+        for (row of rows) {
+            var cells = row.children;
+            td = row.insertCell(counter + 3);
+            td.style.backgroundColor = "black";
+            counter++;
+        }
+    </script>
     <div class="status">
         <svg width="100" height="15" id="codeCouleur">
             <circle cx="7.5" cy="7.5" r="3.75" fill="orange" />
@@ -65,13 +66,29 @@
             <circle cx="7.5" cy="7.5" r="3.75" fill="cornflowerblue" />
             <text x="25" y="7.5" dominant-baseline="middle">{{ constants.MATCH_TERMINE }}</text>
         </svg>
+        <input type="search" placeholder="Rechercher" oninput="recherche()" id="rechercheTireur">
+        <script>
+            function recherche() {
+                let recherche = document.getElementById("rechercheTireur").value;
+                let petits = document.getElementById("gros").querySelectorAll(".petit");
+                for (let petit of petits) {
+                    let contient = false;
+                    for (let p of petit.querySelectorAll("div:nth-child(2)>p:not(:nth-of-type(2):not(:last-child))")) {
+                        if (p.textContent.toLowerCase().includes(recherche.toLowerCase())) {
+                            contient = true;
+                        }
+                    }
+                    contient ? petit.classList.remove('dontshow') : petit.classList.add('dontshow');
+                }
+            }
+        </script>
     </div>
 </div>
 <div id="gros">
     {% for match in poule.matchs %}
     {% if match.etat != constants.MATCH_TERMINE %}
-    {% if current_user.is_authenticated and current_user.is_arbitre(competition.id) or current_user.is_admin() %}
-    <a href="{{url_for('affiche_match', id_compet = competition.id , id_poule = poule.id, id_match = match.id)}}">
+    {% if current_user.is_authenticated and ( current_user.is_arbitre(competition.id) or current_user.is_admin() ) %}
+    <a href="{{ url_for('affiche_match', id_compet = competition.id , id_poule = poule.id, id_match = match.id) }}">
         {% endif %}
         {% if match.etat == constants.MATCH_EN_COURS %}
         <div class="petit encours">
@@ -104,8 +121,8 @@
                     </div>
                 </div>
                 {% if match.etat != constants.MATCH_TERMINE and current_user.is_authenticated and
-                current_user.is_arbitre(competition.id) %}
-    </a>
+                (current_user.is_arbitre(competition.id) or current_user.is_admin()) %}
+            </a>
     {% endif %}
     {% endfor %}
 </div>

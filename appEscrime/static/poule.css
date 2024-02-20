@@ -91,3 +91,7 @@ main a:first-child button:before{
     content: "\2B05 \FE0F";
     margin-right: 5px;
 }
+
+#gros>a:has(>.petit.dontshow){
+    display: none !important;
+}
