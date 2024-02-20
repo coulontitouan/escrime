@@ -543,7 +543,7 @@ class Competition(db.Model):
             elif len(tireurs) == 8:
                 tour = "Quarts de finale"
             else:
-                tour = str(len(tireurs)/2) + "èmes de finale"
+                tour = str(int(len(tireurs)/2)) + "èmes de finale"
 
             if bin(len(tireurs)).count("1") > 1:
                 tireurs = self.reduction_tableau(tireurs)
