@@ -4,8 +4,10 @@
 <link rel="stylesheet" href="{{url_for('static', filename='poule.css')}}">
 {% endblock %}
 {% block content %}
+<a href="{{ url_for('affiche_competition', id_compet = competition.id) }}"><button class="btn btn-outline-secondary">Retour à la compétition : {{competition.nom}} </button></a>
 <div class="titre">
     <h1>Poule A</h1>
+    </div>
     <div id="pouleNorme">
         <table>
             <thead>
@@ -50,7 +52,6 @@
                 counter++;
             }
         </script>
-    </div>
     <div class="status">
         <svg width="100" height="15" id="codeCouleur">
             <circle cx="7.5" cy="7.5" r="3.75" fill="orange" />
@@ -68,12 +69,12 @@
 </div>
 <div id="gros">
     {% for match in poule.matchs %}
-        {% if match.etat != constants.MATCH_TERMINE %}
-            {% if current_user.is_authenticated and current_user.is_arbitre(competition.id) %}
-            <a href="{{url_for('affiche_match', id_compet = competition.id , id_poule = poule.id, id_match = match.id)}}">
-            {% endif %} 
-            {% if match.etat == constants.MATCH_EN_COURS %}
-                <div class="petit encours">
+    {% if match.etat != constants.MATCH_TERMINE %}
+    {% if current_user.is_authenticated and current_user.is_arbitre(competition.id) %}
+    <a href="{{url_for('affiche_match', id_compet = competition.id , id_poule = poule.id, id_match = match.id)}}">
+        {% endif %}
+        {% if match.etat == constants.MATCH_EN_COURS %}
+        <div class="petit encours">
             {% else %}
             <div class="petit avenir">
                 {% endif %}
@@ -102,9 +103,10 @@
                         <p>Arbitré par {{ match.get_arbitre().prenom }} {{ match.get_arbitre().nom }}</p>
                     </div>
                 </div>
-        {% if match.etat != constants.MATCH_TERMINE and current_user.is_authenticated and current_user.is_arbitre(competition.id) %}
-        </a>
-        {% endif %}
+                {% if match.etat != constants.MATCH_TERMINE and current_user.is_authenticated and
+                current_user.is_arbitre(competition.id) %}
+    </a>
+    {% endif %}
     {% endfor %}
 </div>
 {% endblock %}
