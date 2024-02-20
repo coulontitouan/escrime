@@ -707,7 +707,6 @@ class Competition(db.Model):
             _type_: dico[num_licence][str]
         """
         dico = self.dico_victoire_tireur_poule()
-        print(dico)
         def cle_tri(cle):
             return (
                 dico[cle]["victoires"] / dico[cle]["matchs"],  
