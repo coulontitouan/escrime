@@ -413,7 +413,7 @@ class Competition(db.Model):
                 res.append(phase)
         return res
 
-    def get_poules_id(self, idp : int) :
+    def get_phases_id(self, idp : int) :
         """Récupère une poule en fonction de son ID
 
         Args:
@@ -423,7 +423,7 @@ class Competition(db.Model):
             Optional[Phase]: La poule si trouvée, None sinon.
         """
         for phase in self.phases :
-            if phase.libelle == 'Poule' and phase.id == idp :
+            if phase.id == idp :
                 return phase
         return None
     
@@ -529,52 +529,59 @@ class Competition(db.Model):
     
     def programme_tableau(self):
         """Crée les matchs du tableau de la compétition."""
-        arbitres = self.get_arbitres()
-        classement = self.get_tireurs_classes()
-        self.maj_resultat(classement)
-        en_lice = Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id,
-                                           Resultat.rang == "",
-                                           Resultat.points != cst.ARBITRE).all()
-        tireurs = [res for res in en_lice]
-        if len(tireurs) == 2:
-            tour = "Finale"
-        elif len(tireurs) == 4:
-            tour = "Demi-finale"
-        elif len(tireurs) == 8:
-            tour = "Quart de finale"
-        else:
-            tour = str(len(tireurs)) + "ème de finale"
-        
-        if bin(len(tireurs)).count("1") > 1:
-            tireurs = self.reduction_tableau(tireurs)
-            tour = "Barrages"
-        self.ajoute_tour_tableau(tour)
-        phase = self.phases[-1]
-        phase.cree_matchs(list(arbitres), tireurs)
-        db.session.commit()
+        if self.est_tour_termine():
+            arbitres = self.get_arbitres()
+            self.maj_resultat()
+            en_lice = Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id,
+                                                            Resultat.rang == "",
+                                                            Resultat.points != cst.ARBITRE).all()
+            tireurs = [res for res in en_lice]
+            if len(tireurs) == 2:
+                tour = "Finale"
+            elif len(tireurs) == 4:
+                tour = "Demi-finale"
+            elif len(tireurs) == 8:
+                tour = "Quarts de finale"
+            else:
+                tour = str(int(len(tireurs)/2)) + "èmes de finale"
 
-    def maj_resultat(self, classement : dict):
-        """Met à jour le résultat de la compétition."""
-        if self.phases[-2].libelle != "Poule":
-            pos = (Resultat.query
-                   .filter_by(id_competition=self.id)
-                   .order_by(Resultat.rang)
-                   .first()).rang
+            if bin(len(tireurs)).count("1") > 1:
+                tireurs = self.reduction_tableau(tireurs)
+                tour = "Barrages"
+            self.ajoute_tour_tableau(tour)
+            phase = self.phases[-1]
+            phase.cree_matchs(list(arbitres), tireurs)
+            db.session.commit()
         else:
-            pos = len(classement)
-        if self.phases[-1].libelle != "Poule":
+            print("\nLe tour précédent n'est pas terminé\n")
+
+    def maj_resultat(self):
+        """Met à jour le résultat de la compétition."""
+        classement = self.get_tireurs_classes()
+        pos = len(Resultat.query.filter_by(id_competition = self.id,
+                                           rang = "",
+                                           points = cst.TIREUR).all())
+        if self.phases[-1].libelle != "Poule": # Si on au moins au premier tour du tableau
             for licence in classement.keys():
-                if Participation.query.get(id_competition=self.id,
-                                                 id_phase=self.phases[-1].id,
-                                                 id_escrimeur=licence).statut == cst.PERDANT:
-                    Resultat.query.get((self.id, licence)).rang = pos
+                print("maj_resultat", self.id, self.phases[-1].id, licence, pos)
+                try:
+                    if Participation.query.filter_by(id_competition=self.id,
+                                                     id_phase=self.phases[-1].id,
+                                                     id_escrimeur=licence).first().statut == cst.PERDANT:
+                        Resultat.query.get((self.id, licence)).rang = pos
+                except AttributeError:
+                    print("Skip", licence)
     
-    def genere_tableau(self):
-        """Génère le premier tour du tableau de la compétition."""
-        for phase in self.phases:
-            if not phase.est_terminee():
-                return None
-        self.programme_tableau()
+    def est_tour_termine(self):
+        """Vérifie si le dernier tour de la compétition est terminé."""
+        if self.phases[-1].libelle == "Poule":
+            for poule in self.phases:
+                if not poule.est_terminee():
+                    return False
+        else:
+            if not self.phases[-1].est_terminee():
+                return False
+        return True
 
     def desinscription(self, num_licence):
         """Désinscrit un escrimeur de la compétition.
@@ -797,7 +804,7 @@ class Phase(db.Model):
                 res.append(match)
         return res
      
-    def get_match_id(self, id_match : int) :
+    def get_match_id(self, id_match : int):
         """Récupère un match en fonction de son ID dans une poule
 
         Args:
@@ -808,18 +815,31 @@ class Phase(db.Model):
         """
         return Match.query.get((id_match, self.id, self.id_competition))
     
-    def get_matchs_tireur(self, id_tireur : int) :
-        """Récupère les matchs d'un tireur dans la phase
-
-        Args:
-            id_tireur (int): ID du tireur
+    def get_vainqueurs(self):
+        """Récupère les vainqueurs de la phase.
 
         Returns:
-            List[Match]: Les matchs du tireur.
+            List[Participation]: Les participations des vainqueurs de la phase.
         """
-        return sorted(
-            [match for match in self.matchs if id_tireur in [participation.id_escrimeur for participation in match.participations]],
-            key=lambda match: [participation.id_escrimeur for participation in match.participations if participation.id_escrimeur != id_tireur][0])
+        res = []
+        for match in self.matchs :
+            for participation in match.participations :
+                if participation.statut == cst.VAINQUEUR :
+                    res.append(participation)
+        return res
+
+    def get_perdants(self):
+        """Récupère les perdants de la phase.
+
+        Returns:
+            List[Participation]: Les participations des perdants de la phase.
+        """
+        res = []
+        for match in self.matchs :
+            for participation in match.participations :
+                if participation.statut == cst.PERDANT :
+                    res.append(participation)
+        return res
     
     def est_terminee(self) -> bool :
         """Vérifie que la phase est terminée.

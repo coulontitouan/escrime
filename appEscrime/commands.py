@@ -151,4 +151,4 @@ def test(id_competition):
     #for mmatch in Match.query.filter_by(id_competition = id_competition).all():
     #    print(mmatch)
     #    print(mmatch.participations, '\n')
-    print(compet.genere_tableau())
+    print(compet.programme_tableau())
