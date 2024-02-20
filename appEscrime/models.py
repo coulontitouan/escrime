@@ -516,7 +516,7 @@ class Competition(db.Model):
         """Réduit si nécessaire le nombre de tireurs participant à un tour du tableau.
 
         Args:
-            tireurs (list): la liste des licences des tireurs encore en lice.
+            tireurs (list): la liste des tireurs encore en lice.
 
         Returns:
             list: la liste des tireurs participant au prochain tour.
@@ -532,25 +532,26 @@ class Competition(db.Model):
         if self.est_tour_termine():
             arbitres = self.get_arbitres()
             self.maj_resultat()
-            en_lice = Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id,
-                                                            Resultat.rang == "",
-                                                            Resultat.points != cst.ARBITRE).all()
-            tireurs = [res for res in en_lice]
-            if len(tireurs) == 2:
+            classement = self.get_tireurs_classes().keys()
+            en_lice = [Escrimeur.query.get(licence) for licence in classement]
+            if self.phases[-1].libelle != "Poule":
+                en_lice = [tireur for tireur in en_lice if tireur.participations[-1].statut == cst.VAINQUEUR]
+            if len(en_lice) == 2:
                 tour = "Finale"
-            elif len(tireurs) == 4:
+            elif len(en_lice) == 4:
                 tour = "Demi-finale"
-            elif len(tireurs) == 8:
+            elif len(en_lice) == 8:
                 tour = "Quarts de finale"
             else:
-                tour = str(int(len(tireurs)/2)) + "èmes de finale"
+                tour = str(len(en_lice) // 2) + "èmes de finale"
 
-            if bin(len(tireurs)).count("1") > 1:
-                tireurs = self.reduction_tableau(tireurs)
+            if bin(len(en_lice)).count("1") > 1:
+                en_lice = self.reduction_tableau(en_lice)
                 tour = "Barrages"
             self.ajoute_tour_tableau(tour)
             phase = self.phases[-1]
-            phase.cree_matchs(list(arbitres), tireurs)
+            print(len(en_lice))
+            phase.cree_matchs(list(arbitres), en_lice)
             db.session.commit()
         else:
             print("\nLe tour précédent n'est pas terminé\n")
@@ -563,14 +564,13 @@ class Competition(db.Model):
                                            points = cst.TIREUR).all())
         if self.phases[-1].libelle != "Poule": # Si on au moins au premier tour du tableau
             for licence in classement.keys():
-                print("maj_resultat", self.id, self.phases[-1].id, licence, pos)
                 try:
                     if Participation.query.filter_by(id_competition=self.id,
                                                      id_phase=self.phases[-1].id,
                                                      id_escrimeur=licence).first().statut == cst.PERDANT:
                         Resultat.query.get((self.id, licence)).rang = pos
                 except AttributeError:
-                    print("Skip", licence)
+                    pass
     
     def est_tour_termine(self):
         """Vérifie si le dernier tour de la compétition est terminé."""
@@ -680,7 +680,7 @@ class Competition(db.Model):
         trié par ratio victoires/matchs et ensuite par touches si égalité
 
         Returns:
-            _type_: dico[num_licence][str]
+            dict: dico[num_licence][str]
         """
         dico = self.dico_victoire_tireur()
         def cle_tri(cle):
@@ -697,12 +697,11 @@ class Competition(db.Model):
         trié par ratio victoires/matchs et ensuite par touches si égalité
 
         Returns:
-            _type_: dico[num_licence][str]
+            dict: dico[num_licence][str]
         """
         dico = self.dico_victoire_tireur_poule()
         def cle_tri(cle):
             return (
-                dico[cle]["rang"],
                 dico[cle]["victoires"] / dico[cle]["matchs"],  
                 dico[cle]["touches"] 
             )
@@ -790,19 +789,57 @@ class Phase(db.Model):
             arbitres (list): la liste des arbitres de la phase.
             tireurs (list): la liste des tireurs de la phase.
         """
-        if self.libelle == 'Poule':
+        print(len(tireurs))
+        if self.libelle == 'Poule': # En cas de poule
             liste_matchs = self.programme_matchs_poule(tireurs)
             for index, match in enumerate(liste_matchs, start=1):
                 self.ajoute_match(index,
                                   arbitres[0],
                                   match[0],
                                   match[1])
-        else:
+        
+        elif self.libelle == 'Barrages': # En cas de tour préliminaire
             for i in range(len(tireurs)//2):
-                self.ajoute_match(i+1,
+                # Calcul de l'identifiant du match : le moins de variance = 1, le plus de variance = len(tireurs) // 2
+                # Cela afin de correspondre au seeding de l'adversaire suivant
+                identifiant = int(((len(tireurs) - i) - i) / 2 + 0.5)
+                self.ajoute_match(identifiant,
                                   arbitres[i % len(arbitres)],
                                   tireurs[i],
                                   tireurs[-i-1])
+        
+        else:
+            if self.competition.phases[-2].libelle == 'Barrages': # En cas de premier tour de l'arbre complet
+                vainqueurs_barrages = self.competition.phases[-2].get_vainqueurs() # Les tireurs qualifiés via le tour préliminaire
+                barragistes = sorted([participation.tireur for participation in vainqueurs_barrages], # Classement par l'identifiant du barrage remporté
+                                     key=lambda participation : participation.participations[-1].id_match)
+                # Les barragistes sont classés ainsi car les barrages sont générés de telle manière que le vainqueur du barrage 1 le seed 1, etc.
+                tireurs = [tireur for tireur in tireurs if tireur not in barragistes] # Les tireurs qualifiés directement
+                nb_matchs = len(barragistes) + len(tireurs) // 2
+                for i in range(nb_matchs):
+                    try :
+                        self.ajoute_match(i+1,
+                                          arbitres[i % len(arbitres)],
+                                          tireurs[i],
+                                          barragistes[i]) # Seed 1 vs Barragiste 1
+                    except IndexError:
+                        if len(tireurs) > len(barragistes):
+                            self.ajoute_match(i+1,
+                                              arbitres[i % len(arbitres)],
+                                              tireurs[i],
+                                              tireurs[-i-1+len(barragistes)])
+                        else:
+                            self.ajoute_match(i+1,
+                                              arbitres[i % len(arbitres)],
+                                              barragistes[i],
+                                              barragistes[-i-1+len(tireurs)])    
+
+            else: # En cas d'au moins deuxième tour de l'arbre complet : les matchs précédents sont générés de telle sorte que vainqueur 1 affronte vainqueur 2, etc.
+                for i in range(len(tireurs)//2):
+                    self.ajoute_match(i+1,
+                                      arbitres[i % len(arbitres)],
+                                      tireurs[i],
+                                      tireurs[-i-1])
 
     def ajoute_match(self, id_match, arbitre, tireur1, tireur2):
         """Ajoute un match à la phase.
@@ -1008,6 +1045,7 @@ class Match(db.Model):
         Args:
             tireur (Escrimeur): un escrimeur participant au match.
         """
+        print("cree_participation", self.id_competition, self.id_phase, self.id, tireur.num_licence)
         db.session.add(Participation(id_competition = self.id_competition,
                                      id_phase = self.id_phase,
                                      id_match = self.id,
