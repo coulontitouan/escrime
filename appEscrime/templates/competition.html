@@ -56,13 +56,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for tireur in poule.get_tireurs() %}
+                        {% for tireur_id in dicopoule.keys() %}
+                        {% with  tireur = get_tireur(tireur_id) %}
+                        {% if tireur in poule.get_tireurs() %}
                             <tr>
                                 <td>{{ tireur.prenom }}</td>
                                 <td>{{ tireur.nom }}</td>
                                 <td>{{ dicopoule[tireur.num_licence]["touches"] }}</td>
 
                             </tr>
+                        {% endif %}
+                        {% endwith %}
                         {% endfor %}
                     </tbody>
                 </table>
