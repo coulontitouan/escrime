@@ -87,7 +87,7 @@ tr:not(:last-child) td:nth-child(3){
     font-weight: bold;
 }
 
-a button:before{
+main a:first-child button:before{
     content: "\2B05 \FE0F";
     margin-right: 5px;
 }
