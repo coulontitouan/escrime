@@ -87,11 +87,6 @@
                 </form>
                 {% endif %}
                 {% if current_user.peut_sinscrire(competition.id) %}
-                <form id="test1" class="form-inline">
-                    <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Search"
-                    aria-label="Search">
-                    <i class="fas fa-search" aria-hidden="true"></i>
-                </form>
                 {% if not user %}
                 <button id = "openbtn" type="button" class="btn btn-success">S'inscrire</button>
                 <dialog id = "dialog" class="shadow p-3 mb-5 bg-body rounded">
