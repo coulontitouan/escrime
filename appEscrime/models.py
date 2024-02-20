@@ -711,18 +711,9 @@ class Phase(db.Model):
                     tireurs.add(participation.tireur)
         return len(tireurs)
 
-    def get_tireurs(self) -> set[Escrimeur] :
-        """Retourne les tireurs de la phase.
-
-        Returns:
-            Set[Escrimeur]: les tireurs de la phase.
-        """
-        tireurs = set()
-        for match in self.matchs :
-            for participation in match.participations :
-                if participation.id_phase == self.id :
-                    tireurs.add(participation.tireur)
-        return tireurs
+    def get_tireurs(self) :
+        return Escrimeur.query.join(Participation).filter(Participation.id_competition == self.id_competition,
+                                                            Participation.id_phase == self.id).order_by(Escrimeur.num_licence)
 
     def get_arbitre(self) -> Escrimeur :
         """Récupère l'arbitre de la phase.
@@ -817,6 +808,19 @@ class Phase(db.Model):
         """
         return Match.query.get((id_match, self.id, self.id_competition))
     
+    def get_matchs_tireur(self, id_tireur : int) :
+        """Récupère les matchs d'un tireur dans la phase
+
+        Args:
+            id_tireur (int): ID du tireur
+
+        Returns:
+            List[Match]: Les matchs du tireur.
+        """
+        return sorted(
+            [match for match in self.matchs if id_tireur in [participation.id_escrimeur for participation in match.participations]],
+            key=lambda match: [participation.id_escrimeur for participation in match.participations if participation.id_escrimeur != id_tireur][0])
+    
     def est_terminee(self) -> bool :
         """Vérifie que la phase est terminée.
 
@@ -831,7 +835,22 @@ class Phase(db.Model):
     def verrouille_resultats(self):
         """Valide les résultats de la phase et gère la création de la suivante."""
         if self.est_terminee() and self.libelle != 'Finale' and self.libelle != 'Poule':
-            self.competition.programme_tableau()      
+            self.competition.programme_tableau()
+    
+    def get_total_touches_recues_tireur(self, id_tireur : int) :
+        """Récupère le total des touches reçues par un tireur dans la phase.
+
+        Args:
+            id_tireur (int): ID du tireur
+
+        Returns:
+            int: Le total des touches reçues par le tireur.
+        """
+        somme = 0
+        matchs = self.get_matchs_tireur(id_tireur)
+        for match in matchs:
+            somme += [participation.touches for participation in match.participations if participation.id_escrimeur != id_tireur][0]
+        return somme
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de la phase dans un fichier csv."""
@@ -868,6 +887,17 @@ class Match(db.Model):
             Optional[Escrimeur]: L'arbitre du match s'il existe, sinon None.
         """
         return Escrimeur.query.get(self.num_arbitre)
+    
+    def get_participation(self, id_tireur) :
+        """Récupère la participations d'un tireur dans le match.
+
+        Args:
+            id_tireur (int): ID du tireur
+
+        Returns:
+            Participation: La participation du tireur dans le match.
+        """
+        return [participation for participation in self.participations if participation.id_escrimeur == id_tireur][0]
 
     def set_en_cours(self):
         """Met le match en cours."""
@@ -965,7 +995,6 @@ class Participation(db.Model):
             Optional[Escrimeur]: L'escrimeur lié à cette participation, s'il existe.
         """
         return Escrimeur.query.get(self.id_escrimeur)
-
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de la participation dans un fichier csv."""
