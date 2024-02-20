@@ -314,6 +314,15 @@ class Competition(db.Model):
         """
         return len(self.phases)
     
+    def nb_phases_finales(self):
+        """Retourne le nombre de phases finales de la compétition.
+
+        Returns:
+            int: le nombre de phases finales de la compétition.
+        """
+        res = [phase for phase in self.phases if phase.libelle != 'Poule']
+        return len(res)
+
     def nb_poules(self):
         """Retourne le nombre de poules de la compétition.
 
@@ -399,7 +408,7 @@ class Competition(db.Model):
         for phase in self.phases :
             if phase.libelle != 'Poule' :
                 res.append(phase)
-        return res
+        return sorted(res, key=lambda phase: phase.id, reverse=True)
     
     def get_poules(self) -> list :
         """Récupère les poules de la compétition
@@ -1058,6 +1067,17 @@ class Match(db.Model):
             if participation.id_phase == id_poule :
                 participants.append(participation)
         return participants
+    
+    def get_gagnant(self) :
+        """Récupère le vainqueur du match.
+
+        Returns:
+            Optional[str]: Le numéro de licence du vainqueur, s'il existe.
+        """
+        for participation in self.participations:
+            if participation.statut == cst.VAINQUEUR :
+                return participation.id_escrimeur
+        return None
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture du match dans un fichier csv."""
