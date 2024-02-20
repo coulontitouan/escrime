@@ -3,6 +3,10 @@
     padding: 0;
 }
 
+.dontshow {
+    display: none !important;
+}
+
 html,
 #footer {
     overflow-x: hidden;
