@@ -846,11 +846,22 @@ class Phase(db.Model):
         Returns:
             int: Le total des touches reçues par le tireur.
         """
-        somme = 0
-        matchs = self.get_matchs_tireur(id_tireur)
-        for match in matchs:
-            somme += [participation.touches for participation in match.participations if participation.id_escrimeur != id_tireur][0]
-        return somme
+        return sum([[
+            participation.touches for participation in couple_participation
+                     if participation.id_escrimeur != id_tireur][0] 
+                    for couple_participation in [
+                        match.participations for match in self.get_matchs_tireur(id_tireur)]])
+    
+    def get_total_touches_realisees_tireur(self, id_tireur : int) :
+        """Récupère le total des touches réalisées par un tireur dans la phase.
+
+        Args:
+            id_tireur (int): ID du tireur
+
+        Returns:
+            int: Le total des touches réalisées par le tireur.
+        """
+        return sum([[participation.touches for participation in couple_participation if participation.id_escrimeur == id_tireur][0] for couple_participation in [match.participations for match in self.get_matchs_tireur(id_tireur)]])
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de la phase dans un fichier csv."""

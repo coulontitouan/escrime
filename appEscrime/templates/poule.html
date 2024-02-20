@@ -7,7 +7,7 @@
 <div class="titre">
     <h1>Poule A</h1>
     <div id="pouleNorme">
-        <table style="text-align: center;">
+        <table>
             <thead>
                 <tr>
                     <th>Nom</th>
@@ -16,6 +16,7 @@
                     {% for i in range(1, poule.nb_tireurs() + 1) %}
                     <th>{{i}}</th>
                     {% endfor %}
+                    <th>TOUCHES PORTÉES</th>
                 </tr>
             </thead>
             <tbody>
@@ -27,6 +28,7 @@
                     {% for match in poule.get_matchs_tireur(tireur.num_licence) %}
                     <td>{{ match.get_participation(tireur.num_licence).touches }}</td>
                     {% endfor %}
+                    <td>{{poule.get_total_touches_realisees_tireur(tireur.num_licence)}}</td>
                 </tr>
                 {% endfor %}
                 <tr>
