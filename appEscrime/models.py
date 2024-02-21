@@ -220,6 +220,9 @@ class Escrimeur(db.Model, UserMixin):
                                           Participation.id_phase == id_phase,
                                           Participation.id_escrimeur == self.num_licence)
                                           .first().id_match)
+    
+    def get_historique_resultat(self):
+        return (Resultat.query.join(Competition).filter(Resultat.id_escrimeur == self.num_licence).order_by(Competition.date.desc()).all())
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de l'escrimeur dans un fichier csv."""
@@ -342,6 +345,15 @@ class Competition(db.Model):
         """
         return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id,
                                                         Resultat.points != cst.ARBITRE)
+    
+    def get_nb_tireurs(self):
+        """Retourne le nombre de tireurs inscrits à la compétition.
+
+        Returns:
+            Query: le résultat de la requête du nombre de tireurs inscrits à la compétition.
+        """
+        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id,
+                                                        Resultat.points != cst.ARBITRE).count()
 
     def get_tireurs_order_by_pts(self) :
         """Retourne les tireurs inscrits à la compétition, triés par points.

@@ -376,6 +376,8 @@ def creation_competition() :
             db.session.add(lieu)
             db.session.commit()
         sexe = form.sexe_competition.data
+        if sexe == "Hommes":
+            sexe = "Homme"
         if sexe == "Femmes":
             sexe = "Dames"
         competition = Competition(id=(rq.get_max_competition_id() + 1),
@@ -401,7 +403,8 @@ def profil() :
     """
     return render_template(
         "profil.html",
-        to_date = cst.TO_DATE
+        to_date = cst.TO_DATE,
+        rq = rq
     )
 
 class ChangerMdpForm(FlaskForm) :
