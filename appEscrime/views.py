@@ -306,6 +306,20 @@ def competition_cree_poules(id_compet) :
     competition.programme_poules()
     return redirect(url_for("affiche_competition", id_compet=id_compet))
 
+@app.route("/competition/<int:id_compet>/phaseSuivante")
+def phaseSuivante(id_compet) :
+    """Fonction qui permet de créer les poules d'une compétition
+
+    Args:
+        id_compet (int): Identifiant unique de la compétition.
+
+    Returns:
+        flask.Response: Renvoie la page de la compétition
+    """
+    competition = rq.get_competition(id_compet)
+    competition.programme_tableau()
+    return redirect(url_for("affiche_competition", id_compet=id_compet))
+
 @app.route("/competition/<int:id_compet>/poule/<int:id_poule>")
 def affiche_poule(id_compet, id_poule) :
     """Fonction qui permet d'afficher une poule
