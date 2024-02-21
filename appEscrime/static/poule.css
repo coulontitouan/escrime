@@ -81,11 +81,13 @@ p {
 .status {
     display: flex;
     margin-bottom: 2.5vh;
+    align-items: center;
 }
 
 th,
 td {
     padding: 5px;
+    border: 1px solid black;
 }
 
 tr:not(:last-of-type) td:last-of-type {
@@ -97,6 +99,10 @@ table {
     text-align: center;
 }
 
+tbody {
+    border: 1px solid black;
+}
+
 th:last-child {
     font-weight: normal;
 }
@@ -105,7 +111,7 @@ tr:not(:last-child) td:nth-child(3) {
     font-weight: bold;
 }
 
-main a:first-child button:before{
+main a:first-child button:before {
     content: "\2B05 \FE0F";
     margin-right: 5px;
 }
@@ -122,6 +128,20 @@ p:last-of-type.gagnant::after {
     content: "\01F3C5";
 }
 
-#gros>a:has(>.petit.dontshow){
+#gros>a:has(>.petit.dontshow) {
     display: none !important;
+}
+
+#rechercheTireur {
+    margin-left: auto;
+    transition: all 0.3s;
+    border-radius: 5px;
+    --width: 10vw;
+    width: var(--width);
+    min-width: max-content;
+    text-align: left;
+}
+
+#rechercheTireur:hover, #rechercheTireur:focus {
+    width: calc(var(--width) * 2);
 }

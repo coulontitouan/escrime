@@ -789,8 +789,7 @@ class Phase(db.Model):
         return len(tireurs)
 
     def get_tireurs(self) :
-        return Escrimeur.query.join(Participation).filter(Participation.id_competition == self.id_competition,
-                                                            Participation.id_phase == self.id).order_by(Escrimeur.num_licence)
+        return Escrimeur.query.join(Participation).filter(Participation.id_competition == self.id_competition, Participation.id_phase == self.id).order_by(Participation.id_match)
 
     def get_arbitre(self) -> Escrimeur :
         """Récupère l'arbitre de la phase.
