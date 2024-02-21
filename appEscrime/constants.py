@@ -1,5 +1,6 @@
 """Module contenant les constantes de l'application."""
 
+# TRIÉES PAR ORDRE ALPHABÉTIQUE
 AGE_MAX_M13 = 13
 AGE_MAX_M15 = 15
 AGE_MAX_M17 = 17
@@ -11,6 +12,7 @@ AGE_MAX_VETERANS3 = 69
 AGE_MAX_VETERANS4 = -1
 ARBITRE = -2
 CLUB_ADMIN = 1
+COMPET_INDIV = -1
 MATCH_A_VENIR = "A venir"
 MATCH_EN_COURS = "En cours"
 MATCH_TERMINE = "Terminé"
