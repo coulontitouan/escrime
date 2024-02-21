@@ -70,7 +70,7 @@
 <div id="gros">
     {% for match in poule.matchs %}
     {% if match.etat != constants.MATCH_TERMINE %}
-    {% if current_user.is_authenticated and current_user.is_arbitre(competition.id) or current_user.is_admin() %}
+    {% if current_user.is_authenticated and current_user.is_arbitre(competition.id) %}
     <a href="{{url_for('affiche_match', id_compet = competition.id , id_poule = poule.id, id_match = match.id)}}">
         {% endif %}
         {% if match.etat == constants.MATCH_EN_COURS %}

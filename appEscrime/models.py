@@ -675,11 +675,9 @@ class Competition(db.Model):
                         else:
                             for participant in [participant1,participant2]:
                                 if dico[participant.id_escrimeur]["matchs"] == 0:
-                                    dico[participant.id_escrimeur]["victoires"]=0
+                                    dico[participant.id_escrimeur]["victoires"] = 0
                                     dico[participant.id_escrimeur]["touches"] = 0
-                                    dico[participant.id_escrimeur]["matchs"]+=1
-
-
+                                    dico[participant.id_escrimeur]["matchs"] += 1
         return dico
     
     def get_tireurs_classes(self):
@@ -787,7 +785,7 @@ class Phase(db.Model):
         Returns:
             Escrimeur: l'arbitre de la phase.
         """
-        return Escrimeur.query.get(self.matchs[0].num_arbitre)
+        return Escrimeur.query.get(self.matchs[0].num_arbitre)      
 
     def cree_matchs(self, arbitres, tireurs):
         """Crée les matchs de la phase.
@@ -797,6 +795,7 @@ class Phase(db.Model):
             tireurs (list): la liste des tireurs de la phase.
         """
         print(len(tireurs))
+        phase_precedente = self.competition.phases[-2]
         if self.libelle == 'Poule': # En cas de poule
             liste_matchs = self.programme_matchs_poule(tireurs)
             for index, match in enumerate(liste_matchs, start=1):
@@ -815,38 +814,63 @@ class Phase(db.Model):
                                   tireurs[i],
                                   tireurs[-i-1])
         
-        else:
-            if self.competition.phases[-2].libelle == 'Barrages': # En cas de premier tour de l'arbre complet
-                vainqueurs_barrages = self.competition.phases[-2].get_vainqueurs() # Les tireurs qualifiés via le tour préliminaire
+        elif phase_precedente.libelle == 'Barrages' or phase_precedente.libelle == 'Poule': # En cas de tour de l'arbre complet
+            if phase_precedente.libelle == 'Barrages': # En cas de premier tour de l'arbre complet après barrages
+                vainqueurs_barrages = phase_precedente.get_vainqueurs() # Les tireurs qualifiés via le tour préliminaire
+                print("vainqueurs_barrages",vainqueurs_barrages,"\n")
                 barragistes = sorted([participation.tireur for participation in vainqueurs_barrages], # Classement par l'identifiant du barrage remporté
                                      key=lambda participation : participation.participations[-1].id_match)
-                # Les barragistes sont classés ainsi car les barrages sont générés de telle manière que le vainqueur du barrage 1 le seed 1, etc.
+                print("barragistes",barragistes,"\n")
                 tireurs = [tireur for tireur in tireurs if tireur not in barragistes] # Les tireurs qualifiés directement
-                nb_matchs = len(barragistes) + len(tireurs) // 2
-                for i in range(nb_matchs):
-                    try :
-                        self.ajoute_match(i+1,
-                                          arbitres[i % len(arbitres)],
-                                          tireurs[i],
-                                          barragistes[i]) # Seed 1 vs Barragiste 1
-                    except IndexError:
-                        if len(tireurs) > len(barragistes):
-                            self.ajoute_match(i+1,
-                                              arbitres[i % len(arbitres)],
-                                              tireurs[i],
-                                              tireurs[-i-1+len(barragistes)])
-                        else:
-                            self.ajoute_match(i+1,
-                                              arbitres[i % len(arbitres)],
-                                              barragistes[i],
-                                              barragistes[-i-1+len(tireurs)])    
+                print("tireurs1",tireurs,"\n")
+                tireurs = tireurs + barragistes[::-1]
+                print("tireurs2",tireurs,"\n")
 
-            else: # En cas d'au moins deuxième tour de l'arbre complet : les matchs précédents sont générés de telle sorte que vainqueur 1 affronte vainqueur 2, etc.
-                for i in range(len(tireurs)//2):
-                    self.ajoute_match(i+1,
-                                      arbitres[i % len(arbitres)],
-                                      tireurs[i],
-                                      tireurs[-i-1])
+            top_seed = tireurs[:len(tireurs) // 2] # Les tireurs les mieux classés
+            print("top_seed",top_seed,"\n")
+            bottom_seed = tireurs[len(tireurs) // 2:] # Les tireurs les moins bien classés
+            print("bottom_seed",bottom_seed,"\n")
+            bottom_seed = bottom_seed[::-1] # Inversion afin de correspondre au seeding car le dernier affronte le premier, etc.
+            print("bottom_seed_reversed",bottom_seed,"\n")
+            top_top_seed = top_seed[:len(top_seed) // 2] # Les meilleurs top seed (jouant les matchs impairs)
+            print("top_top_seed",top_top_seed,"\n")
+            bottom_top_seed = top_seed[len(top_seed) // 2:] # Les moins bons top seed (jouant les matchs pairs)
+            print("bottom_top_seed",bottom_top_seed,"\n")
+
+            for i in range(1, len(top_seed), 2):
+                tireur1 = top_top_seed[0]
+                tireur2 = bottom_seed[top_seed.index(tireur1)]
+                self.ajoute_match(i,
+                                  arbitres[i % len(arbitres)],
+                                  tireur1,
+                                  tireur2)
+                top_top_seed.remove(tireur1)
+                top_top_seed = top_top_seed[::-1]
+
+            for i in range(2, len(top_seed) + 1, 2):
+                tireur1 = bottom_top_seed[0]
+                tireur2 = bottom_seed[top_seed.index(tireur1)]
+                self.ajoute_match(i,
+                                  arbitres[i % len(arbitres)],
+                                  tireur1,
+                                  tireur2)
+                bottom_top_seed.remove(tireur1)
+                bottom_top_seed = bottom_top_seed[::-1]
+
+        else: 
+            # En cas d'au moins deuxième tour de l'arbre complet : 
+            # les matchs précédents sont générés de telle manière que 
+            # vainqueur 1 affronte vainqueur 2, vainqueur 3 affronte vainqueur 4, etc.
+            phase_precedente_triee = sorted(phase_precedente.get_vainqueurs(), 
+                                            key=lambda partipation : partipation.id_match)
+            tireurs = [participation.tireur for participation in phase_precedente_triee]
+            id_match = 1
+            for i in range(0, len(tireurs), 2):
+                self.ajoute_match(id_match,
+                                  arbitres[i % len(arbitres)],
+                                  tireurs[i],
+                                  tireurs[i + 1])
+                id_match += 1
 
     def ajoute_match(self, id_match, arbitre, tireur1, tireur2):
         """Ajoute un match à la phase.
@@ -912,7 +936,7 @@ class Phase(db.Model):
         """
         return Match.query.get((id_match, self.id, self.id_competition))
     
-    def get_vainqueurs(self):
+    def get_vainqueurs(self) -> list:
         """Récupère les vainqueurs de la phase.
 
         Returns:
@@ -1097,6 +1121,14 @@ class Match(db.Model):
             if participation.id_phase == id_poule :
                 participants.append(participation)
         return participants
+    
+    def get_tireur_vainqueur(self) -> Escrimeur:
+        """Récupère le tireur vainqueur du match.
+
+        Returns:
+            Participation: La participation du vainqueur.
+        """
+        return [participation.tireur for participation in self.participations if participation.statut == cst.VAINQUEUR][0]
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture du match dans un fichier csv."""
