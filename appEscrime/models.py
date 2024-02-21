@@ -737,6 +737,13 @@ class Competition(db.Model):
             )
         dico_trie = dict(sorted(dico.items(), key=lambda x: cle_tri(x[0]), reverse=True))
         return dico_trie
+    
+    def peux_genere_phase_suivante(self) :
+        for phase in self.phases :
+            for match in phase.matchs :
+                if match.etat != cst.MATCH_TERMINE or Phase.query.filter_by(id_competition = self.id).order_by(Phase.id.desc()).first().libelle == "Finale":
+                    return False
+        return True
 
     def to_titre_csv(self):
         """Retourne le format du titre du fichier csv de la compétition."""
