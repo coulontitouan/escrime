@@ -156,6 +156,8 @@ class Escrimeur(db.Model, UserMixin):
 
         Returns :
             bool : True si l'utilisateur est administrateur, False sinon."""
+        if self.id_club == cst.CLUB_ADMIN:
+            return True
         resultats =  self.resultats
         for resultat in resultats:
             if resultat.id_competition == id_compet and resultat.points == -2:
@@ -218,6 +220,9 @@ class Escrimeur(db.Model, UserMixin):
                                           Participation.id_phase == id_phase,
                                           Participation.id_escrimeur == self.num_licence)
                                           .first().id_match)
+    
+    def get_historique_resultat(self):
+        return (Resultat.query.join(Competition).filter(Resultat.id_escrimeur == self.num_licence).order_by(Competition.date.desc()).all())
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de l'escrimeur dans un fichier csv."""
@@ -265,6 +270,7 @@ class Competition(db.Model):
     date = db.Column(db.Date)
     coefficient = db.Column(db.Integer())
     sexe = db.Column(db.String(6))
+    est_individuelle = db.Column(db.Boolean, default=True)
     # Clé étrangère vers le lieu
     id_lieu = db.Column(db.Integer(), db.ForeignKey('lieu.id'))
     # Relation plusieurs-à-un : Une compétition se déroule dans un seul lieu
@@ -314,6 +320,15 @@ class Competition(db.Model):
         """
         return len(self.phases)
     
+    def nb_phases_finales(self):
+        """Retourne le nombre de phases finales de la compétition.
+
+        Returns:
+            int: le nombre de phases finales de la compétition.
+        """
+        res = [phase for phase in self.phases if phase.libelle != 'Poule']
+        return len(res)
+
     def nb_poules(self):
         """Retourne le nombre de poules de la compétition.
 
@@ -331,6 +346,15 @@ class Competition(db.Model):
         """
         return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id,
                                                         Resultat.points != cst.ARBITRE)
+    
+    def get_nb_tireurs(self):
+        """Retourne le nombre de tireurs inscrits à la compétition.
+
+        Returns:
+            Query: le résultat de la requête du nombre de tireurs inscrits à la compétition.
+        """
+        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id,
+                                                        Resultat.points != cst.ARBITRE).count()
 
     def get_tireurs_order_by_pts(self) :
         """Retourne les tireurs inscrits à la compétition, triés par points.
@@ -399,7 +423,7 @@ class Competition(db.Model):
         for phase in self.phases :
             if phase.libelle != 'Poule' :
                 res.append(phase)
-        return res
+        return sorted(res, key=lambda phase: phase.id, reverse=True)
     
     def get_poules(self) -> list :
         """Récupère les poules de la compétition
@@ -427,7 +451,7 @@ class Competition(db.Model):
                 return phase
         return None
     
-    def inscription(self, num_licence : int, arbitre : bool = False) :
+    def inscription(self, num_licence : int, arbitre : bool = False, id_groupe : int = cst.COMPET_INDIV, est_chef : bool = False) :
         """Inscrit un tireur à une compétition
 
         Args:
@@ -440,8 +464,14 @@ class Competition(db.Model):
         db.session.add(Resultat(id_competition = self.id,
                                 id_escrimeur = num_licence,
                                 rang = None,
-                                points = points))
+                                points = points,est_chef = est_chef,id_groupe = id_groupe))
         db.session.commit()
+
+    def inscription_groupe(self,num_licence_chef,groupe:tuple):
+        id_groupe = Resultat.query.filter_by(id_competition = self.id).order_by(desc(Resultat.id_groupe)).first().id_groupe1+1
+        for num_licence in groupe:
+            self.inscription(numlicence = num_licence,id_groupe = id_groupe)
+        self.inscription(numlicence = num_licence_chef,id_groupe = id_groupe, est_chef= True)
 
     def ajoute_poule(self, id_poule):
         """Ajoute une poule à la compétition.
@@ -529,6 +559,8 @@ class Competition(db.Model):
     
     def programme_tableau(self):
         """Crée les matchs du tableau de la compétition."""
+        if len(self.phases) == 0:
+            self.programme_poules()
         if self.est_tour_termine():
             arbitres = self.get_arbitres()
             self.maj_resultat()
@@ -712,6 +744,13 @@ class Competition(db.Model):
             )
         dico_trie = dict(sorted(dico.items(), key=lambda x: cle_tri(x[0]), reverse=True))
         return dico_trie
+    
+    def peux_genere_phase_suivante(self) :
+        for phase in self.phases :
+            for match in phase.matchs :
+                if match.etat != cst.MATCH_TERMINE or Phase.query.filter_by(id_competition = self.id).order_by(Phase.id.desc()).first().libelle == "Finale":
+                    return False
+        return True
 
     def to_titre_csv(self):
         """Retourne le format du titre du fichier csv de la compétition."""
@@ -776,8 +815,7 @@ class Phase(db.Model):
         return len(tireurs)
 
     def get_tireurs(self) :
-        return Escrimeur.query.join(Participation).filter(Participation.id_competition == self.id_competition,
-                                                            Participation.id_phase == self.id).order_by(Escrimeur.num_licence)
+        return Escrimeur.query.join(Participation).filter(Participation.id_competition == self.id_competition, Participation.id_phase == self.id).order_by(Participation.id_match)
 
     def get_arbitre(self) -> Escrimeur :
         """Récupère l'arbitre de la phase.
@@ -1129,6 +1167,17 @@ class Match(db.Model):
             Participation: La participation du vainqueur.
         """
         return [participation.tireur for participation in self.participations if participation.statut == cst.VAINQUEUR][0]
+    
+    def get_gagnant(self) :
+        """Récupère le vainqueur du match.
+
+        Returns:
+            Optional[str]: Le numéro de licence du vainqueur, s'il existe.
+        """
+        for participation in self.participations:
+            if participation.statut == cst.VAINQUEUR :
+                return participation.id_escrimeur
+        return None
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture du match dans un fichier csv."""
@@ -1186,6 +1235,8 @@ class Resultat(db.Model):
     id_escrimeur = db.Column(db.String(16), db.ForeignKey('escrimeur.num_licence'))
     # Relation plusieurs-à-un : Une participation est effectuée par un seul tireur
     escrimeur = db.relationship('Escrimeur', back_populates = 'resultats')
+    id_groupe = db.Column(db.Integer(),default = cst.COMPET_INDIV)
+    est_chef = db.Column(db.Boolean, default = False)
     rang = db.Column(db.Integer())
     points = db.Column(db.Integer())
     __table_args__ = (
