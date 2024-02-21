@@ -21,7 +21,7 @@ body>* {
     flex-wrap: nowrap;
 }
 
-body *:not(#message, #message *, #retour) {
+body:has(#message) *:not(#message, #message *, #retour) {
     pointer-events: none;
     user-select: none;
   }
