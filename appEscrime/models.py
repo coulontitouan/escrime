@@ -270,6 +270,7 @@ class Competition(db.Model):
     date = db.Column(db.Date)
     coefficient = db.Column(db.Integer())
     sexe = db.Column(db.String(6))
+    est_individuelle = db.Column(db.Boolean, default=True)
     # Clé étrangère vers le lieu
     id_lieu = db.Column(db.Integer(), db.ForeignKey('lieu.id'))
     # Relation plusieurs-à-un : Une compétition se déroule dans un seul lieu
@@ -450,7 +451,7 @@ class Competition(db.Model):
                 return phase
         return None
     
-    def inscription(self, num_licence : int, arbitre : bool = False) :
+    def inscription(self, num_licence : int, arbitre : bool = False, id_groupe : int = cst.COMPET_INDIV, est_chef : bool = False) :
         """Inscrit un tireur à une compétition
 
         Args:
@@ -463,8 +464,14 @@ class Competition(db.Model):
         db.session.add(Resultat(id_competition = self.id,
                                 id_escrimeur = num_licence,
                                 rang = None,
-                                points = points))
+                                points = points,est_chef = est_chef,id_groupe = id_groupe))
         db.session.commit()
+
+    def inscription_groupe(self,num_licence_chef,groupe:tuple,):
+        id_groupe = Resultat.query.filter_by(id_competition = self.id).order_by(desc(Resultat.id_groupe)).first().id_groupe1+1
+        for num_licence in groupe:
+            self.inscription(numlicence = num_licence,id_groupe = id_groupe)
+        self.inscription(numlicence = num_licence_chef,id_groupe = id_groupe, est_chef= True)
 
     def ajoute_poule(self, id_poule):
         """Ajoute une poule à la compétition.
@@ -1155,6 +1162,8 @@ class Resultat(db.Model):
     id_escrimeur = db.Column(db.String(16), db.ForeignKey('escrimeur.num_licence'))
     # Relation plusieurs-à-un : Une participation est effectuée par un seul tireur
     escrimeur = db.relationship('Escrimeur', back_populates = 'resultats')
+    id_groupe = db.Column(db.Integer(),default = cst.COMPET_INDIV)
+    est_chef = db.Column(db.Boolean, default = False)
     rang = db.Column(db.Integer())
     points = db.Column(db.Integer())
     __table_args__ = (
