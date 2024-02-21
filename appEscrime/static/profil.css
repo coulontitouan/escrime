@@ -58,3 +58,59 @@ main {
     margin-top: 1rem;
     font-weight: lighter;
 }
+
+table {
+    margin: 2em auto auto auto;
+    border: 1px solid black;
+}
+
+table thead>tr {
+    border-bottom: 1px solid black;
+    background-color: rgba(255, 0, 0, 0.9);
+    color: white;
+    padding: 1em;
+}
+
+table td,
+th {
+  width: 8vw;
+  text-align: center;
+  padding: 0.5em;
+}
+
+
+tbody tr:nth-child(even) {
+    background-color: rgba(255, 0, 0, 0.2);
+  }
+
+
+.styled {
+    background-color: rgb(0, 100, 220);
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 10px 15px;
+  text-align: center;
+  transition: 200ms;
+  width: 80%;
+  box-sizing: border-box;
+  border: 0;
+  font-size: 16px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.styled:not(:disabled):hover,
+.styled:not(:disabled):focus {
+  outline: 0;
+  background-color: rgba(0, 100, 255, 1);
+  box-shadow: 0 0 0 2px rgba(0,0,0,.2);
+}
+
+.styled:disabled {
+  filter: saturate(0.2) opacity(0.5);
+  -webkit-filter: saturate(0.2) opacity(0.5);
+  cursor: not-allowed;
+}
