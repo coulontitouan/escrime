@@ -21,6 +21,11 @@ body>* {
     flex-wrap: nowrap;
 }
 
+body *:not(#message, #message *, #retour) {
+    pointer-events: none;
+    user-select: none;
+  }
+
 #informations {
     flex-basis: 10%;
 }
