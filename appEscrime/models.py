@@ -750,7 +750,7 @@ class Competition(db.Model):
             for match in phase.matchs :
                 if match.etat != cst.MATCH_TERMINE or Phase.query.filter_by(id_competition = self.id).order_by(Phase.id.desc()).first().libelle == "Finale":
                     return False
-        return True
+        return True if len(self.phases) != 0 else False
 
     def to_titre_csv(self):
         """Retourne le format du titre du fichier csv de la compétition."""

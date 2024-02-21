@@ -153,3 +153,11 @@ aside > button{
 aside.visible{
     display: unset;
 }
+
+#retour {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    font-size: 3rem;
+    cursor: pointer;
+}
