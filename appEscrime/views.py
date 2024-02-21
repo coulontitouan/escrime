@@ -13,7 +13,6 @@ from .app import app ,db
 from .models import Escrimeur, Club, Competition, Lieu
 from . import requests as rq
 from .commands import newuser
-from .requests import get_tireur
 
 with app.app_context() :
     class CreeCompetitionForm(FlaskForm) :
@@ -289,7 +288,7 @@ def affiche_competition(id_compet) :
         user = -1
     return render_template(
         "competition.html",
-        competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
+        competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=rq.get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
     )
 
 @app.route("/competition/<int:id_compet>/createPoule")
@@ -624,7 +623,7 @@ def affichage_grand_ecran(id_compet) :
     flash('Vous êtes désinscrit', 'warning')
 
     return render_template('affichageGE.html',
-                           competition=competition,get_tireur = get_tireur)
+                           competition=competition,get_tireur = rq.get_tireur)
 
 @app.errorhandler(Exception)
 def page_not_found(erreur) :
