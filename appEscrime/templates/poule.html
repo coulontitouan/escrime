@@ -42,19 +42,6 @@
                 </tr>
             </tbody>
         </table>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                var table = document.querySelector('#pouleNorme table tbody');
-                var rows = table.rows;
-                let counter = 0
-                for (row of rows) {
-                    var cells = row.children;
-                    td = row.insertCell(counter + 3);
-                    td.style.backgroundColor = "black";
-                    counter++;
-                }
-            });
-        </script>
     {% endif %}
         <div class="status">
         <svg width="100" height="15" id="codeCouleur">
@@ -69,7 +56,12 @@
             <circle cx="7.5" cy="7.5" r="3.75" fill="cornflowerblue" />
             <text x="25" y="7.5" dominant-baseline="middle">{{ constants.MATCH_TERMINE }}</text>
         </svg>
-        <input type="search" placeholder="Rechercher" oninput="recherche()" id="rechercheTireur">
+        <input type="search" placeholder="Rechercher un tireur..." oninput="recherche()" id="rechercheTireur" list="tireurs">
+        <datalist id="tireurs">
+            {% for tireur in poule.get_tireurs() %}
+            <option value="{{ tireur.nom }}.{{ tireur.prenom[0] }}">{{ tireur.nom }} {{ tireur.prenom }}</option>
+            {% endfor %}
+        </datalist>
         <script>
             function recherche() {
                 let recherche = document.getElementById("rechercheTireur").value;
@@ -83,7 +75,31 @@
                     }
                     contient ? petit.classList.remove('dontshow') : petit.classList.add('dontshow');
                 }
+                countPetit = document.getElementById("gros").querySelectorAll("#gros div.dontshow");
+                if (petits.length != (countPetit ? countPetit.length : 0) || recherche == "") {
+                    document.getElementById("noresult").classList.toggle('dontshow',true);
+                }else{
+                    document.getElementById("noresult").classList.toggle('dontshow',false);
+                }
             }
+            {% if poule.libelle == "Poule" %}
+            document.addEventListener('DOMContentLoaded', function() {
+                let table = document.querySelector('#pouleNorme table tbody');
+                let rows = table.rows;
+                let counter = 0
+                for (let row of rows) {
+                    if([...rows].indexOf(row) == rows.length - 1){
+                        td = row.insertCell(row.cells.length);
+                        td.style.backgroundColor = "white";
+                        td.style.border = "1px solid white";
+                    }else{
+                        td = row.insertCell(counter + 3);
+                        td.style.backgroundColor = "black";
+                    }
+                    counter++;
+                }
+            });
+            {% endif %}
         </script>
     </div>
 </div>
@@ -127,5 +143,6 @@
     </a>
     {% endif %}
     {% endfor %}
+    <p id="noresult" class="dontshow">Aucun résultat</p>
 </div>
 {% endblock %}

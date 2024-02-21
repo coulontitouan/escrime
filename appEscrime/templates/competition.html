@@ -41,161 +41,171 @@
                     </tr>
                   {% endfor %}
                 </tbody>
+              </table>
+            </a>
+          {% endfor %}
+        {% endif %}
+        <h2>Poules</h2>
+        {% for poule in competition.get_poules() %}
+          <a href="{{ url_for('affiche_poule', id_compet = competition.id, id_poule = loop.index) }}">
+            <table class="scroll">
+              <thead>
+                <tr>
+                  <th id="intitule" colspan="3">Poule {{ poule.id }} - {{ poule.nb_tireurs() }} Tireurs - {{ poule.get_arbitre().prenom[0] }} {{ poule.get_arbitre().nom }}</th>
+                </tr>
+                <tr>
+                  <th>Prénom</th>
+                  <th>Nom</th>
+                  <th>Points</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for tireur_id in dicopoule.keys() %}
+                  {% with tireur = get_tireur(tireur_id) %}
+                    {% if tireur in poule.get_tireurs() %}
+                      <tr>
+                        <td>{{ tireur.prenom }}</td>
+                        <td>{{ tireur.nom }}</td>
+                        <td>{{ dicopoule[tireur.num_licence]['touches'] }}</td>
+                      </tr>
+                    {% endif %}
+                  {% endwith %}
+                {% endfor %}
+              </tbody>
             </table>
-            {%endfor%}
-            {%endif%}
-            {% for poule in competition.get_poules() %}
-                <table class="scroll" style="display:table;">
-                    <thead>
-                        <tr>
-                            <th id="intitule" colspan="3">Poule {{ poule.id }} - {{ poule.nb_tireurs() }} Tireurs - {{ poule.get_arbitre().prenom[0] }} {{ poule.get_arbitre().nom }} <a href="{{url_for('affiche_poule', id_compet = competition.id , id_poule = loop.index)}}"><img id="info" src="../static/images/i.png" alt=""></a></th>
-                        </tr>
-                        <tr>
-                            <th>Prénom</th>
-                            <th>Nom</th>
-                            <th>Points</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                      {% for tireur_id in dicopoule.keys() %}
-                      {% with  tireur = get_tireur(tireur_id) %}
-                      {% if tireur in poule.get_tireurs() %}
-                          <tr>
-                              <td>{{ tireur.prenom }}</td>
-                              <td>{{ tireur.nom }}</td>
-                              <td>{{ dicopoule[tireur.num_licence]["touches"] }}</td>
-
-                          </tr>
-                      {% endif %}
-                      {% endwith %}
-                      {% endfor %}
-                    </tbody>
-                </table>
-              </a>
-            {% endfor %}
-            {% else %}
-                <p>Aucune poule créée</p>
-                {% if current_user.is_authenticated %}
-                {% if current_user.is_admin() %}
-                    <a href="{{url_for('competition_cree_poules', id_compet=competition.id)}}"><button class="btn btn-primary" type="button">Répartir les poules</button></a>
-                {% endif %}
-                {% endif %}
-            {% endif %}
-        </div>
-        <div id="deux">
-            <div class="header-class">
-                <h2>Classements :</h2>
-                <button class="btn btn-primary" type="button" onclick="changeClassement()">Changer Classement</button>
-                {% if current_user.is_authenticated %}
-                {% if current_user.is_admin() %}
-                <form action="{{ url_for('affichage_grand_ecran', id_compet = competition.id) }}" method="get" target="_blank">
-                    <button id="affichageGE" type="submit" class="btn btn-success">affichage grand ecran</button>
-                </form>
-                {% endif %}
-                {% if competition.get_poules() == [] %}
-                {% if current_user.peut_sinscrire(competition.id) %}
-                <form id="test1" class="form-inline">
-                    <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Search"
-                    aria-label="Search">
-                    <i class="fas fa-search" aria-hidden="true"></i>
-                </form>
-                {% if not user %}
-                <button id = "openbtn" type="button" class="btn btn-success">S'inscrire</button>
-                <dialog id = "dialog" class="shadow p-3 mb-5 bg-body rounded">
-                    <form action="{{ url_for('inscription_competition', id_compet = competition.id) }}" method="post" role="form">
-                    <div id="haut">
-                        <h2>Inscription</h2>
-                        <a id = "closebtn"><img id="uneimage" src="{{ url_for('static', filename = 'images/croix.png') }}" alt=""></a>
-                    </div>
-                    <div class = "header-class">
-                    {{ form.role }}
-                    </div>
-                    <button id = "openbtn" type="submit" class="btn btn-success">Confirmer</button>
-                    </form>
-                </dialog>
-                {% else %}
-                    <form action="{{ url_for('deinscription_competition', id_compet = competition.id )}}" method="post" role="form">
-                        <button type="submit" class="btn btn-danger">Se désinscrire</button>
-                    </form>
-                {% endif %}
-                {% endif %}
-                {% endif %}
-                {% endif %}
-            </div>
-            <table id="Cprovisoire" class = "scroll" style="display:table;">
-                <thead>
-                    <tr>
-                        <th id="intitule" colspan="5">Classement provisoire</th>
-                    </tr>
-                    <tr>
-                        <th>N°</th>
-                        <th>Prénom</th>
-                        <th>Nom</th>
-                        <th>Club</th>
-                        <th>Points</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for num_tireur in dico.keys() %}
-                    {% set tireur = get_tireur(num_tireur)%}
-                        <tr>
-                            <td>{{ loop.index }}</td>
-                            <td>{{ tireur.prenom }}</td>
-                            <td>{{ tireur.nom }}</td>
-                            <td>{{ tireur.club.nom }}</td>
-                            <td>{{  dico[num_tireur]["victoires"] }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <table id="Cnational" class = "scroll" style="display:none;">
-                <thead>
-                    <tr>
-                        <th id="intitule" colspan="5">Têtes de série</th>
-                    </tr>
-                    <tr>
-                        <th>N°</th>
-                        <th>Prénom</th>
-                        <th>Nom</th>
-                        <th>Club</th>
-                        <th>Points nationaux</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for tireur in competition.get_tireurs_order_by_rang() %}
-                        <tr>
-                            <td>{{ loop.index }}</td>
-                            <td>{{ tireur.prenom }}</td>
-                            <td>{{ tireur.nom }}</td>
-                            <td>{{ tireur.club.nom }}</td>
-                            <td>{{ tireur.get_classement(competition.id_arme, competition.id_categorie).points }}</td>
-                        </tr>
-                    {% endfor %}
-                    {% for tireur in competition.get_tireurs_sans_rang() %}
-                        <tr>
-                            <td>NC</td>
-                            <td>{{ tireur.prenom }}</td>
-                            <td>{{ tireur.nom }}</td>
-                            <td>{{ tireur.club.nom }}</td>
-                            <td>0</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+          </a>
+        {% endfor %}
+      {% else %}
+        <p>Aucune poule créée</p>
+        {% if current_user.is_authenticated %}
+          {% if current_user.is_admin() %}
+            <a href="{{ url_for('competition_cree_poules', id_compet = competition.id) }}"><button class="btn btn-primary" type="button">Répartir les poules</button></a>
+          {% endif %}
+        {% endif %}
+      {% endif %}
     </div>
-    <script>
-        function changeClassement() {
-            var x = document.querySelector("#Cprovisoire");
-            var y = document.querySelector("#Cnational");
-            if (x.style.display === "none") {
-                x.style.display = "table";
-                y.style.display = "none";
-            } else {
-                x.style.display = "none";
-                y.style.display = "table";
-            }
-        }
-
-    </script>
-    {% endblock %}
+    <div id="deux">
+      <div class="header-class">
+        <h2>Classements :</h2>
+        <button class="btn btn-primary" type="button" onclick="changeClassement()">Changer Classement</button>
+        {% if current_user.is_authenticated %}
+          {% if current_user.is_admin() %}
+            <form action="{{ url_for('affichage_grand_ecran', id_compet = competition.id) }}" method="get" target="_blank">
+              <button id="affichageGE" type="submit" class="btn btn-success">affichage grand ecran</button>
+            </form>
+          {% endif %}
+          {% if competition.get_poules() == [] %}
+            {% if current_user.peut_sinscrire(competition.id) %}
+              <form id="test1" class="form-inline">
+                <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Search" aria-label="Search" />
+                <i class="fas fa-search" aria-hidden="true"></i>
+              </form>
+              {% if not user %}
+                <button id="openbtn" type="button" class="btn btn-success">S'inscrire</button>
+                <dialog id="dialog" class="shadow p-3 mb-5 bg-body rounded">
+                  <form action="{{ url_for('inscription_competition', id_compet = competition.id) }}" method="post" role="form">
+                    <div id="haut">
+                      <h2>Inscription</h2>
+                      <a id="closebtn"><img id="uneimage" src="{{ url_for('static', filename = 'images/croix.png') }}" alt="" /></a>
+                    </div>
+                    <div class="header-class">{{ form.role }}</div>
+                    <button id="openbtn" type="submit" class="btn btn-success">Confirmer</button>
+                  </form>
+                </dialog>
+              {% else %}
+                <form action="{{ url_for('deinscription_competition', id_compet = competition.id) }}" method="post" role="form">
+                  <button type="submit" class="btn btn-danger">Se désinscrire</button>
+                </form>
+              {% endif %}
+              <script>
+                const dialog = document.getElementById('dialog')
+                const openbtn = document.getElementById('openbtn')
+                const closebtn = document.getElementById('closebtn')
+                
+                openbtn.addEventListener('click', function () {
+                  dialog.setAttribute('open', true)
+                })
+                closebtn.addEventListener('click', function () {
+                  dialog.removeAttribute('open')
+                })
+              </script>
+            {% endif %}
+          {% endif %}
+        {% endif %}
+      </div>
+      <table id="Cprovisoire" class="scroll" style="display:table;">
+        <thead>
+          <tr>
+            <th id="intitule" colspan="5">Classement provisoire</th>
+          </tr>
+          <tr>
+            <th>N°</th>
+            <th>Prénom</th>
+            <th>Nom</th>
+            <th>Club</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for num_tireur in dico.keys() %}
+            {% set tireur = get_tireur(num_tireur) %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ tireur.prenom }}</td>
+              <td>{{ tireur.nom }}</td>
+              <td>{{ tireur.club.nom }}</td>
+              <td>{{ dico[num_tireur]['victoires'] }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <table id="Cnational" class="scroll" style="display:none;">
+        <thead>
+          <tr>
+            <th id="intitule" colspan="5">Têtes de série</th>
+          </tr>
+          <tr>
+            <th>N°</th>
+            <th>Prénom</th>
+            <th>Nom</th>
+            <th>Club</th>
+            <th>Points nationaux</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tireur in competition.get_tireurs_order_by_rang() %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ tireur.prenom }}</td>
+              <td>{{ tireur.nom }}</td>
+              <td>{{ tireur.club.nom }}</td>
+              <td>{{ tireur.get_classement(competition.id_arme, competition.id_categorie).points }}</td>
+            </tr>
+          {% endfor %}
+          {% for tireur in competition.get_tireurs_sans_rang() %}
+            <tr>
+              <td>NC</td>
+              <td>{{ tireur.prenom }}</td>
+              <td>{{ tireur.nom }}</td>
+              <td>{{ tireur.club.nom }}</td>
+              <td>0</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+    function changeClassement() {
+      var x = document.querySelector('#Cprovisoire')
+      var y = document.querySelector('#Cnational')
+      if (x.style.display === 'none') {
+        x.style.display = 'table'
+        y.style.display = 'none'
+      } else {
+        x.style.display = 'none'
+        y.style.display = 'table'
+      }
+    }
+  </script>
+{% endblock %}
