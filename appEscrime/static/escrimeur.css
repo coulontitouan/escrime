@@ -1,0 +1,14 @@
+/* escrimeur.css */
+
+.escrimeur-info, .competition-info {
+    margin-bottom: 20px;
+}
+
+.escrimeur-info h2, .competition-info h2 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.escrimeur-info p, .competition-info p {
+    margin: 5px 0;
+}

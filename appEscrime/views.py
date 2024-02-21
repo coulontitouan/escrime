@@ -291,6 +291,25 @@ def affiche_competition(id_compet) :
         competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=rq.get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
     )
 
+@app.route("/escrimeur/<int:id_escrimeur>/competition/<int:id_competition>")
+def affiche_escrimeur(id_escrimeur, id_competition) :
+    """Fonction qui permet d'afficher un escrimeur
+
+    Args:
+        id_escrimeur (int): Identifiant unique de l'escrimeur.
+        id_competition (int): Identifiant unique de la compétition.
+    
+    Returns:
+        flask.Response: Renvoie la page de l'escrimeur
+    """
+    escrimeur = rq.get_tireur(id_escrimeur)
+    competition = rq.get_competition(id_competition)
+    return render_template(
+        "escrimeur.html",
+        escrimeur = escrimeur,
+        competition = competition,
+    ) 
+
 @app.route("/competition/<int:id_compet>/createPoule")
 def competition_cree_poules(id_compet) :
     """Fonction qui permet de créer les poules d'une compétition
