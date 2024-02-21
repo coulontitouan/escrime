@@ -530,8 +530,11 @@ class Competition(db.Model):
         """Crée les matchs des poules de la compétition."""
         arbitres = list(self.get_arbitres())
         repartition = self.repartition_poules()
+        id_poule = 1
         for poule in self.phases:
-            poule.cree_matchs(arbitres, repartition[poule.id - 1])
+            arbitre = [arbitres[id_poule - 1 % len(arbitres)]]
+            poule.cree_matchs(arbitre, repartition[poule.id - 1])
+            id_poule += 1
         db.session.commit()
 
     def ajoute_tour_tableau(self, libelle):
@@ -570,9 +573,11 @@ class Competition(db.Model):
         """Crée les matchs du tableau de la compétition."""
         if len(self.phases) == 0:
             self.programme_poules()
-        if self.est_tour_termine():
-            arbitres = self.get_arbitres()
+        elif self.phases[-1].libelle == "Finale" and self.est_tour_termine():
             self.maj_resultat()
+        elif self.est_tour_termine():
+            self.maj_resultat()
+            arbitres = self.get_arbitres()
             classement = self.get_tireurs_classes().keys()
             en_lice = [Escrimeur.query.get(licence) for licence in classement]
             if self.phases[-1].libelle != "Poule":
@@ -585,7 +590,6 @@ class Competition(db.Model):
                 tour = "Quarts de finale"
             else:
                 tour = str(len(en_lice) // 2) + "èmes de finale"
-
             if bin(len(en_lice)).count("1") > 1:
                 en_lice = self.reduction_tableau(en_lice)
                 tour = "Barrages"
@@ -593,9 +597,9 @@ class Competition(db.Model):
             phase = self.phases[-1]
             print(len(en_lice))
             phase.cree_matchs(list(arbitres), en_lice)
-            db.session.commit()
         else:
             print("\nLe tour précédent n'est pas terminé\n")
+        db.session.commit()
 
     def maj_resultat(self):
         """Met à jour le résultat de la compétition."""
@@ -612,6 +616,11 @@ class Competition(db.Model):
                         Resultat.query.get((self.id, licence)).rang = pos
                 except AttributeError:
                     pass
+        if pos == 2:
+            vainqueur = Participation.query.filter_by(id_competition=self.id,
+                                                      id_phase=self.phases[-1].id,
+                                                      statut=cst.VAINQUEUR).first().id_escrimeur
+            Resultat.query.get((self.id, vainqueur)).rang = 1
     
     def est_tour_termine(self):
         """Vérifie si le dernier tour de la compétition est terminé."""
