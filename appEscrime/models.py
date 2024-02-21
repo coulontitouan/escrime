@@ -457,6 +457,9 @@ class Competition(db.Model):
         Args:
             num_licence (int): Numéro de licence de l'escrimeur
             arbitre (bool, optional): True si l'escrimeur est arbitre. Defaults to False.
+            id_groupe (int, optional): l'id du groupe si la compétition est en groupe. -1 sinon
+            est_chef (bool, optional): True si l'escrimeur est chef de son groupe. Defaults to False.
+
         """
         points = cst.TIREUR
         if arbitre :
@@ -467,11 +470,17 @@ class Competition(db.Model):
                                 points = points,est_chef = est_chef,id_groupe = id_groupe))
         db.session.commit()
 
-    def inscription_groupe(self,num_licence_chef,groupe:tuple):
+    def inscription_groupe(self,num_licence_chef,groupe:tuple) -> None:
+        """Inscrit un groupe à une compétition
+
+        Args:
+            num_licence_chef (int): Numéro de licence de l'escrimeur chef de groupe
+            groupe (tuple): le tuple des 3 autres escimeurs.
+        """
         id_groupe = Resultat.query.filter_by(id_competition = self.id).order_by(desc(Resultat.id_groupe)).first().id_groupe1+1
         for num_licence in groupe:
-            self.inscription(numlicence = num_licence,id_groupe = id_groupe)
-        self.inscription(numlicence = num_licence_chef,id_groupe = id_groupe, est_chef= True)
+            self.inscription(numlicence = num_licence,id_groupe = id_groupe,arbitre=False)
+        self.inscription(numlicence = num_licence_chef,id_groupe = id_groupe, est_chef= True,arbitre=False)
 
     def ajoute_poule(self, id_poule):
         """Ajoute une poule à la compétition.
