@@ -57,6 +57,7 @@
                         <th>Compétition</th>
                         <th>Catégorie</th>
                         <th>Arme</th>
+                        <th>Coefficient</th>
                         <th>Date</th>
                         <th>Participants</th>
                         <th>Résultat</th>
@@ -71,6 +72,7 @@
                         <td>{{competition.nom}}</td>
                         <td>{{rq.get_categorie(competition.id_categorie).libelle}}</td>
                         <td>{{rq.get_arme(competition.id_arme).libelle}}</td>
+                        <td>{{competition.coefficient}}</td>
                         <td>{{competition.date.strftime(to_date)}}</td>
                         <td>{{competition.get_nb_tireurs()}}</td>
                         <td>{{resultat.rang}}</td>
