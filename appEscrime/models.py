@@ -225,6 +225,19 @@ class Escrimeur(db.Model, UserMixin):
                                           Participation.id_escrimeur == self.num_licence)
                                           .first().id_match)
     
+    def get_id_groupe(self, id_compet):
+        """Récupère l'id du groupe d'un escrimeur dans une compétition donnée
+
+        Args:
+            id_compet (int): l'identifiant de la compétition
+
+        Returns:
+            int: l'identifiant du groupe de l'escrimeur dans la compétition donnée
+        """
+        return (Participation.query.filter(Participation.id_competition == id_compet,
+                                          Participation.id_escrimeur == self.num_licence)
+                                          .first().id_groupe)
+    
     def get_historique_resultat(self):
         return (Resultat.query.join(Competition).filter(Resultat.id_escrimeur == self.num_licence).order_by(Competition.date.desc()).all())
 

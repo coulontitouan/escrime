@@ -145,7 +145,7 @@
       <table id="Cprovisoire" class="scroll" style="display:table;">
         <thead>
           <tr>
-            <th id="intitule" colspan="5">Classement provisoire</th>
+            <th id="intitule" colspan="100%">Classement provisoire</th>
           </tr>
           <tr>
             <th>N°</th>
@@ -153,6 +153,9 @@
             <th>Nom</th>
             <th>Club</th>
             <th>Points</th>
+            {% if not competition.est_individuelle %}
+              <th>Équipe</th>
+            {% endif %}
           </tr>
         </thead>
         <tbody>
@@ -164,6 +167,9 @@
               <td>{{ tireur.nom }}</td>
               <td>{{ tireur.club.nom }}</td>
               <td>{{ dico[num_tireur]['victoires'] }}</td>
+              {% if competition.est_individuelle %}
+                <td>{{ tireur.get_id_groupe(competition.id) }}</td>
+              {% endif %}
             </tr>
           {% endfor %}
         </tbody>
@@ -171,7 +177,7 @@
       <table id="Cnational" class="scroll" style="display:none;">
         <thead>
           <tr>
-            <th id="intitule" colspan="5">Têtes de série</th>
+            <th id="intitule" colspan="100%">Têtes de série</th>
           </tr>
           <tr>
             <th>N°</th>
