@@ -188,8 +188,7 @@ class SignUpForm(FlaskForm) :
             check_prenom = user.prenom.upper() == self.prenom.data.upper()
             check_nom = user.nom.upper() == self.nom.data.upper()
             if check_sexe and check_prenom and check_nom:
-                sha256().update(self.mot_de_passe.data.encode())
-                passwd= sha256().hexdigest()
+                passwd =sha256(self.mot_de_passe.data.encode()).hexdigest()
                 user.set_mdp(passwd)
                 db.session.commit()
                 return True
