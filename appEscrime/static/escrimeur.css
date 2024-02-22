@@ -1,14 +1,36 @@
-/* escrimeur.css */
-
-.escrimeur-info, .competition-info {
-    margin-bottom: 20px;
+#recap > tbody tr:nth-child(even) {
+    background-color: rgba(255, 0, 0, 0.2);
 }
 
-.escrimeur-info h2, .competition-info h2 {
-    font-size: 1.5em;
-    margin-bottom: 10px;
+#recap {
+    border: 1px solid black;
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
+    width: 100%;
 }
 
-.escrimeur-info p, .competition-info p {
-    margin: 5px 0;
+#recap > thead > tr {
+    border-bottom: 1px solid black;
+}
+
+#recap td>a {
+    display: block;
+    width: 100%;
+    text-decoration: underline;
+}
+
+#recap > thead tr:first-child {
+    white-space: nowrap;
+    background-color: rgba(255, 0, 0, 0.9);
+    color: white;
+}
+
+#retourCompet button:before {
+    content: "\2B05 \FE0F";
+    margin-right: 5px;
+}
+
+#retourCompet button {
+    margin-bottom: 2%;
 }
