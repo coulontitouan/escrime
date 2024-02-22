@@ -291,6 +291,26 @@ def affiche_competition(id_compet) :
         competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=rq.get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
     )
 
+@app.route("/escrimeur/<int:id_escrimeur>/competition/<int:id_competition>")
+def affiche_escrimeur(id_escrimeur, id_competition) :
+    """Fonction qui permet d'afficher un escrimeur
+
+    Args:
+        id_escrimeur (int): Identifiant unique de l'escrimeur.
+        id_competition (int): Identifiant unique de la compétition.
+    
+    Returns:
+        flask.Response: Renvoie la page de l'escrimeur
+    """
+    escrimeur = rq.get_tireur(id_escrimeur)
+    competition = rq.get_competition(id_competition)
+    return render_template(
+        "escrimeur.html",
+        escrimeur = escrimeur,
+        competition = competition,
+        to_date = cst.TO_DATE
+    ) 
+
 @app.route("/competition/<int:id_compet>/createPoule")
 def competition_cree_poules(id_compet) :
     """Fonction qui permet de créer les poules d'une compétition
@@ -511,6 +531,10 @@ def inscription_competition(id_compet) :
     form = InscriptionForm()
     competition = rq.get_competition(id_compet)
     inscrit = competition.est_inscrit(current_user.num_licence)
+    try :
+        user = current_user.num_licence
+    except AttributeError:
+        user = -1
     if not form.is_submitted() :
         form.next.data = request.args.get("next")
     else :
@@ -524,7 +548,9 @@ def inscription_competition(id_compet) :
             return redirect(url_for('affiche_competition', id_compet = id_compet))
         flash('Vous êtes déja inscrit', 'danger')
         return redirect(url_for('affiche_competition', id_compet = id_compet))
-    return render_template('competition.html',form = form, competition = competition, id_compet = id_compet)
+    return render_template('competition.html',
+        competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=rq.get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
+)
 
 @app.route("/suppr-competition/<int:id_compet>")
 @login_required
@@ -664,12 +690,14 @@ def desinscription_competition(id_compet : int) :
     form = InscriptionForm()
     competition = rq.get_competition(id_compet)
     competition.desinscription(current_user.num_licence)
+    try :
+        user = current_user.num_licence
+    except AttributeError:
+        user = -1
     flash('Vous êtes désinscrit', 'warning')
     return render_template('competition.html',
-                           form=form,
-                           competition=rq.get_competition(id_compet),
-                           id=id_compet,
-                           dico=competition.get_tireurs_classes())
+    competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=rq.get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
+)
 
 @app.route("/competition/<int:id_compet>/affichage-grand-ecran", methods=("GET", "POST"))
 def affichage_grand_ecran(id_compet) :

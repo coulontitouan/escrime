@@ -241,6 +241,17 @@ class Escrimeur(db.Model, UserMixin):
     def get_historique_resultat(self):
         return (Resultat.query.join(Competition).filter(Resultat.id_escrimeur == self.num_licence).order_by(Competition.date.desc()).all())
 
+    def get_info_participation(self, id_compet) :
+        """Récupère les informations de participation d'un tireur à une compétition.
+
+        Args:
+            id_compet (int): l'identifiant de la compétition.
+
+        Returns:
+            Participation: les informations de participation du tireur à la compétition.
+        """
+        return Participation.query.filter_by(id_competition = id_compet, id_escrimeur = self.num_licence)
+
     def to_json(self):
         """Json pour l'api"""
         return {"num_licence": self.num_licence,
@@ -250,7 +261,7 @@ class Escrimeur(db.Model, UserMixin):
                 "nationalite": self.nationalite,
                 "club": self.club.to_json()
                 }
-
+      
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de l'escrimeur dans un fichier csv."""
         naissance = self.date_naissance.strftime(cst.TO_DATE)
@@ -493,7 +504,7 @@ class Competition(db.Model):
             points = cst.ARBITRE
         db.session.add(Resultat(id_competition = self.id,
                                 id_escrimeur = num_licence,
-                                rang = None,
+                                rang = "",
                                 points = points,est_chef = est_chef,id_groupe = id_groupe))
         db.session.commit()
 
@@ -789,6 +800,21 @@ class Competition(db.Model):
                 if match.etat != cst.MATCH_TERMINE or Phase.query.filter_by(id_competition = self.id).order_by(Phase.id.desc()).first().libelle == "Finale":
                     return False
         return True if len(self.phases) != 0 else False
+    
+    def get_participation(self, id_tireur, id_phase, id_match) :
+        """Récupère la participation du tireur concurent au tireur donné dans un match donné.
+
+        Args:
+            id_tireur (int): l'identifiant du tireur concurent.
+            id_phase (int): l'identifiant de la phase.
+            id_match (int): l'identifiant du match.
+
+        Returns:
+            Participation: la participation du tireur concurent au tireur donné dans un match donné.
+        """
+        return Participation.query.filter_by(id_competition = self.id,
+                                            id_phase = id_phase,
+                                            id_match = id_match).where(Participation.id_escrimeur != id_tireur).first()
 
     def to_titre_csv(self):
         """Retourne le format du titre du fichier csv de la compétition."""
@@ -1257,6 +1283,22 @@ class Participation(db.Model):
             Optional[Escrimeur]: L'escrimeur lié à cette participation, s'il existe.
         """
         return Escrimeur.query.get(self.id_escrimeur)
+
+    def get_concurrent(self) -> Escrimeur :
+        """Récupère le concurrent de l'escrimeur associé à cette participation.
+
+        Returns:
+            Optional[Escrimeur]: Le concurrent de l'escrimeur lié à cette participation, s'il existe.
+        """
+        return [participation.tireur for participation in self.match.participations if participation.id_escrimeur != self.id_escrimeur][0]
+    
+    def get_phase(self) -> Phase :
+        """Récupère la phase associée à cette participation.
+
+        Returns:
+            Optional[Phase]: La phase liée à cette participation, si elle existe.
+        """
+        return Phase.query.get((self.id_phase, self.id_competition))
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de la participation dans un fichier csv."""
