@@ -50,7 +50,7 @@
             </a>
           {% endfor %}
         {% endif %}
-        <h2>Poules</h2>
+        <h2>Poules :</h2>
         {% for poule in competition.get_poules() %}
           <a href="{{ url_for('affiche_poule', id_compet = competition.id, id_poule = loop.index) }}">
             <table class="scroll">
