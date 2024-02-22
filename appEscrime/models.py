@@ -36,6 +36,10 @@ class Club(db.Model):
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture du club dans un fichier csv."""
         return [self.region, self.nom]
+    
+    def to_json(self):
+        """Retourne les données nécessaires à l'écriture du club dans un fichier json."""
+        return {"region": self.region, "nom": self.nom}
 
 class Categorie(db.Model):
     """Classe représentant une catégorie d'âge d'escrimeurs."""
@@ -221,6 +225,19 @@ class Escrimeur(db.Model, UserMixin):
                                           Participation.id_escrimeur == self.num_licence)
                                           .first().id_match)
     
+    def get_id_groupe(self, id_compet):
+        """Récupère l'id du groupe d'un escrimeur dans une compétition donnée
+
+        Args:
+            id_compet (int): l'identifiant de la compétition
+
+        Returns:
+            int: l'identifiant du groupe de l'escrimeur dans la compétition donnée
+        """
+        return (Participation.query.filter(Participation.id_competition == id_compet,
+                                          Participation.id_escrimeur == self.num_licence)
+                                          .first().id_groupe)
+    
     def get_historique_resultat(self):
         return (Resultat.query.join(Competition).filter(Resultat.id_escrimeur == self.num_licence).order_by(Competition.date.desc()).all())
 
@@ -235,6 +252,16 @@ class Escrimeur(db.Model, UserMixin):
         """
         return Participation.query.filter_by(id_competition = id_compet, id_escrimeur = self.num_licence)
 
+    def to_json(self):
+        """Json pour l'api"""
+        return {"num_licence": self.num_licence,
+                "nom": self.nom,
+                "prenom": self.prenom,
+                "date_naissance": self.date_naissance.strftime(cst.TO_DATE),
+                "nationalite": self.nationalite,
+                "club": self.club.to_json()
+                }
+      
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de l'escrimeur dans un fichier csv."""
         naissance = self.date_naissance.strftime(cst.TO_DATE)
@@ -486,12 +513,13 @@ class Competition(db.Model):
 
         Args:
             num_licence_chef (int): Numéro de licence de l'escrimeur chef de groupe
-            groupe (tuple): le tuple des 3 autres escimeurs.
+            groupe (tuple): le tuple des 3 autres num_licence des escimeurs.
         """
-        id_groupe = Resultat.query.filter_by(id_competition = self.id).order_by(desc(Resultat.id_groupe)).first().id_groupe1+1
+        resultat = Resultat.query.filter_by(id_competition = self.id).order_by(desc(Resultat.id_groupe)).first()
+        id_groupe = 1 if resultat is None else resultat.id_groupe+1
         for num_licence in groupe:
-            self.inscription(numlicence = num_licence,id_groupe = id_groupe,arbitre=False)
-        self.inscription(numlicence = num_licence_chef,id_groupe = id_groupe, est_chef= True,arbitre=False)
+            self.inscription(num_licence = num_licence, id_groupe = id_groupe, arbitre=False)
+        self.inscription(num_licence = num_licence_chef, id_groupe = id_groupe, est_chef= True, arbitre=False)
 
     def ajoute_poule(self, id_poule):
         """Ajoute une poule à la compétition.
@@ -692,7 +720,8 @@ class Competition(db.Model):
 
         for resultat in Resultat.query.filter_by(id_competition = self.id).all():
             if resultat.rang != "" and resultat.points != cst.ARBITRE:
-                dico[resultat.id_escrimeur]["rang"] = -resultat.rang
+                if(resultat.rang is not None):
+                    dico[resultat.id_escrimeur]["rang"] = -resultat.rang
         return dico
     
     def dico_victoire_tireur_poule(self):
