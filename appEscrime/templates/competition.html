@@ -50,7 +50,7 @@
             </a>
           {% endfor %}
         {% endif %}
-        <h2>Poules</h2>
+        <h2>Poules :</h2>
         {% for poule in competition.get_poules() %}
           <a href="{{ url_for('affiche_poule', id_compet = competition.id, id_poule = loop.index) }}">
             <table class="scroll">
@@ -155,7 +155,11 @@
           {% for num_tireur in dico.keys() %}
             {% set tireur = get_tireur(num_tireur) %}
             <tr class="escrimeur-row" data-escrimeur-id="{{ tireur.num_licence }}">
+              {%if dico[num_tireur]['rang'] != 0%}
+              <td>{{ dico[num_tireur]['rang']*-1 }}</td>
+              {%else%}
               <td>{{ loop.index }}</td>
+              {%endif%}
               <td>{{ tireur.prenom }}</td>
               <td>{{ tireur.nom }}</td>
               <td>{{ tireur.club.nom }}</td>

@@ -478,20 +478,26 @@ def inscription_competition(id_compet) :
     form = InscriptionForm()
     competition = rq.get_competition(id_compet)
     inscrit = competition.est_inscrit(current_user.num_licence)
+    try :
+        user = current_user.num_licence
+    except AttributeError:
+        user = -1
     if not form.is_submitted() :
         form.next.data = request.args.get("next")
     else :
         if form.role.data == "Arbitre" and not inscrit :
             competition.inscription(current_user.num_licence,True)
             flash('Vous êtes inscrit comme arbitre', 'success')
-            return redirect(url_for('competition',id_compet = id_compet))
+            return redirect(url_for('affiche_competition',id_compet = id_compet))
         if form.role.data == "Tireur" and not inscrit :
             competition.inscription(current_user.num_licence)
             flash('Vous êtes inscrit comme tireur', 'success')
-            return redirect(url_for('competition', id_compet = id_compet))
+            return redirect(url_for('affiche_competition', id_compet = id_compet))
         flash('Vous êtes déja inscrit', 'danger')
-        return redirect(url_for('competition', id_compet = id_compet))
-    return render_template('competition.html',form = form, competition = competition, id_compet = id_compet)
+        return redirect(url_for('affiche_competition', id_compet = id_compet))
+    return render_template('competition.html',
+        competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=rq.get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
+)
 
 @app.route("/suppr-competition/<int:id_compet>")
 @login_required
@@ -631,11 +637,14 @@ def deinscription_competition(id_compet : int) :
     form = InscriptionForm()
     competition = rq.get_competition(id_compet)
     competition.desinscription(current_user.num_licence)
+    try :
+        user = current_user.num_licence
+    except AttributeError:
+        user = -1
     flash('Vous êtes désinscrit', 'warning')
     return render_template('competition.html',
-                           form=form,
-                           competition=rq.get_competition(id_compet),
-                           id=id_compet)
+    competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=rq.get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
+)
 
 @app.route("/competition/<int:id_compet>/affichage-grand-ecran", methods=("GET", "POST"))
 def affichage_grand_ecran(id_compet) :
