@@ -155,7 +155,11 @@
           {% for num_tireur in dico.keys() %}
             {% set tireur = get_tireur(num_tireur) %}
             <tr>
+              {%if dico[num_tireur]['rang'] != 0%}
+              <td>{{ dico[num_tireur]['rang']*-1 }}</td>
+              {%else%}
               <td>{{ loop.index }}</td>
+              {%endif%}
               <td>{{ tireur.prenom }}</td>
               <td>{{ tireur.nom }}</td>
               <td>{{ tireur.club.nom }}</td>
