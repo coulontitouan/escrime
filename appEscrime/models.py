@@ -466,7 +466,7 @@ class Competition(db.Model):
             points = cst.ARBITRE
         db.session.add(Resultat(id_competition = self.id,
                                 id_escrimeur = num_licence,
-                                rang = None,
+                                rang = "",
                                 points = points,est_chef = est_chef,id_groupe = id_groupe))
         db.session.commit()
 
