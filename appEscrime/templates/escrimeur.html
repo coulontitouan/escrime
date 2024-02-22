@@ -34,7 +34,7 @@
   <table>
     <thead>
       <tr>
-        <th colspan="5">Récapitulatif des matchs</th>
+        <th colspan="100%">Récapitulatif des matchs</th>
       </tr>
       <tr>
         <th>Résultats</th>
@@ -50,11 +50,14 @@
       <tr>
         <td>{{ participation.statut }}</td>
         <td>{{ participation.id_match }}</td>
+        <td><a href="{{ url_for('affiche_poule', id_compet = competition.id, id_poule = participation.get_phase().id) }}">
         {% if participation.get_phase().libelle == 'Poule' %}
-        <td>{{ participation.get_phase().libelle }} {{ participation.get_phase().id }}</td>
+        {{ participation.get_phase().libelle }} {{ participation.get_phase().id }}
         {% else %}
-        <td>{{ participation.get_phase().libelle }}</td>
+        {{ participation.get_phase().libelle }}
         {% endif %}
+        </a>
+        </td>
         <td>{{ participation.touches }} - {{ competition.get_participation(escrimeur.num_licence,
           participation.get_phase().id, id_match).touches }}
         </td>

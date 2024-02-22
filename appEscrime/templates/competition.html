@@ -154,7 +154,7 @@
         <tbody>
           {% for num_tireur in dico.keys() %}
             {% set tireur = get_tireur(num_tireur) %}
-            <tr class="escrimeur-row" data-escrimeur-id="{{ tireur.num_licence }}">
+            <tr class="clickable-row" onclick="window.location = '{{ url_for('affiche_escrimeur', id_escrimeur = num_tireur, id_competition = competition.id) }}'">
               {%if dico[num_tireur]['rang'] != 0%}
               <td>{{ dico[num_tireur]['rang']*-1 }}</td>
               {%else%}
@@ -216,14 +216,5 @@
         y.style.display = 'table'
       }
     }
-    document.addEventListener("DOMContentLoaded", function() {
-      let escrimeurRows = document.querySelectorAll(".escrimeur-row");
-      escrimeurRows.forEach(function(escrimeurRow) {
-          escrimeurRow.addEventListener("click", function() {
-              let escrimeurId = escrimeurRow.getAttribute("data-escrimeur-id");
-              window.location.href = "/competition/" + {{ competition.id }} + "/escrimeur/" + escrimeurId;
-          });
-      });
-  });
   </script>
 {% endblock %}
