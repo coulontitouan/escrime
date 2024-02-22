@@ -1,31 +1,94 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block style %}
-    {{ super() }}
-    <link rel="stylesheet" href="{{ url_for('static', filename='escrimeur.css') }}">
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'escrimeur.css') }}" />
 {% endblock %}
 
 {% block content %}
-<div class="escrimeur-info">
+<style>
+  tbody tr:nth-child(even) {
+    background-color: rgba(255, 0, 0, 0.2);
+  }
+ table {
+    border: 1px solid black;
+    width: 100%;
+  }
+  
+ table thead>tr {
+    border-bottom: 1px solid black;
+  }
+</style>
+  <div class="escrimeur-info">
     <h2>Informations sur l'escrimeur</h2>
-    <p><strong>Nom:</strong> {{ escrimeur.nom }}</p>
-    <p><strong>Prénom:</strong> {{ escrimeur.prenom }}</p>
-    <p><strong>Date de naissance:</strong> {{ escrimeur.date_naissance }}</p>
-    <p><strong>Numéro de licence:</strong> {{ escrimeur.num_licence }}</p>
-    <p><strong>Club:</strong> {{ escrimeur.get_club() }}</p>
-    <p><strong>Sexe:</strong> {{ escrimeur.get_sexe() }}</p>
-</div>
+    <p>
+      <strong>Nom:</strong> {{ escrimeur.nom }}
+    </p>
+    <p>
+      <strong>Prénom:</strong> {{ escrimeur.prenom }}
+    </p>
+    <p>
+      <strong>Date de naissance:</strong> {{ escrimeur.date_naissance }}
+    </p>
+    <p>
+      <strong>Numéro de licence:</strong> {{ escrimeur.num_licence }}
+    </p>
+    <p>
+      <strong>Club:</strong> {{ escrimeur.get_club() }}
+    </p>
+    <p>
+      <strong>Sexe:</strong> {{ escrimeur.get_sexe() }}
+    </p>
+  </div>
 
-<div class="competition-info">
+  <div class="competition-info">
     <h2>Informations sur la compétition</h2>
-    <p><strong>Nom:</strong> {{ competition.nom }}</p>
-    <p><strong>Date:</strong> {{ competition.date }}</p>
-    {% for participation in escrimeur.get_info_participation(competition.id) %}
-        {% if participation.get_phase().libelle == "Poule" %}
-            {% if participation.statut == "Vainqueur" %}
-                <p>Vainqueur du match {{participation.id_match}} de la poule {{ participation.get_phase().id }} contre {{ participation.get_concurrent().nom }} avec {{ participation.touches }} touches</p>
+    <p>
+      <strong>Nom:</strong> {{ competition.nom }}
+    </p>
+    <p>
+      <strong>Date:</strong> {{ competition.date.strftime(to_date) }}
+    </p>
+    <table style="text-align: center; border-collapse: collapse; width: 100%;">
+      <thead>
+        <tr>
+          <th colspan="5" style="white-space: nowrap;
+          background-color: rgba(255, 0, 0, 0.9);
+          color: white;">Récapitulatif des matchs</th>
+        </tr>
+        <tr>
+          <th>Résultats</th>
+          <th>Matchs</th>
+          <th>Phase</th>
+          <th>Scores</th>
+          <th>Adversaires</th>
+        </tr>
+      </thead>
+      <tbody style="tbody tr:nth-child(even) {
+        background-color: rgba(255, 0, 0, 0.2);
+      }">
+        {% for participation in escrimeur.get_info_participation(competition.id) %}
+          {% with id_match = participation.id_match %}
+            {% if participation.get_phase().libelle == 'Poule' %}
+                <tr>
+                    <td>{{ participation.statut }}</td>
+                    <td>{{ participation.id_match }}</td>
+                    <td>{{ participation.get_phase().libelle }} {{ participation.get_phase().id }}</td>
+                    <td>{{ participation.touches }} - {{ competition.get_participation(escrimeur.num_licence, participation.get_phase().id, id_match).touches }}</td>
+                    <td>{{ participation.get_concurrent().prenom }} {{ participation.get_concurrent().nom }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                  <td>{{ participation.statut }}</td>
+                  <td>{{ participation.id_match }}</td>
+                  <td>{{ participation.get_phase().libelle }}</td>
+                  <td>{{ participation.touches }} - {{ competition.get_participation(escrimeur.num_licence, participation.get_phase().id, id_match).touches }}</td>
+                  <td>{{ participation.get_concurrent().prenom }} {{ participation.get_concurrent().nom }}</td>
+                </tr>
             {% endif %}
-        {% endif %}
-    {% endfor %}
-</div>
+          {% endwith %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 {% endblock %}

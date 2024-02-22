@@ -308,6 +308,7 @@ def affiche_escrimeur(id_escrimeur, id_competition) :
         "escrimeur.html",
         escrimeur = escrimeur,
         competition = competition,
+        to_date = cst.TO_DATE
     ) 
 
 @app.route("/competition/<int:id_compet>/createPoule")
