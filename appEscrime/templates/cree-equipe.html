@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block styles %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'cree-equipe.css') }}" />
+{% endblock %}
+{% block content %}
+  <div id="formulaire" class="shadow p-3 mb-5 bg-body rounded">
+    <h1 class="text-center mb-4">Inscrire une équipe</h1>
+    <form action="{{ url_for('creation_equipe', id_compet = competition.id) }}" method="post" role="form">
+      <div class="form-group">{{ form.club.label }} {{ form.club }}</div>
+      <ul id="liste-des-tireurs">
+        {% for choix in form.chef_equipe %}
+          <li class="form-group">{{ choix(disabled = True, autocomplete = 'off') }}{{ form.tireurs[loop.index - 1] }}</li>
+        {% endfor %}
+      </ul>
+
+      <label id="informations"></label>
+      <button id="button" type="submit" class="btn btn-primary">Inscrire</button>
+    </form>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const listesDesTireurs = document.getElementById('liste-des-tireurs')
+        function disable(status) {
+          let formElements = listesDesTireurs.querySelectorAll('input, select')
+          for (let elem of formElements) {
+            elem.disabled = status
+          }
+        }
+        function resetOptions() {
+          let selectTireurs = listesDesTireurs.querySelectorAll('select[name^="tireurs"]')
+          for (let tireur of selectTireurs) {
+            tireur.innerHTML = '<option value="" selected disabled hidden> -- Choisir un tireur -- </option>'
+            tireur.disabled = true
+          }
+        }
+        let club = document.getElementById('club')
+        let tireurs = document.querySelectorAll('select[name^="tireurs"]')
+        let informations = document.getElementById('informations')
+        resetOptions()
+        disable(true)
+        club.addEventListener('change', function (e) {
+          if (club.options[club.selectedIndex].value == '2') {
+            resetOptions()
+            disable(true)
+            return
+          }
+          fetch('/api/club/' + club.value)
+            .then((response) => response.json())
+            .then((data) => {
+              resetOptions()
+              for (let tireur of data.members) {
+                let option = new Option(tireur['nom'] + ' ' + tireur['prenom'], tireur['num_licence'])
+                for (let select of tireurs) {
+                  select.appendChild(option.cloneNode(true))
+                }
+              }
+              if (data.members.length < 4) {
+                informations.innerHTML = 'Le club ne contient pas assez de tireurs pour inscrire une équipe'
+              }else{
+                informations.innerHTML = 'N\'oubliez pas de sélectionner un chef d\'équipe'
+              }
+              disable(false)
+            })
+        })
+        tireurs.forEach((select) => {
+          select.addEventListener('change', function () {
+            let autres = listesDesTireurs.querySelectorAll(`select[name^='tireurs']:not(#${select.id}) option[value='${select.value}']`)
+            for (let autre of autres) {
+              autre.disabled = true
+            }
+          })
+        })
+      })
+    </script>
+  </div>
+{% endblock %}

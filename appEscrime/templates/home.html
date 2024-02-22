@@ -34,7 +34,8 @@
                 <th>Genre</th>
                 <th>Lieu</th>
                 <th>Date</th>
-                <th style="color: white; user-select: none;">Bouton</th>
+                <th>Groupe</th>
+                <th style="color: white; user-select: none;"></th>
             </tr>
         </thead>
         <tbody>
@@ -46,6 +47,7 @@
                 <td>{{ c.sexe }}</td>
                 <td>{{ c.get_lieu().nom }}</td>
                 <td>{{ c.date.strftime(to_date) }}</td>
+                <td>{{ 'Individuel' if c.est_individuelle else 'Équipe' }}</td>
                 <td><a href="{{url_for('affiche_competition', id_compet=c.id)}}"><button class="favorite styled" type="button" >Voir plus</button></a></td>
                 {% if current_user.is_authenticated %}
                 {% if current_user.is_admin() %}

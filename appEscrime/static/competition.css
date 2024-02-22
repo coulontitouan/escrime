@@ -136,3 +136,8 @@ tbody tr:nth-child(even) {
 h2:last-of-type:not(:first-of-type) {
   margin-top: 5vh;
 }
+
+.clickable-row:hover {
+  box-shadow: 0 0 5px 5px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
