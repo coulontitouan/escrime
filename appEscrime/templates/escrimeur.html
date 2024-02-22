@@ -19,6 +19,8 @@
     border-bottom: 1px solid black;
   }
 </style>
+<a id="retour" href="{{ url_for('affiche_competition', id_compet = competition.id) }}"><button
+  class="btn btn-outline-secondary">Retour à la compétition : {{competition.nom}} </button></a>
   <div class="escrimeur-info">
     <h2>Informations sur l'escrimeur</h2>
     <p>
