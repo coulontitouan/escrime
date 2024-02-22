@@ -721,7 +721,7 @@ class Competition(db.Model):
                                     dico[participant.id_escrimeur]["matchs"] += 1
         return dico
     
-    def get_tireurs_classes(self):
+    def get_tireurs_classes(self) -> dict:
         """renvoie le dictionnaire des performances de la competition 
         trié par ratio victoires/matchs et ensuite par touches si égalité
 
