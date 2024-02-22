@@ -1,8 +1,8 @@
-tbody tr:nth-child(even) {
+#recap > tbody tr:nth-child(even) {
     background-color: rgba(255, 0, 0, 0.2);
 }
 
-table {
+#recap {
     border: 1px solid black;
     width: 100%;
     text-align: center;
@@ -10,17 +10,17 @@ table {
     width: 100%;
 }
 
-table thead>tr {
+#recap > thead > tr {
     border-bottom: 1px solid black;
 }
 
-td>a {
+#recap td>a {
     display: block;
     width: 100%;
     text-decoration: underline;
 }
 
-thead tr:first-child {
+#recap > thead tr:first-child {
     white-space: nowrap;
     background-color: rgba(255, 0, 0, 0.9);
     color: white;
