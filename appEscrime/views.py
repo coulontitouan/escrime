@@ -13,7 +13,6 @@ from .app import app ,db
 from .models import Escrimeur, Club, Competition, Lieu
 from . import requests as rq
 from .commands import newuser
-from .requests import get_tireur
 
 with app.app_context() :
     class CreeCompetitionForm(FlaskForm) :
@@ -289,7 +288,7 @@ def affiche_competition(id_compet) :
         user = -1
     return render_template(
         "competition.html",
-        competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
+        competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=rq.get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
     )
 
 @app.route("/competition/<int:id_compet>/createPoule")
@@ -304,6 +303,20 @@ def competition_cree_poules(id_compet) :
     """
     competition = rq.get_competition(id_compet)
     competition.programme_poules()
+    return redirect(url_for("affiche_competition", id_compet=id_compet))
+
+@app.route("/competition/<int:id_compet>/phaseSuivante")
+def phaseSuivante(id_compet) :
+    """Fonction qui permet de créer les poules d'une compétition
+
+    Args:
+        id_compet (int): Identifiant unique de la compétition.
+
+    Returns:
+        flask.Response: Renvoie la page de la compétition
+    """
+    competition = rq.get_competition(id_compet)
+    competition.programme_tableau()
     return redirect(url_for("affiche_competition", id_compet=id_compet))
 
 @app.route("/competition/<int:id_compet>/poule/<int:id_poule>")
@@ -435,7 +448,8 @@ def profil() :
     """
     return render_template(
         "profil.html",
-        to_date = cst.TO_DATE
+        to_date = cst.TO_DATE,
+        rq = rq
     )
 
 class ChangerMdpForm(FlaskForm) :
@@ -656,7 +670,7 @@ def affichage_grand_ecran(id_compet) :
     flash('Vous êtes désinscrit', 'warning')
 
     return render_template('affichageGE.html',
-                           competition=competition,get_tireur = get_tireur)
+                           competition=competition,get_tireur = rq.get_tireur)
 
 @app.route("/api/club/<int:id_club>")
 def get_club(id_club) :

@@ -13,6 +13,11 @@
   {% endfor %}
 
   <h1>{{ competition.nom }}</h1>
+  {% if current_user.is_authenticated %}
+    {% if competition.peux_genere_phase_suivante() and current_user.is_admin() %}
+      <a href="{{ url_for('phaseSuivante', id_compet = competition.id) }}"><button class="btn btn-primary" type="button">Générer phase suivante</button></a>
+    {% endif %}
+  {% endif %}
   <div id="body">
     <div id="un">
       {% if competition.nb_phases() != 0 %}
