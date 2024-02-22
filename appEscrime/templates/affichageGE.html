@@ -72,69 +72,28 @@
 
             {% endfor %}
             {%else%}
-            <div id="un" >
-                {% set dicopoule = competition.get_tireurs_classes_poule() %}
-                {% if competition.nb_phases() != 0 %}
-                {% if competition.nb_phases_finales() == 0 %}
-                {% for poule in competition.get_poules() %}
-                    <table class="scroll poule">
-                        <thead>
-                            <tr>
-                                <th id="intitule" colspan="3"> Poule {{ poule.id }} - {{ poule.nb_tireurs() }} Tireurs - {{ poule.get_arbitre().prenom[0] }} {{ poule.get_arbitre().nom }}</th>
-                            </tr>
-                            <tr> 
-                                <th>Prénom</th>
-                                <th>Nom</th>
-                                <th>Points</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            
-                            {% for num_licence in dicopoule.keys() %}
-                            {% with tireur = get_tireur(num_licence) %}
-                            {% if tireur in poule.get_tireurs() %}
-                                <tr>
-                                    <td>{{ tireur.prenom }}</td>
-                                    <td>{{ tireur.nom }}</td>
-                                    <td> {{dicopoule[num_licence]['touches']}}</td>
-                                </tr>
-                                {% endif %}
-                                {% endwith %}
-                            {% endfor %}
-                        </tbody>
-                        </tbody>
-                    </table>
-                    <div class = "matchesAffiche">
-                        <h3 id = "h3match"> Matchs à venir : </h3>
-                    <ul class = "matchsComing ">
-                        {% set matches = poule.matchs[:4] %}
-                        {% set moitie = matches|length // 2 %}
-    
-    
-                            <ul id="matchsGauche">
-                                {% for match in matches[:moitie] %}
-                                    <li class = "match">
-                                        <p class="opposant">{{ match.arbitre.prenom }} {{ match.arbitre.nom }}</p>
-                                        <p class="opposant">{{ match.participations[0].get_escrimeur().prenom }} {{ match.participations[0].get_escrimeur().nom }}</p>
-                                        <p class="opposant">{{ match.participations[1].get_escrimeur().prenom }} {{ match.participations[1].get_escrimeur().nom }}</p>
-                                        <p class="opposant">Poule A - Piste 1</p>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-    
-                            <ul id="matchsDroite">
-                                {% for match in matches[moitie:] %}
-                                    <li class = "match">
-                                        
-                                        <p class="opposant">{{ match.arbitre.prenom }} {{ match.arbitre.nom }}</p>
-                                        <p class="opposant">{{ match.participations[0].get_escrimeur().prenom }} {{ match.participations[0].get_escrimeur().nom }}</p>
-                                        <p class="opposant">{{ match.participations[1].get_escrimeur().prenom }} {{ match.participations[1].get_escrimeur().nom }}</p>
-                                        <p class="opposant">Poule A - Piste 1</p>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                    </ul>
-                </div>
+            {% set phase = competition.get_phases_tableau()[0] %}
+              <table class="scroll">
+                <thead>
+                  <tr>
+                    <th id="intitule" colspan="3">{{ phase.libelle }} - {{ phase.nb_tireurs() }} Tireurs</th>
+                  </tr>
+                  <tr>
+                    <th>Prénom</th>
+                    <th>Nom</th>
+                    <th>Match</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for tireur in phase.get_tireurs() %}
+                    <tr>
+                      <td>{{ tireur.prenom }}</td>
+                      <td>{{ tireur.nom }}</td>
+                      <td>{{ tireur.get_id_match(competition.id, phase.id) }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             {%endif%}
             {% else %}
                 <p>Aucune poule créée</p>
