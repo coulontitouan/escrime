@@ -217,7 +217,7 @@
       escrimeurRows.forEach(function(escrimeurRow) {
           escrimeurRow.addEventListener("click", function() {
               let escrimeurId = escrimeurRow.getAttribute("data-escrimeur-id");
-              window.location.href = "/escrimeur/" + escrimeurId + "/competition/" + {{ competition.id }};
+              window.location.href = "/competition/" + {{ competition.id }} + "/escrimeur/" + escrimeurId;
           });
       });
   });

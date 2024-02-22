@@ -291,7 +291,7 @@ def affiche_competition(id_compet) :
         competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=rq.get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
     )
 
-@app.route("/escrimeur/<int:id_escrimeur>/competition/<int:id_competition>")
+@app.route("/competition/<int:id_competition>/escrimeur/<int:id_escrimeur>")
 def affiche_escrimeur(id_escrimeur, id_competition) :
     """Fonction qui permet d'afficher un escrimeur
 
