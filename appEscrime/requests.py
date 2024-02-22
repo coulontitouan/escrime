@@ -4,19 +4,19 @@ from sqlalchemy import desc
 from .models import Lieu, Competition, Phase, Match, Participation, Resultat, Club, TypePhase, Arme, Categorie, Escrimeur # pylint: disable=line-too-long
 from .app import db
 
-def get_all_armes():
+def get_all_armes()-> list[Arme]:
     """Récupère toutes les armes dans la base de données"""
     return Arme.query.all()
 
-def get_all_categories():
+def get_all_categories()->list[Categorie]:
     """Récupère toutes les catégories dans la base de données"""
     return Categorie.query.all()
 
-def get_all_competitions():
+def get_all_competitions()->list[Competition]:
     """Récupère toutes les compétitions dans la base de données"""
     return Competition.query.all()
 
-def get_arme(id_arme):
+def get_arme(id_arme)->Arme:
     """Récupère une arme dans la base de données à partir de son id
 
     Args:
@@ -24,7 +24,7 @@ def get_arme(id_arme):
     """
     return Arme.query.get(id_arme)
 
-def get_arme_par_libelle(libelle):
+def get_arme_par_libelle(libelle)->Arme:
     """Fonction qui permet de récupérer une arme à partir de son libellé dans la base de données
 
     Args:
@@ -32,7 +32,7 @@ def get_arme_par_libelle(libelle):
     """
     return Arme.query.filter(Arme.libelle == libelle).first()
 
-def get_club(id_club):
+def get_club(id_club) -> Club:
     """Récupère un club dans la base de données à partir de son id
 
     Args:
@@ -40,7 +40,7 @@ def get_club(id_club):
     """
     return Club.query.get(id_club)
 
-def get_categorie(id_cat):
+def get_categorie(id_cat)->Categorie:
     """Récupère une catégorie dans la base de données à partir de son id
 
     Args:
@@ -48,7 +48,7 @@ def get_categorie(id_cat):
     """
     return Categorie.query.get(id_cat)
 
-def get_categorie_par_libelle(libelle):
+def get_categorie_par_libelle(libelle)->Categorie:
     """Fonction qui permet de récupérer une catégorie à partir de son libellé dans la base de données
 
     Args:
@@ -56,7 +56,7 @@ def get_categorie_par_libelle(libelle):
     """
     return Categorie.query.filter(Categorie.libelle == libelle).first()
 
-def get_competition(id_compet):
+def get_competition(id_compet)->Competition:
     """Récupère une compétition dans la base de données à partir de son id
 
     Args:
@@ -64,7 +64,7 @@ def get_competition(id_compet):
     """
     return Competition.query.get(id_compet)
 
-def get_participation(id_part):
+def get_participation(id_part)->Participation:
     """Récupère une participation dans la base de données à partir de son id
 
     Args:
@@ -72,7 +72,7 @@ def get_participation(id_part):
     """
     return Participation.query.get(id_part)
 
-def get_tireur(num_licence):
+def get_tireur(num_licence)->Escrimeur:
     """Récupère un tireur dans la base de données à partir de son numéro de licence
 
     Args:
@@ -80,7 +80,7 @@ def get_tireur(num_licence):
     """
     return Escrimeur.query.get(num_licence)
 
-def get_match(id_match):
+def get_match(id_match)->Match:
     """Récupère un match dans la base de données à partir de son id
 
     Args:
@@ -88,7 +88,7 @@ def get_match(id_match):
     """
     return Match.query.get(id_match)
 
-def get_type_phase(id_type):
+def get_type_phase(id_type)->TypePhase:
     """Récupère un type de phase dans la base de données à partir de son id
 
     Args:
@@ -96,13 +96,13 @@ def get_type_phase(id_type):
     """
     return TypePhase.query.get(id_type)
 
-def get_max_competition_id():
+def get_max_competition_id()->int:
     """Récupère l'id de la dernière compétition créée"""
     if Competition.query.count() == 0:
         return 0
     return Competition.query.order_by(desc(Competition.id)).first().id
 
-def get_lieu(nom, adresse, ville):
+def get_lieu(nom, adresse, ville)->Lieu:
     """Récupère un lieu dans la base de données à partir de son nom, son adresse et sa ville
 
     Args:
@@ -112,7 +112,7 @@ def get_lieu(nom, adresse, ville):
     """
     return Lieu.query.filter_by(nom = nom, adresse = adresse, ville = ville).first()
 
-def get_tireurs_competition(id_compet):
+def get_tireurs_competition(id_compet)->list[Escrimeur]:
     """Récupère tous les tireurs d'une compétition à partir de son id
 
     Args:
@@ -120,7 +120,7 @@ def get_tireurs_competition(id_compet):
     """
     return get_competition(id_compet).get_tireurs()
 
-def get_est_inscrit(num_licence, id_compet):
+def get_est_inscrit(num_licence, id_compet)->bool:
     """Vérifie si un tireur donné est inscrit à une compétition donnée
 
     Args:
@@ -133,7 +133,7 @@ def get_est_inscrit(num_licence, id_compet):
         return False
     return True
 
-def delete_competition(id_compet):
+def delete_competition(id_compet:int)->None:
     """Supprime une compétion dans la BD à partir de son id
 
     Args:
@@ -146,7 +146,7 @@ def delete_competition(id_compet):
     Competition.query.filter(Competition.id == id_compet).delete()
     db.session.commit()
 
-def cree_liste_nom_objet(liste):
+def cree_liste_nom_objet(liste)->list:
     """Crée une liste de tuples (id, libelle) à partir d'une liste d'objets
 
     Args:

@@ -36,6 +36,10 @@ class Club(db.Model):
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture du club dans un fichier csv."""
         return [self.region, self.nom]
+    
+    def to_json(self):
+        """Retourne les données nécessaires à l'écriture du club dans un fichier json."""
+        return {"region": self.region, "nom": self.nom}
 
 class Categorie(db.Model):
     """Classe représentant une catégorie d'âge d'escrimeurs."""
@@ -221,6 +225,16 @@ class Escrimeur(db.Model, UserMixin):
                                           Participation.id_escrimeur == self.num_licence)
                                           .first().id_match)
 
+    def to_json(self):
+        """Json pour l'api"""
+        return {"num_licence": self.num_licence,
+                "nom": self.nom,
+                "prenom": self.prenom,
+                "date_naissance": self.date_naissance.strftime(cst.TO_DATE),
+                "nationalite": self.nationalite,
+                "club": self.club.to_json()
+                }
+
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de l'escrimeur dans un fichier csv."""
         naissance = self.date_naissance.strftime(cst.TO_DATE)
@@ -283,6 +297,7 @@ class Competition(db.Model):
     phases = db.relationship('Phase', back_populates = 'competition')
     # Relation un-à-plusieurs : Une compétition comprend plusieurs escrimeurs
     resultats = db.relationship('Resultat', back_populates = 'competition')
+    est_individuelle = False
 
     def get_categorie(self):
         """Retourne la catégorie de la compétition.
@@ -651,7 +666,8 @@ class Competition(db.Model):
 
         for resultat in Resultat.query.filter_by(id_competition = self.id).all():
             if resultat.rang != "" and resultat.points != cst.ARBITRE:
-                dico[resultat.id_escrimeur]["rang"] = -resultat.rang
+                if(resultat.rang is not None):
+                    dico[resultat.id_escrimeur]["rang"] = -resultat.rang
         return dico
     
     def dico_victoire_tireur_poule(self):

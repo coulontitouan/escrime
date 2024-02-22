@@ -143,14 +143,14 @@
         let elem = document.getElementById("img");
         let a = document.getElementsByClassName("logo")[0];
         coords = elem.getBoundingClientRect()
-        console.log(coords)
+        //console.log(coords)
         let barre = document.createElement('span')
         barre.setAttribute("id", "barre");
         barre.style.cssText = "position:fixed; z-index: 5";
         barre.style.left = -41 + coords.width + "px";
         barre.style.top = 2+ coords.top + "px";
         document.querySelector('header').appendChild(barre)
-        console.log(barre.getBoundingClientRect())
+        //console.log(barre.getBoundingClientRect())
     
     function shutdown() {
         let texte =  "Vous êtes sur le point de fermer l'application.\r\n" +
