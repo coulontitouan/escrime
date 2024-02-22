@@ -250,7 +250,7 @@ class Escrimeur(db.Model, UserMixin):
         Returns:
             Participation: les informations de participation du tireur à la compétition.
         """
-        return Participation.query.filter_by(id_competition = id_compet, id_escrimeur = self.num_licence)
+        return Participation.query.filter_by(id_competition = id_compet, id_escrimeur = self.num_licence).order_by(Participation.id_phase.desc())
 
     def to_json(self):
         """Json pour l'api"""
