@@ -301,7 +301,6 @@ class Competition(db.Model):
     phases = db.relationship('Phase', back_populates = 'competition')
     # Relation un-à-plusieurs : Une compétition comprend plusieurs escrimeurs
     resultats = db.relationship('Resultat', back_populates = 'competition')
-    est_individuelle = False
 
     def get_categorie(self):
         """Retourne la catégorie de la compétition.
@@ -490,12 +489,13 @@ class Competition(db.Model):
 
         Args:
             num_licence_chef (int): Numéro de licence de l'escrimeur chef de groupe
-            groupe (tuple): le tuple des 3 autres escimeurs.
+            groupe (tuple): le tuple des 3 autres num_licence des escimeurs.
         """
-        id_groupe = Resultat.query.filter_by(id_competition = self.id).order_by(desc(Resultat.id_groupe)).first().id_groupe1+1
+        resultat = Resultat.query.filter_by(id_competition = self.id).order_by(desc(Resultat.id_groupe)).first()
+        id_groupe = 1 if resultat is None else resultat.id_groupe+1
         for num_licence in groupe:
-            self.inscription(numlicence = num_licence,id_groupe = id_groupe,arbitre=False)
-        self.inscription(numlicence = num_licence_chef,id_groupe = id_groupe, est_chef= True,arbitre=False)
+            self.inscription(num_licence = num_licence, id_groupe = id_groupe, arbitre=False)
+        self.inscription(num_licence = num_licence_chef, id_groupe = id_groupe, est_chef= True, arbitre=False)
 
     def ajoute_poule(self, id_poule):
         """Ajoute une poule à la compétition.

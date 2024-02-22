@@ -31,7 +31,7 @@ with app.app_context() :
         coefficient_competition = IntegerField('Coefficient', validators=[DataRequired()])
         nom_arme = SelectField("Arme", coerce=str, default=1)
         nom_categorie = SelectField("Catégorie", coerce=str, default=1)
-        type_competition = RadioField('Type de compétition', choices = ['Individuelle','En équipe'])
+        est_individuelle = RadioField('Type de compétition', choices = ['Individuelle','En équipe'])
         next = HiddenField()
 
 class SearchForm(FlaskForm) :
@@ -377,8 +377,9 @@ def creation_competition() :
         sexe = form.sexe_competition.data
         if sexe == "Hommes":
             sexe = "Homme"
-        if sexe == "Femmes":
+        elif sexe == "Femmes":
             sexe = "Dames"
+        est_individuelle = True if form.est_individuelle.data=="Individuelle" else False 
         competition = Competition(id=(rq.get_max_competition_id() + 1),
                                   nom=form.nom_competition.data,
                                   date=form.date_competition.data,
@@ -386,10 +387,8 @@ def creation_competition() :
                                   sexe=sexe,
                                   id_lieu=lieu.id,
                                   id_arme=arme.id,
-                                  id_categorie=categorie.id)
-        # true si "Individuelle" sinon false
-        type_competition = True if form.type_competition.data=="Individuelle" else False 
-        print(type_competition)
+                                  id_categorie=categorie.id,
+                                  est_individuelle=est_individuelle)
         db.session.add(competition)
         db.session.commit()
         flash('Compétition créée avec succès', 'success') #Utilise Flash de Flask pour les messages
@@ -419,9 +418,8 @@ def creation_equipe(id_compet) :
         flask.Response: Renvoie la page de création d'une équipe
     """
     competition = rq.get_competition(id_compet)
-    if hasattr(competition,"type_competition"):
-        if competition.type_competition == "Individuelle" :
-            return redirect(url_for('home'))
+    if competition.est_individuelle == "Individuelle" :
+        return redirect(url_for('home'))
     form = EquipeForm()
     
     selection_club = [(club.id, club.nom) for club in db.session.query(Club).all() if club.id != cst.CLUB_ADMIN]
@@ -433,10 +431,19 @@ def creation_equipe(id_compet) :
     if not form.is_submitted():
         form.next.data = request.args.get("next")
     else:
-        if form.validate_on_submit():
-            tireurs = [rq.get_tireur(tireur) for tireur in form.tireurs.data]
-            tireurs.insert(0, tireurs.pop(int(form.chef_equipe.data)-1)) # Mettre le chef en premier
-            #competition.cree_equipe(tireurs, chef, form.club.data)
+        tireurs = [rq.get_tireur(tireur) for tireur in form.tireurs.data]
+        tireurs.insert(0, tireurs.pop(int(form.chef_equipe.data)-1)) # Mettre le chef en premier
+        valide = True
+        for tireur in tireurs:
+            if not tireur.peut_sinscrire(competition.id):
+                flash(f'{tireur.nom} {tireur.prenom} ne peut pas participer à cette compétition.', 'warning')
+                valide = False
+        tireurs = [tireur.num_licence for tireur in tireurs]
+        chef_equipe = tireurs.pop(0)
+        if valide:
+            competition.inscription_groupe(chef_equipe, tireurs)
+            flash("Equipe créée avec succès", "success")
+        return redirect(url_for('affiche_competition', id_compet = id_compet))
     return render_template('cree-equipe.html', form=form, competition=competition)
 
 @app.route("/profil")
