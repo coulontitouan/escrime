@@ -105,7 +105,7 @@
             <table id="Cprovisoire" class = "scroll" style="display:table;">
                 <thead>
                     <tr>
-                        <th id="intitule" colspan="5">Classement provisoire <a href="https://openclassrooms.com/forum/sujet/scroll-vertical-sur-balise-table"><img id="info" src="../static/images/istockphoto-1140611970-612x612-removebg-preview(1).png" alt=""></a></th>
+                        <th id="intitule" colspan="5">Classement provisoire </th>
                     </tr>
                     <tr>
                         <th>N°</th>
@@ -132,42 +132,48 @@
         </div>
     </main>
     <script>
-        setInterval(changePoule, 4000);
+        console.log("test");
+        
         var pouleGlobal = document.getElementsByClassName('poule');
         var pouleAffiche = 0;
-        var pouleDebut = pouleGlobal[pouleAffiche].style.display == "table";
-        var matchesGlobal = document.getElementsByClassName('matchesAffiche');
-        var matchesDebut = matchesGlobal[pouleAffiche].style.display == "flex";
-        
-        for (var i = pouleAffiche+1; i < pouleGlobal.length; i++) {
-            pouleGlobal[i].style.display = "none";
-            matchesGlobal[i].style.display = "none";
+        if (pouleGlobal.length != 0){
+            setInterval(changePoule, 4000);
+            var pouleDebut = pouleGlobal[pouleAffiche].style.display == "table";
+            var matchesGlobal = document.getElementsByClassName('matchesAffiche');
+            var matchesDebut = matchesGlobal[pouleAffiche].style.display == "flex";
+            
+            for (var i = pouleAffiche+1; i < pouleGlobal.length; i++) {
+                pouleGlobal[i].style.display = "none";
+                matchesGlobal[i].style.display = "none";
+            }
+    
+            function changePoule(){
+                var x = pouleGlobal[pouleAffiche];
+                var xx = matchesGlobal[pouleAffiche];
+                if (pouleAffiche+1 == pouleGlobal.length){
+                    pouleAffiche = 0
+                    
+                }
+                else{
+                    pouleAffiche +=1
+                }
+                var y = pouleGlobal[pouleAffiche]
+                var yy = matchesGlobal[pouleAffiche];
+                if (x.style.display === "none") {
+                    x.style.display = "none";
+                    xx.style.display = "none";
+                    y.style.display = "table";
+                    yy.style.display = "table"
+                } else {
+                    x.style.display = "none";
+                    xx.style.display = "none";
+                    y.style.display = "table";
+                    yy.style.display = "table"
+                    
+                }
         }
-
-        function changePoule(){
-            var x = pouleGlobal[pouleAffiche];
-            var xx = matchesGlobal[pouleAffiche];
-            if (pouleAffiche+1 == pouleGlobal.length){
-                pouleAffiche = 0
-                
-            }
-            else{
-                pouleAffiche +=1
-            }
-            var y = pouleGlobal[pouleAffiche]
-            var yy = matchesGlobal[pouleAffiche];
-            if (x.style.display === "none") {
-                x.style.display = "none";
-                xx.style.display = "none";
-                y.style.display = "table";
-                yy.style.display = "table"
-            } else {
-                x.style.display = "none";
-                xx.style.display = "none";
-                y.style.display = "table";
-                yy.style.display = "table"
-                
-            }
+        }
+       
             function mettreAJourHeure() {
                 var date = new Date();
                 var heures = date.getHours();
@@ -187,7 +193,7 @@
             mettreAJourHeure();
             
            
-        }
+        
     </script>
     {% endblock %}
 
