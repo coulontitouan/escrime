@@ -7,7 +7,9 @@
   <h1>{{ competition.nom }}</h1>
   {% if current_user.is_authenticated %}
     {% if competition.peux_genere_phase_suivante() and current_user.is_admin() %}
-      <a href="{{ url_for('phaseSuivante', id_compet = competition.id) }}"><button class="btn btn-primary" type="button">Générer phase suivante</button></a>
+      <a href="{{ url_for('phase_suivante', id_compet = competition.id) }}"><button class="btn btn-primary" type="button">Générer phase suivante</button></a>
+    {% elif competition.est_finie() %}
+      <a href="{{ url_for('phase_suivante', id_compet = competition.id, finie = True) }}"><button class="btn btn-primary" type="button">Clôturer la compétition</button></a>
     {% endif %}
   {% endif %}
   <div id="body">
@@ -76,7 +78,9 @@
         <p>Aucune poule créée</p>
         {% if current_user.is_authenticated %}
           {% if current_user.is_admin() %}
-            <a href="{{ url_for('competition_cree_poules', id_compet = competition.id) }}"><button class="btn btn-primary" type="button">Répartir les poules</button></a>
+            {% if (not competition.est_individuelle and competition.get_nb_participants() >= 2) or (competition.get_nb_participants() >= 5 and (competition.get_arbitres()|length) >= 1) %}
+              <a href="{{ url_for('competition_cree_poules', id_compet = competition.id) }}"><button class="btn btn-primary" type="button">Répartir les poules</button></a>
+            {% endif %}
           {% endif %}
         {% endif %}
       {% endif %}
@@ -93,48 +97,31 @@
           {% endif %}
           {% if competition.get_poules() == [] %}
             {% if competition.est_individuelle %}
-              {% if current_user.peut_sinscrire(competition.id) %}
-                <form id="test1" class="form-inline">
-                  <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Search" aria-label="Search" />
-                  <i class="fas fa-search" aria-hidden="true"></i>
-                </form>
-                {% if not user %}
-                  <button id="openbtn" type="button" class="btn btn-success">S'inscrire</button>
-                  <dialog id="dialog" class="shadow p-3 mb-5 bg-body rounded">
-                    <form action="{{ url_for('inscription_competition', id_compet = competition.id) }}" method="post" role="form">
-                      <div id="haut">
-                        <h2>Inscription</h2>
-                        <a id="closebtn"><img id="uneimage" src="{{ url_for('static', filename = 'images/croix.png') }}" alt="" /></a>
-                      </div>
-                      <div class="header-class">{{ form.role }}</div>
-                      <button id="openbtn" type="submit" class="btn btn-success">Confirmer</button>
-                    </form>
-                  </dialog>
+              {% if not current_user.is_admin() %}
+                {% if competition.est_inscrit(current_user.num_licence) %}
+                  <form action="{{ url_for('desinscription_competition', id_compet = competition.id) }}">
+                    <button class="btn btn-success">Se désinscrire ({{ competition.get_type_inscription(current_user.num_licence) }})</button>
+                  </form>
                 {% else %}
-                  <form action="{{ url_for('desinscription_competition', id_compet = competition.id) }}" method="post" role="form">
-                    <button type="submit" class="btn btn-danger">Se désinscrire</button>
+                  {% if current_user.peut_sinscrire(competition.id) %}
+                    <form action="{{ url_for('inscription_competition', id_compet = competition.id, arbitre = False) }}">
+                      <button class="btn btn-success">S'inscrire (Tireur)</button>
+                    </form>
+                  {% endif %}
+                  <form action="{{ url_for('inscription_competition', id_compet = competition.id, arbitre = True) }}">
+                    <button class="btn btn-success">S'inscrire (Arbitre)</button>
                   </form>
                 {% endif %}
-                <script>
-                  const dialog = document.getElementById('dialog')
-                  const openbtn = document.getElementById('openbtn')
-                  const closebtn = document.getElementById('closebtn')
-                  
-                  openbtn.addEventListener('click', function () {
-                    dialog.setAttribute('open', true)
-                  })
-                  closebtn.addEventListener('click', function () {
-                    dialog.removeAttribute('open')
-                  })
-                </script>
               {% endif %}
             {% else %}
-              <a href="{{ url_for('creation_equipe', id_compet = competition.id) }}"><button id="openbtn" type="button" class="btn btn-success">Créer une équipe</button></a>
+              {% if current_user.is_admin() %}
+                <a href="{{ url_for('creation_equipe', id_compet = competition.id) }}"><button id="openbtn" type="button" class="btn btn-success">Créer une équipe</button></a>
+              {% endif %}
             {% endif %}
           {% endif %}
         {% endif %}
       </div>
-      <table id="Cprovisoire" class="scroll" style="display:table;">
+      <table id="Cprovisoire" class="scroll">
         <thead>
           <tr>
             <th id="intitule" colspan="100%">Classement provisoire</th>
@@ -148,17 +135,20 @@
             {% if not competition.est_individuelle %}
               <th>Équipe</th>
             {% endif %}
+            {% if current_user.is_admin %}
+              <th></th>
+            {% endif %}
           </tr>
         </thead>
         <tbody>
           {% for num_tireur in dico.keys() %}
             {% set tireur = get_tireur(num_tireur) %}
             <tr class="clickable-row" onclick="window.location = '{{ url_for('affiche_escrimeur', id_escrimeur = num_tireur, id_competition = competition.id) }}'">
-              {%if dico[num_tireur]['rang'] != 0%}
-              <td>{{ dico[num_tireur]['rang']*-1 }}</td>
-              {%else%}
-              <td>{{ loop.index }}</td>
-              {%endif%}
+              {% if dico[num_tireur]['rang'] != 0 %}
+                <td>{{ dico[num_tireur]['rang'] * - 1 }}</td>
+              {% else %}
+                <td>{{ loop.index }}</td>
+              {% endif %}
               <td>{{ tireur.prenom }}</td>
               <td>{{ tireur.nom }}</td>
               <td>{{ tireur.club.nom }}</td>
@@ -168,10 +158,10 @@
               {% endif %}
             </tr>
           {% endfor %}
-          {% if dico.keys()|length == 0 %}
-          <tr>
+          {% if (dico.keys()|length) == 0 %}
+            <tr>
               <td colspan="100%">Aucun match joué</td>
-          </tr>
+            </tr>
           {% endif %}
         </tbody>
       </table>
@@ -196,6 +186,13 @@
               <td>{{ tireur.nom }}</td>
               <td>{{ tireur.club.nom }}</td>
               <td>{{ tireur.get_classement(competition.id_arme, competition.id_categorie).points }}</td>
+              {% if current_user.is_admin() %}
+              <td>
+                <form action="{{ url_for('desinscription_competition', id_compet = competition.id, id_tireur = tireur.num_licence) }}">
+                  <button type="submit" class="btn btn-danger">Retirer</button>
+                </form>
+              </td>
+            {% endif %}
             </tr>
           {% endfor %}
           {% for tireur in competition.get_tireurs_sans_rang() %}
@@ -205,12 +202,19 @@
               <td>{{ tireur.nom }}</td>
               <td>{{ tireur.club.nom }}</td>
               <td>0</td>
+              {% if current_user.is_admin() %}
+              <td>
+                <form action="{{ url_for('desinscription_competition', id_compet = competition.id, id_tireur = tireur.num_licence) }}">
+                  <button type="submit" class="btn btn-danger">Retirer</button>
+                </form>
+              </td>
+            {% endif %}
             </tr>
           {% endfor %}
-          {% if competition.get_tireurs_order_by_rang()|length == 0 and competition.get_tireurs_sans_rang()|length == 0 %}
-          <tr>
+          {% if (competition.get_tireurs_order_by_rang()|length) == 0 and (competition.get_tireurs_sans_rang()|length) == 0 %}
+            <tr>
               <td colspan="100%">Aucun tireur inscrit</td>
-          </tr>
+            </tr>
           {% endif %}
         </tbody>
       </table>

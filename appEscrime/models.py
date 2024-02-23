@@ -178,6 +178,8 @@ class Escrimeur(db.Model, UserMixin):
             bool : True si l'escrimeur peut s'inscrire, False sinon.
         """
         compet = Competition.query.get(id_compet)
+        if compet.est_inscrit(self.num_licence) :
+            return False
         if compet.sexe == self.sexe:
             today = date.today()
             age = (today.month, today.day) < (self.date_naissance.month, self.date_naissance.day)
@@ -309,6 +311,7 @@ class Competition(db.Model):
     coefficient = db.Column(db.Integer())
     sexe = db.Column(db.String(6))
     est_individuelle = db.Column(db.Boolean, default=True)
+    cloturee = db.Column(db.Boolean, default=False)
     # Clé étrangère vers le lieu
     id_lieu = db.Column(db.Integer(), db.ForeignKey('lieu.id'))
     # Relation plusieurs-à-un : Une compétition se déroule dans un seul lieu
@@ -383,16 +386,23 @@ class Competition(db.Model):
             Query: le résultat de la requête des tireurs inscrits à la compétition.
         """
         return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id,
-                                                        Resultat.points != cst.ARBITRE)
+                                                        Resultat.points != cst.ARBITRE).all()
     
-    def get_nb_tireurs(self):
-        """Retourne le nombre de tireurs inscrits à la compétition.
+    def get_nb_participants(self):
+        """Retourne le nombre de participants (tireurs ou équipes) inscrits à la compétition.
 
         Returns:
-            Query: le résultat de la requête du nombre de tireurs inscrits à la compétition.
+            Query: le résultat de la requête du nombre de participants inscrits à la compétition.
         """
-        return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id,
-                                                        Resultat.points != cst.ARBITRE).count()
+        liste_part = Resultat.query.filter(Resultat.id_competition == self.id, 
+                              Resultat.points != cst.ARBITRE).all()
+        if self.est_individuelle:
+            return len(liste_part)
+        res = 0
+        for resultat in liste_part:
+            if resultat.est_chef:
+                res += 1
+        return res
 
     def get_tireurs_order_by_pts(self) :
         """Retourne les tireurs inscrits à la compétition, triés par points.
@@ -427,14 +437,14 @@ class Competition(db.Model):
         """
         return [tireur for tireur in self.get_tireurs() if tireur not in self.get_tireurs_order_by_rang()]
     
-    def get_arbitres(self):
+    def get_arbitres(self)-> list:
         """Retourne les arbitres inscrits à la compétition.
 
         Returns:
-            Query: le résultat de la requête des arbitres inscrits à la compétition.
+            List: la liste des arbitres inscrits à la compétition.
         """
         return Escrimeur.query.join(Resultat).filter(Resultat.id_competition == self.id,
-                                                     Resultat.points == cst.ARBITRE)
+                                                     Resultat.points == cst.ARBITRE).all()
     
     def get_points(self, id_tireur):
         """Retourne les points d'un tireur à la compétition.
@@ -515,6 +525,27 @@ class Competition(db.Model):
         for num_licence in groupe:
             self.inscription(num_licence = num_licence, id_groupe = id_groupe, arbitre=False)
         self.inscription(num_licence = num_licence_chef, id_groupe = id_groupe, est_chef= True, arbitre=False)
+        
+    def get_type_inscription(self,num_licence):
+        """Récupère le type d'inscription d'un tireur à la compétition.
+
+        Args:
+            num_licence (string): l'identifiant du tireur.
+
+        Returns:
+            int: le type d'inscription du tireur à la compétition.
+        """
+        return 'Arbitre' if Resultat.query.get((self.id,num_licence)).points == cst.ARBITRE else 'Tireur'
+    
+    def est_finie(self):
+        """Vérifie si la compétition est terminée.
+
+        Returns:
+            bool: True si la compétition est terminée, False sinon.
+        """
+        if len(self.phases) > 0:
+            return self.est_tour_termine() and self.phases[-1].libelle == "Finale" and not self.cloturee
+        return False
 
     def ajoute_poule(self, id_poule):
         """Ajoute une poule à la compétition.
@@ -532,9 +563,9 @@ class Competition(db.Model):
         """
         arbitres = self.get_arbitres()
         tireurs = self.get_tireurs()
-        nb_arbitres = arbitres.count()
+        nb_arbitres = len(arbitres)
         len_poules = 5
-        nb_poules = tireurs.count() // len_poules
+        nb_poules = len(tireurs) // len_poules
 
         while nb_poules > nb_arbitres:
             len_poules += 1
@@ -555,18 +586,18 @@ class Competition(db.Model):
         repartition = []
         for i in range(len(self.phases)):
             repartition.append([])
-        for i in range(tireurs.count()):
+        for i in range(len(tireurs)):
             id_poule = rotation_poules[i % len(rotation_poules)]
             repartition[id_poule-1].append(tireurs[i])
         return repartition
 
     def programme_poules(self):
         """Crée les matchs des poules de la compétition."""
-        arbitres = list(self.get_arbitres())
+        arbitres = self.get_arbitres()
         repartition = self.repartition_poules()
         id_poule = 1
         for poule in self.phases:
-            arbitre = [arbitres[id_poule - 1 % len(arbitres)]]
+            arbitre = [arbitres[(id_poule - 1) % len(arbitres)]]
             poule.cree_matchs(arbitre, repartition[poule.id - 1])
             id_poule += 1
         db.session.commit()
@@ -899,7 +930,11 @@ class Phase(db.Model):
             tireurs (list): la liste des tireurs de la phase.
         """
         print(len(tireurs))
-        phase_precedente = self.competition.phases[-2]
+        print(self.competition.phases)
+        try:
+            phase_precedente = self.competition.phases[-2]
+        except IndexError:
+            phase_precedente = self.competition.phases[-1]
         if self.libelle == 'Poule': # En cas de poule
             liste_matchs = self.programme_matchs_poule(tireurs)
             for index, match in enumerate(liste_matchs, start=1):
