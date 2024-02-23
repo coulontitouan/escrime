@@ -81,6 +81,11 @@
                     {% endwith %}
                     {% endif %}
                     {% endfor %}
+                    {% if current_user.get_historique_resultat()|length == 0 %}
+                    <tr>
+                        <td colspan="100%">Aucun résultat disponible</td>
+                    </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </li>

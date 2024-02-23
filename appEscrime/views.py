@@ -27,7 +27,7 @@ with app.app_context() :
         nom_competition = StringField('Nom compétition', validators=[DataRequired()])
         date_competition = DateField('Date compétition',
                                      format='%Y-%m-%d', validators=[DataRequired()])
-        sexe_competition = RadioField('Sexe', choices = ['Hommes','Femmes'])
+        sexe_competition = RadioField('Sexe', choices = ['Homme','Femme'])
         coefficient_competition = IntegerField('Coefficient', validators=[DataRequired()])
         nom_arme = SelectField("Arme", coerce=str, default=1)
         nom_categorie = SelectField("Catégorie", coerce=str, default=1)
@@ -51,7 +51,8 @@ class HomeForm(FlaskForm) :
     """
     categoriesField = SelectField("catégories",coerce=str,default=1, choices = ["Catégorie"])
     armesField = SelectField("armes",coerce=str,default=1, choices = ["Arme"])
-    genresField = SelectField("genres",coerce=str,default=1, choices = ["Genre","Homme", "Dames"])
+    genresField = SelectField("genres",coerce=str,default=1, choices = [("Genre","Genre"),("Homme","Homme"), ("Dames","Dame")])
+    equipeField = SelectField("equipes",coerce=str,default=1, choices = ["Format","Individuel", "Équipe"])
 
 @app.route("/", methods =("GET","POST",))
 def home() :
@@ -74,7 +75,10 @@ def home() :
                         Competition.id_arme == rq.get_arme_par_libelle(form.armesField.data).id)
     if form.genresField.data != "Genre" and form.genresField.data != "1":
         competitions = competitions.filter(
-                        Competition.sexe == form.genresField.data)
+                        Competition.sexe == form.genresField.data if form.genresField.data != "Dame" else "Dames")
+    if form.equipeField.data != "Format" and form.equipeField.data != "1":
+        competitions = competitions.filter(
+                        Competition.est_individuelle == (form.equipeField.data == "Individuel"))
     return render_template(
         "home.html",
         form = form,
@@ -236,7 +240,7 @@ def inscription() :
     form2 = SignUpForm()
     selection_club = []
     for club in db.session.query(Club).all():
-        if club.id != 1:
+        if club.id != cst.CLUB_ADMIN:
             selection_club.append((club.id,club.nom))
     form2.club.choices = selection_club
     if not form2.is_submitted():
@@ -252,7 +256,7 @@ def inscription() :
             if form2.sexe.data == "Femme":
                 sexe = "Dames"
             else:
-                sexe = "Hommes"
+                sexe = "Homme"
             newuser(form2.num_licence.data,
                     form2.mot_de_passe.data,
                     form2.prenom.data,
@@ -279,15 +283,10 @@ def affiche_competition(id_compet) :
     Returns:
         flask.Response: Renvoie la page de la compétition
     """
-    form = InscriptionForm()
     competition = rq.get_competition(id_compet)
-    try :
-        user = current_user.num_licence
-    except AttributeError:
-        user = -1
     return render_template(
         "competition.html",
-        competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=rq.get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
+        competition = competition, get_tireur=rq.get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
     )
 
 @app.route("/competition/<int:id_competition>/escrimeur/<int:id_escrimeur>")
@@ -310,7 +309,7 @@ def affiche_escrimeur(id_escrimeur, id_competition) :
         to_date = cst.TO_DATE
     ) 
 
-@app.route("/competition/<int:id_compet>/createPoule")
+@app.route("/competition/<int:id_compet>/creer-poule")
 def competition_cree_poules(id_compet) :
     """Fonction qui permet de créer les poules d'une compétition
 
@@ -324,8 +323,8 @@ def competition_cree_poules(id_compet) :
     competition.programme_poules()
     return redirect(url_for("affiche_competition", id_compet=id_compet))
 
-@app.route("/competition/<int:id_compet>/phaseSuivante")
-def phaseSuivante(id_compet) :
+@app.route("/competition/<int:id_compet>/phase-suivante/<int:finie>")
+def phase_suivante(id_compet, finie=False):
     """Fonction qui permet de créer les poules d'une compétition
 
     Args:
@@ -336,6 +335,8 @@ def phaseSuivante(id_compet) :
     """
     competition = rq.get_competition(id_compet)
     competition.programme_tableau()
+    if finie:
+        flash('La compétition est terminée', 'success')
     return redirect(url_for("affiche_competition", id_compet=id_compet))
 
 @app.route("/competition/<int:id_compet>/poule/<int:id_poule>")
@@ -394,9 +395,7 @@ def creation_competition() :
             db.session.add(lieu)
             db.session.commit()
         sexe = form.sexe_competition.data
-        if sexe == "Hommes":
-            sexe = "Homme"
-        elif sexe == "Femmes":
+        if sexe == "Femme":
             sexe = "Dames"
         est_individuelle = True if form.est_individuelle.data=="Individuelle" else False 
         competition = Competition(id=(rq.get_max_competition_id() + 1),
@@ -484,17 +483,32 @@ class ChangerMdpForm(FlaskForm) :
     Args:
         FlaskForm (FlaskForm): Classe formulaire de Flask.
     """
-    new_mdp = PasswordField("Password",validators=[DataRequired()])
+    cur_mdp = PasswordField("Mot de passe actuel",validators=[DataRequired()])
+    new_mdp = PasswordField("Nouveau mot de passe",validators=[DataRequired()])
+    con_mdp = PasswordField("Confirmer le mot de passe",validators=[DataRequired()])
     next = HiddenField()
 
-@app.route("/profil/changer-mdp", methods=("POST",))
+@app.route("/profil/changer-mdp", methods=(["GET","POST"]))
 def changer_mdp() :
     """Fonction qui permet de gérer le changement de mot de passe d'un utilisateur.
 
     Returns:
         flask.Response: Renvoie la page du profil
     """
-    form =ChangerMdpForm()
+    form = ChangerMdpForm()
+    if not form.is_submitted():
+        form.next.data = request.args.get("next")
+    else :
+        if sha256(form.cur_mdp.data.encode()).hexdigest() == current_user.mot_de_passe:
+            if form.new_mdp.data != form.con_mdp.data:
+                flash(f"Les mots de passe ne correspondent pas.", "warning")
+            else:
+                current_user.set_mdp(sha256(form.new_mdp.data.encode()).hexdigest())
+                db.session.commit()
+                flash(f"Votre mot de passe a bien été changé !","success")
+                return redirect(url_for("profil"))
+        else:
+            flash("Votre mot de passe est incorrect.","danger")
     return render_template("changer-mdp.html", form=form)
 
 @app.route("/shutdown", methods=['GET'])
@@ -516,9 +530,9 @@ class InscriptionForm(FlaskForm) :
     role = RadioField('Role', choices = ['Arbitre','Tireur'])
     next = HiddenField()
 
-@app.route("/competition/<int:id_compet>/inscription", methods=("GET", "POST"))
+@app.route("/competition/<int:id_compet>/inscription/<int:arbitre>", methods=("GET", "POST"))
 @login_required
-def inscription_competition(id_compet) :
+def inscription_competition(id_compet, arbitre = False) :
     """Fonction qui permet de gérer l'inscription d'un utilisateur à une compétition spécifique.
 
     Args:
@@ -527,29 +541,11 @@ def inscription_competition(id_compet) :
     Returns:
         flask.Response: Renvoie la page de la compétition
     """
-    form = InscriptionForm()
     competition = rq.get_competition(id_compet)
-    inscrit = competition.est_inscrit(current_user.num_licence)
-    try :
-        user = current_user.num_licence
-    except AttributeError:
-        user = -1
-    if not form.is_submitted() :
-        form.next.data = request.args.get("next")
-    else :
-        if form.role.data == "Arbitre" and not inscrit :
-            competition.inscription(current_user.num_licence,True)
-            flash('Vous êtes inscrit comme arbitre', 'success')
-            return redirect(url_for('affiche_competition',id_compet = id_compet))
-        if form.role.data == "Tireur" and not inscrit :
-            competition.inscription(current_user.num_licence)
-            flash('Vous êtes inscrit comme tireur', 'success')
-            return redirect(url_for('affiche_competition', id_compet = id_compet))
-        flash('Vous êtes déja inscrit', 'danger')
-        return redirect(url_for('affiche_competition', id_compet = id_compet))
-    return render_template('competition.html',
-        competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=rq.get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
-)
+    competition.inscription(current_user.num_licence,arbitre)
+    print(arbitre)
+    flash(f"Vous êtes inscrit comme {'arbitre' if arbitre else 'tireur'}", 'success')
+    return redirect(url_for('affiche_competition',id_compet = id_compet))
 
 @app.route("/suppr-competition/<int:id_compet>")
 @login_required
@@ -677,7 +673,8 @@ def valide_resultats(id_compet, id_poule, id_match):
     )
 
 @app.route("/competition/<int:id_compet>/desinscription", methods=("GET", "POST"))
-def desinscription_competition(id_compet : int) :
+@app.route("/competition/<int:id_compet>/desinscription/<int:id_tireur>", methods=("GET", "POST"))
+def desinscription_competition(id_compet : int, id_tireur = None) :
     """Fonction qui permet de gérer la désinscription d'un utilisateur à une compétition spécifique
 
     Args:
@@ -686,17 +683,19 @@ def desinscription_competition(id_compet : int) :
     Returns:
         flask.Response: Renvoie la page de la compétition
     """
-    form = InscriptionForm()
     competition = rq.get_competition(id_compet)
-    competition.desinscription(current_user.num_licence)
-    try :
-        user = current_user.num_licence
-    except AttributeError:
-        user = -1
-    flash('Vous êtes désinscrit', 'warning')
-    return render_template('competition.html',
-    competition = competition, form = form, user = competition.est_inscrit(user),get_tireur=rq.get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
-)
+    if id_tireur is None:
+        competition.desinscription(current_user.num_licence)
+        flash('Vous êtes désinscrit', 'warning')
+    else:
+        if current_user.is_admin() :
+            competition.desinscription(id_tireur)
+            tireur = rq.get_tireur(id_tireur)
+            flash(f'{tireur.prenom} {tireur.nom} est retiré de la compétition', 'warning')
+        else:
+            competition.desinscription(current_user.num_licence)
+            flash('Vous êtes désinscrit', 'warning')
+    return redirect(url_for('affiche_competition',id_compet = id_compet))
 
 @app.route("/competition/<int:id_compet>/affichage-grand-ecran", methods=("GET", "POST"))
 def affichage_grand_ecran(id_compet) :
