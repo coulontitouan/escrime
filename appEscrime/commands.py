@@ -19,7 +19,7 @@ def loadbd():
 
     if os.path.exists(DB_DIR):
         os.remove(DB_DIR)
-    # création de toutes les tables
+    # initialisation de toutes les tables
     db.create_all()
 
     # création des 3 armes possibles
@@ -58,7 +58,6 @@ def loadbd():
     escrimeurs = {}
     competitions = {}
     lieux = {}
-    phases = {}
 
     # chargement de toutes les données
     les_fichiers = os.listdir('./data') # Éxecution dans appEscrime
@@ -79,9 +78,6 @@ def loadbd():
 
                 elif contenu[0] == 'competitions':
                     load_competitions(lecteur, armes, categories, competitions, lieux)
-
-                elif contenu[0] == 'matchs':
-                    load_matchs(contenu, lecteur, escrimeurs, competitions, phases, types_phase)
 
                 elif contenu[0] == 'resultats':
                     load_resultats(contenu, lecteur)
@@ -128,27 +124,24 @@ def newadmin():
     prenom = input("Prénom : ")
     nom = input("Nom : ")
     mot_de_passe = getpass.getpass("Mot de passe : ")
-    mot_de_passe =sha256(mot_de_passe.encode()).hexdigest()
+    mot_de_passe = sha256(mot_de_passe.encode()).hexdigest()
     date_convert = datetime.strptime('01/01/0001', cst.TO_DATE).date()
     user = Escrimeur.query.get(prenom)
-    if (not user):
+    if user is None:
         db.session.add(Escrimeur(num_licence=prenom,
-                    prenom=prenom,
-                    nom=nom,
-                    sexe="Admin",
-                    date_naissance=date_convert,
-                    id_club=cst.CLUB_ADMIN,
-                    mot_de_passe=mot_de_passe))
+                                 prenom=prenom,
+                                 nom=nom,
+                                 sexe="Admin",
+                                 date_naissance=date_convert,
+                                 id_club=cst.CLUB_ADMIN,
+                                 mot_de_passe=mot_de_passe))
         db.session.commit()
     else:
-        print("ce prenom est deja pris")
+        print("Ce prénom est déjà pris")
 
 @app.cli.command()
 @click.argument('id_competition')
 def test(id_competition):
     """Commande test développeur"""
     compet = Competition.query.get(int(id_competition))
-    #for mmatch in Match.query.filter_by(id_competition = id_competition).all():
-    #    print(mmatch)
-    #    print(mmatch.participations, '\n')
     print(compet.programme_tableau())

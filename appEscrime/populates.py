@@ -119,63 +119,9 @@ def load_competitions(lecteur, armes, categories, competitions, lieux):
                                   sexe = ligne['sexe'],
                                   id_arme = arme.id,
                                   id_categorie = categorie.id,
-                                  id_lieu = lieu.id
-                                  )
+                                  id_lieu = lieu.id)
         competitions[ligne['nom']] = competition
         db.session.add(competition)
-
-
-def load_matchs(contenu, lecteur, escrimeurs, competitions, phases, types_phase):
-    """Charge les matchs dans la base de données
-
-    Args:
-        contenu (list[String]): le contenu du fichier csv courant
-        lecteur (DictReader): le lecteur du fichier csv courant
-        escrimeurs (dict): le dictionnaire des escrimeurs déjà présents dans la base
-        competitions (dict): le dictionnaire des compétitions déjà présentes dans la base
-        phases (dict): le dictionnaire des phases de compétition déjà présentes dans la base
-        types_phase (dict): le dictionnaire des types de phase déjà présents dans la base
-    """
-    for ligne in lecteur:
-        nom_phase = ligne['libelle phase']
-        if nom_phase not in types_phase:
-            type_phase = TypePhase(libelle = nom_phase, nb_touches = cst.TOUCHES_BRACKET)
-            types_phase[nom_phase] = type_phase
-            db.session.add(type_phase)
-
-        concatenation_compet_phase = competitions[contenu[3]] + ligne['phase']
-        if concatenation_compet_phase not in phases:
-            phase = Phase(id = ligne['phase'],
-                          id_competition = competitions[contenu[4]],
-                          libelle = nom_phase)
-            phases[concatenation_compet_phase] = phase
-            db.session.add(phase)
-
-            mmatch = Match(id = ligne['numero'],
-                           id_competition = competitions[contenu[3]],
-                           id_phase = ligne['phase'],
-                           piste = ligne['piste'],
-                           etat = ligne['etat'],
-                           num_arbitre = escrimeurs[ligne['arbitre']].num_licence)
-            db.session.add(mmatch)
-
-            for i in range(1,3):
-                escrimeur = escrimeurs[ligne['tireur' + i]]
-                nb_touches = int(ligne['touches' + i])
-                if ligne['etat'] == cst.MATCH_TERMINE:
-                    if nb_touches == types_phase[ligne['libelle phase']].touches_victoire:
-                        statut = cst.VAINQUEUR
-                    else:
-                        statut = cst.PERDANT
-                else:
-                    statut = cst.MATCH_A_VENIR
-                db.session.add(Participation(id_competition = mmatch.id_competition,
-                                             id_phase = mmatch.id_phase,
-                                             match = mmatch,
-                                             tireur = escrimeur,
-                                             touches = nb_touches,
-                                             statut = statut))
-
 
 def load_resultats(contenu, lecteur):
     """Charge les résultats dans la base de données
