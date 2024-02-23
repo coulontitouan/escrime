@@ -74,7 +74,7 @@
                         <td>{{rq.get_arme(competition.id_arme).libelle}}</td>
                         <td>{{competition.coefficient}}</td>
                         <td>{{competition.date.strftime(to_date)}}</td>
-                        <td>{{competition.get_nb_tireurs()}}</td>
+                        <td>{{competition.get_nb_participants()}}</td>
                         <td>{{resultat.rang}}</td>
                         <td><a href="{{url_for('affiche_competition', id_compet=competition.id)}}"><button class="favorite styled" type="button" >Voir plus</button></a></td>
                     </tr>
