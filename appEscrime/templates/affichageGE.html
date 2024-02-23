@@ -118,6 +118,7 @@
                 <tbody>
                     {% set dico = competition.get_tireurs_classes() %}
                     {% for num_tireur in dico.keys() %}
+                    {%if loop.index < 26%}
                     {% set tireur = get_tireur(num_tireur)%}
                         <tr>
                             <td>{{ loop.index }}</td>
@@ -126,14 +127,14 @@
                             <td>{{ tireur.club.nom }}</td>
                             <td>{{  dico[num_tireur]["victoires"] }}</td>
                         </tr>
-                    {% endfor %}
+                    {%endif%}
+                        {% endfor %}
+                    
                 </tbody>
             </table>
         </div>
     </main>
     <script>
-        console.log("test");
-        
         var pouleGlobal = document.getElementsByClassName('poule');
         var pouleAffiche = 0;
         if (pouleGlobal.length != 0){
