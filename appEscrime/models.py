@@ -55,6 +55,14 @@ class Categorie(db.Model):
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de la catégorie dans un fichier csv."""
         return [self.libelle]
+    
+    def get_categorie_surclasse(self):
+        """Retourne la categorie ou un tireur peut se surclasser."""
+        cate_list = Categorie.query.order_by(Categorie.age_maxi).all()
+        for i in range(len(cate_list)):
+            if cate_list[i].age_maxi == self.age_maxi:
+                return cate_list[i+1]
+
 
 class Arme(db.Model):
     """Classe représentant une arme d'escrime."""
@@ -178,18 +186,34 @@ class Escrimeur(db.Model, UserMixin):
             bool : True si l'escrimeur peut s'inscrire, False sinon.
         """
         compet = Competition.query.get(id_compet)
+        if compet.est_inscrit(self.num_licence):
+            return False
         if compet.sexe == self.sexe:
-            today = date.today()
-            age = (today.month, today.day) < (self.date_naissance.month, self.date_naissance.day)
-            age = today.year - self.date_naissance.year - age
+            categorie = self.get_categorie()
+            categorie_surclasse = categorie.get_categorie_surclasse()
             agemax = compet.categorie.age_maxi
-            if agemax < 0:
-                agemax = 1000
-            surclassable = age < cst.AGE_MAX_SENIORS and "Vétérans" not in compet.categorie.libelle
-            if age < agemax and (surclassable):
+            if agemax == categorie.age_maxi or agemax == categorie_surclasse.age_maxi:
                 return True
         return False
     
+    def get_categorie(self):
+        """Récupère la catégorie la plus proche d'un tireur.
+
+        Returns:
+            Categorie: la categorie d'age la plus proche.
+        """
+        today = date.today()
+        age = (today.month, today.day) < (self.date_naissance.month, self.date_naissance.day)
+        age = today.year - self.date_naissance.year - age
+        categorie_age_maxi = 100000
+        categorie = ""
+        for cate in Categorie.query.all():
+            if cate.age_maxi == -1:
+                cate.age_maxi = 72
+            if abs(age - cate.age_maxi) < abs(age - categorie_age_maxi) and cate.age_maxi - age > 0:
+                categorie= cate
+                categorie_age_maxi = cate.age_maxi
+        return categorie
 
     def get_classement(self, id_arme : int, id_categorie : int) :
         """Récupère le classement d'un tireur pour une arme et une catégorie données.
