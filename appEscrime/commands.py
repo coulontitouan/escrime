@@ -6,8 +6,8 @@ import click
 import appEscrime.constants as cst
 import getpass
 from .app import app , db
-from .models import Match, TypePhase, Arme, Categorie, Club, Escrimeur, Competition
-from .populates import load_competitions,load_connexion,load_escrimeurs,load_matchs,load_resultats
+from .models import TypePhase, Arme, Categorie, Club, Escrimeur, Competition
+from .populates import load_competitions, load_connexion, load_escrimeurs, load_resultats
 from .populates import save_competitions, save_classements, save_connexions
 from hashlib import sha256
 
