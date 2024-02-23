@@ -730,14 +730,14 @@ def get_club(id_club) :
     json["members"] = [json for json in [m.to_json() for m in club.adherents] if json.pop("club")]
     return jsonify(json)
 
-# @app.errorhandler(Exception)
-# def page_not_found(erreur) :
-#     """Fonction qui permet de gérer les erreurs.
+@app.errorhandler(Exception)
+def page_not_found(erreur) :
+    """Fonction qui permet de gérer les erreurs.
 
-#     Args:
-#         erreur (Exception): Erreur qui est levée.
+    Args:
+        erreur (Exception): Erreur qui est levée.
 
-#     Returns:
-#         flask.Response: Renvoie la page d'erreur
-#     """
-#     return render_template('erreur.html', code=erreur.code, message=erreur.__class__.__name__), erreur.code
+    Returns:
+        flask.Response: Renvoie la page d'erreur
+    """
+    return render_template('erreur.html', code=erreur.code, message=erreur.__class__.__name__), erreur.code
