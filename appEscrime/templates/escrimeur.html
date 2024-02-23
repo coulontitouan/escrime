@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename = 'escrimeur.css') }}" />
+{% endblock %}
+
+{% block content %}
+<a id="retourCompet" href="{{ url_for('affiche_competition', id_compet = competition.id) }}"><button
+    class="btn btn-outline-secondary">Retour à la compétition : {{competition.nom}} </button></a>
+<div class="escrimeur-info">
+  <h2>Informations sur {{ escrimeur.prenom }} {{ escrimeur.nom }}</h2>
+  <p>
+    <strong>Date de naissance:</strong> {{ escrimeur.date_naissance.strftime(to_date) }}
+  </p>
+  <p>
+    <strong>Numéro de licence:</strong> {{ escrimeur.num_licence }}
+  </p>
+  <p>
+    <strong>Club:</strong> {{ escrimeur.get_club() }}
+  </p>
+  <p>
+    <strong>Sexe:</strong> {{ escrimeur.get_sexe() }}
+  </p>
+</div>
+<div class="competition-info">
+  <h2>Informations sur la compétition</h2>
+  <p>
+    <strong>Nom:</strong> {{ competition.nom }}
+  </p>
+  <p>
+    <strong>Date:</strong> {{ competition.date.strftime(to_date) }}
+  </p>
+  <table id="recap">
+    <thead>
+      <tr>
+        <th colspan="100%">Récapitulatif des matchs</th>
+      </tr>
+      <tr>
+        <th>Résultats</th>
+        <th>Matchs</th>
+        <th>Phase</th>
+        <th>Scores</th>
+        <th>Adversaires</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for participation in escrimeur.get_info_participation(competition.id) %}
+      {% with id_match = participation.id_match %}
+      <tr>
+        <td>{{ participation.statut }}</td>
+        <td>{{ participation.id_match }}</td>
+        <td><a href="{{ url_for('affiche_poule', id_compet = competition.id, id_poule = participation.get_phase().id) }}">
+        {% if participation.get_phase().libelle == 'Poule' %}
+        {{ participation.get_phase().libelle }} {{ participation.get_phase().id }}
+        {% else %}
+        {{ participation.get_phase().libelle }}
+        {% endif %}
+        </a>
+        </td>
+        <td>{{ participation.touches }} - {{ competition.get_participation(escrimeur.num_licence,
+          participation.get_phase().id, id_match).touches }}
+        </td>
+        <td><a
+            href="{{ url_for('affiche_escrimeur', id_escrimeur = participation.get_concurrent().num_licence, id_competition = competition.id) }}">{{
+            participation.get_concurrent().prenom }} {{ participation.get_concurrent().nom }}</a></td>
+      </tr>
+      {% endwith %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

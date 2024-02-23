@@ -36,6 +36,10 @@ class Club(db.Model):
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture du club dans un fichier csv."""
         return [self.region, self.nom]
+    
+    def to_json(self):
+        """Retourne les données nécessaires à l'écriture du club dans un fichier json."""
+        return {"region": self.region, "nom": self.nom}
 
 class Categorie(db.Model):
     """Classe représentant une catégorie d'âge d'escrimeurs."""
@@ -221,9 +225,43 @@ class Escrimeur(db.Model, UserMixin):
                                           Participation.id_escrimeur == self.num_licence)
                                           .first().id_match)
     
+    def get_id_groupe(self, id_compet):
+        """Récupère l'id du groupe d'un escrimeur dans une compétition donnée
+
+        Args:
+            id_compet (int): l'identifiant de la compétition
+
+        Returns:
+            int: l'identifiant du groupe de l'escrimeur dans la compétition donnée
+        """
+        return (Participation.query.filter(Participation.id_competition == id_compet,
+                                          Participation.id_escrimeur == self.num_licence)
+                                          .first().id_groupe)
+    
     def get_historique_resultat(self):
         return (Resultat.query.join(Competition).filter(Resultat.id_escrimeur == self.num_licence).order_by(Competition.date.desc()).all())
 
+    def get_info_participation(self, id_compet) :
+        """Récupère les informations de participation d'un tireur à une compétition.
+
+        Args:
+            id_compet (int): l'identifiant de la compétition.
+
+        Returns:
+            Participation: les informations de participation du tireur à la compétition.
+        """
+        return Participation.query.filter_by(id_competition = id_compet, id_escrimeur = self.num_licence).order_by(Participation.id_phase.desc())
+
+    def to_json(self):
+        """Json pour l'api"""
+        return {"num_licence": self.num_licence,
+                "nom": self.nom,
+                "prenom": self.prenom,
+                "date_naissance": self.date_naissance.strftime(cst.TO_DATE),
+                "nationalite": self.nationalite,
+                "club": self.club.to_json()
+                }
+      
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de l'escrimeur dans un fichier csv."""
         naissance = self.date_naissance.strftime(cst.TO_DATE)
@@ -466,7 +504,7 @@ class Competition(db.Model):
             points = cst.ARBITRE
         db.session.add(Resultat(id_competition = self.id,
                                 id_escrimeur = num_licence,
-                                rang = None,
+                                rang = "",
                                 points = points,est_chef = est_chef,id_groupe = id_groupe))
         db.session.commit()
 
@@ -475,12 +513,13 @@ class Competition(db.Model):
 
         Args:
             num_licence_chef (int): Numéro de licence de l'escrimeur chef de groupe
-            groupe (tuple): le tuple des 3 autres escimeurs.
+            groupe (tuple): le tuple des 3 autres num_licence des escimeurs.
         """
-        id_groupe = Resultat.query.filter_by(id_competition = self.id).order_by(desc(Resultat.id_groupe)).first().id_groupe1+1
+        resultat = Resultat.query.filter_by(id_competition = self.id).order_by(desc(Resultat.id_groupe)).first()
+        id_groupe = 1 if resultat is None else resultat.id_groupe+1
         for num_licence in groupe:
-            self.inscription(numlicence = num_licence,id_groupe = id_groupe,arbitre=False)
-        self.inscription(numlicence = num_licence_chef,id_groupe = id_groupe, est_chef= True,arbitre=False)
+            self.inscription(num_licence = num_licence, id_groupe = id_groupe, arbitre=False)
+        self.inscription(num_licence = num_licence_chef, id_groupe = id_groupe, est_chef= True, arbitre=False)
 
     def ajoute_poule(self, id_poule):
         """Ajoute une poule à la compétition.
@@ -530,8 +569,11 @@ class Competition(db.Model):
         """Crée les matchs des poules de la compétition."""
         arbitres = list(self.get_arbitres())
         repartition = self.repartition_poules()
+        id_poule = 1
         for poule in self.phases:
-            poule.cree_matchs(arbitres, repartition[poule.id - 1])
+            arbitre = [arbitres[id_poule - 1 % len(arbitres)]]
+            poule.cree_matchs(arbitre, repartition[poule.id - 1])
+            id_poule += 1
         db.session.commit()
 
     def ajoute_tour_tableau(self, libelle):
@@ -551,67 +593,71 @@ class Competition(db.Model):
                              libelle = libelle))
         db.session.commit()
     
-    def reduction_tableau(self, tireurs):
-        """Réduit si nécessaire le nombre de tireurs participant à un tour du tableau.
-
-        Args:
-            tireurs (list): la liste des tireurs encore en lice.
-
-        Returns:
-            list: la liste des tireurs participant au prochain tour.
-        """
-        nb_tireurs = len(tireurs)
-        puissance_proche = puissance_de_deux_proches(nb_tireurs)
-        nb_matchs = (nb_tireurs - puissance_proche)
-        tireurs = tireurs[-nb_matchs*2:]
-        return tireurs
-    
     def programme_tableau(self):
         """Crée les matchs du tableau de la compétition."""
         if len(self.phases) == 0:
             self.programme_poules()
-        if self.est_tour_termine():
+        elif self.phases[-1].libelle == "Finale" and self.est_tour_termine():
+            classement = self.get_tireurs_classes_poule()
+            self.maj_resultat(classement)
+
+        elif self.est_tour_termine():
+            classement = self.get_tireurs_classes_poule()
+            self.maj_resultat(classement)
             arbitres = self.get_arbitres()
-            self.maj_resultat()
-            classement = self.get_tireurs_classes().keys()
-            en_lice = [Escrimeur.query.get(licence) for licence in classement]
+            en_lice = [Escrimeur.query.get(licence) for licence in classement.keys()]
             if self.phases[-1].libelle != "Poule":
-                en_lice = [tireur for tireur in en_lice if tireur.participations[-1].statut == cst.VAINQUEUR]
+                en_lice = [tireur for tireur in en_lice if tireur.resultats[-1].rang == ""]
             if len(en_lice) == 2:
                 tour = "Finale"
             elif len(en_lice) == 4:
-                tour = "Demi-finale"
+                tour = "Demi-finales"
             elif len(en_lice) == 8:
                 tour = "Quarts de finale"
             else:
                 tour = str(len(en_lice) // 2) + "èmes de finale"
-
-            if bin(len(en_lice)).count("1") > 1:
-                en_lice = self.reduction_tableau(en_lice)
+                
+            if bin(len(en_lice)).count("1") > 1: # Si le nombre de tireurs n'est pas une puissance de 2
+                nb_tireurs = len(en_lice)
+                puissance_proche = puissance_de_deux_proches(nb_tireurs)
+                nb_matchs = (nb_tireurs - puissance_proche)
+                en_lice = en_lice[-nb_matchs*2:] # Réduction du nombre de tireurs pour créer un tour de barrage
                 tour = "Barrages"
+                
             self.ajoute_tour_tableau(tour)
             phase = self.phases[-1]
             print(len(en_lice))
             phase.cree_matchs(list(arbitres), en_lice)
-            db.session.commit()
         else:
             print("\nLe tour précédent n'est pas terminé\n")
+        db.session.commit()
 
-    def maj_resultat(self):
+    def maj_resultat(self, classement):
         """Met à jour le résultat de la compétition."""
-        classement = self.get_tireurs_classes()
         pos = len(Resultat.query.filter_by(id_competition = self.id,
                                            rang = "",
                                            points = cst.TIREUR).all())
+        print("pos", pos)
         if self.phases[-1].libelle != "Poule": # Si on au moins au premier tour du tableau
-            for licence in classement.keys():
+            classement_inverse = list(reversed(list(classement.keys())))
+            for licence in classement_inverse:
                 try:
                     if Participation.query.filter_by(id_competition=self.id,
                                                      id_phase=self.phases[-1].id,
                                                      id_escrimeur=licence).first().statut == cst.PERDANT:
+                        if pos == 4: # Car la 3ème place est partagée
+                            pos = 3
                         Resultat.query.get((self.id, licence)).rang = pos
+                        if pos != 3: # Car la 3ème place est partagée
+                            pos -= 1
                 except AttributeError:
                     pass
+        if pos == 1:
+            vainqueur = Participation.query.filter_by(id_competition=self.id,
+                                                      id_phase=self.phases[-1].id,
+                                                      statut=cst.VAINQUEUR).first().id_escrimeur
+            Resultat.query.get((self.id, vainqueur)).rang = 1
+        db.session.commit()
     
     def est_tour_termine(self):
         """Vérifie si le dernier tour de la compétition est terminé."""
@@ -681,7 +727,8 @@ class Competition(db.Model):
 
         for resultat in Resultat.query.filter_by(id_competition = self.id).all():
             if resultat.rang != "" and resultat.points != cst.ARBITRE:
-                dico[resultat.id_escrimeur]["rang"] = -resultat.rang
+                if(resultat.rang is not None):
+                    dico[resultat.id_escrimeur]["rang"] = -resultat.rang
         return dico
     
     def dico_victoire_tireur_poule(self):
@@ -760,6 +807,21 @@ class Competition(db.Model):
                 if match.etat != cst.MATCH_TERMINE or Phase.query.filter_by(id_competition = self.id).order_by(Phase.id.desc()).first().libelle == "Finale":
                     return False
         return True if len(self.phases) != 0 else False
+    
+    def get_participation(self, id_tireur, id_phase, id_match) :
+        """Récupère la participation du tireur concurent au tireur donné dans un match donné.
+
+        Args:
+            id_tireur (int): l'identifiant du tireur concurent.
+            id_phase (int): l'identifiant de la phase.
+            id_match (int): l'identifiant du match.
+
+        Returns:
+            Participation: la participation du tireur concurent au tireur donné dans un match donné.
+        """
+        return Participation.query.filter_by(id_competition = self.id,
+                                            id_phase = id_phase,
+                                            id_match = id_match).where(Participation.id_escrimeur != id_tireur).first()
 
     def to_titre_csv(self):
         """Retourne le format du titre du fichier csv de la compétition."""
@@ -894,6 +956,8 @@ class Phase(db.Model):
                 top_top_seed.remove(tireur1)
                 top_top_seed = top_top_seed[::-1]
 
+            if self.competition.phases[-1] != 'Barrages':
+                bottom_top_seed = bottom_top_seed[::-1] # Inversion car les moins bons top seeds jouent dans la même partie de l'arbre que les meilleurs top seeds
             for i in range(2, len(top_seed) + 1, 2):
                 tireur1 = bottom_top_seed[0]
                 tireur2 = bottom_seed[top_seed.index(tireur1)]
@@ -934,9 +998,9 @@ class Phase(db.Model):
                       piste = self.id,
                       etat = cst.MATCH_A_VENIR,
                       arbitre = arbitre)
+        db.session.add(match)
         match.cree_participation(tireur1)
         match.cree_participation(tireur2)
-        db.session.add(match)
 
     def programme_matchs_poule(self, tireurs):
         """Organise l'ordre des matchs de la phase.
@@ -1123,7 +1187,6 @@ class Match(db.Model):
         Args:
             tireur (Escrimeur): un escrimeur participant au match.
         """
-        print("cree_participation", self.id_competition, self.id_phase, self.id, tireur.num_licence)
         db.session.add(Participation(id_competition = self.id_competition,
                                      id_phase = self.id_phase,
                                      id_match = self.id,
@@ -1228,6 +1291,22 @@ class Participation(db.Model):
             Optional[Escrimeur]: L'escrimeur lié à cette participation, s'il existe.
         """
         return Escrimeur.query.get(self.id_escrimeur)
+
+    def get_concurrent(self) -> Escrimeur :
+        """Récupère le concurrent de l'escrimeur associé à cette participation.
+
+        Returns:
+            Optional[Escrimeur]: Le concurrent de l'escrimeur lié à cette participation, s'il existe.
+        """
+        return [participation.tireur for participation in self.match.participations if participation.id_escrimeur != self.id_escrimeur][0]
+    
+    def get_phase(self) -> Phase :
+        """Récupère la phase associée à cette participation.
+
+        Returns:
+            Optional[Phase]: La phase liée à cette participation, si elle existe.
+        """
+        return Phase.query.get((self.id_phase, self.id_competition))
 
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de la participation dans un fichier csv."""
