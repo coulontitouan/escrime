@@ -44,7 +44,7 @@
             </a>
           {% endfor %}
         {% endif %}
-        {%if competition.est_individuelle()%}
+        {% if competition.est_individuelle %}
         <h2>Poules :</h2>
         {% for poule in competition.get_poules() %}
           <a href="{{ url_for('affiche_poule', id_compet = competition.id, id_poule = loop.index) }}">
