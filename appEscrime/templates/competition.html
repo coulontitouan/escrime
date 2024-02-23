@@ -44,13 +44,14 @@
             </a>
           {% endfor %}
         {% endif %}
+        {%if competition.est_individuelle()%}
         <h2>Poules :</h2>
         {% for poule in competition.get_poules() %}
           <a href="{{ url_for('affiche_poule', id_compet = competition.id, id_poule = loop.index) }}">
             <table class="scroll">
               <thead>
                 <tr>
-                  <th id="intitule" colspan="3">Poule {{ poule.id }} - {{ poule.nb_tireurs() }} Tireurs - {{ poule.get_arbitre().prenom[0] }} {{ poule.get_arbitre().nom }}</th>
+                  <th id="intitule" colspan="100%">Poule {{ poule.id }} - {{ poule.nb_tireurs() }} Tireurs - {{ poule.get_arbitre().prenom[0] }} {{ poule.get_arbitre().nom }}</th>
                 </tr>
                 <tr>
                   <th>Prénom</th>
@@ -74,8 +75,9 @@
             </table>
           </a>
         {% endfor %}
+        {%endif%}
       {% else %}
-        <p>Aucune poule créée</p>
+        <p>La compétition n'a pas encore été démarrée.</p>
         {% if current_user.is_authenticated %}
           {% if current_user.is_admin() %}
             {% if (not competition.est_individuelle and competition.get_nb_participants() >= 2) or (competition.get_nb_participants() >= 5 and (competition.get_arbitres()|length) >= 1) %}
@@ -95,7 +97,7 @@
               <button id="affichageGE" type="submit" class="btn btn-success">Affichage grand ecran</button>
             </form>
           {% endif %}
-          {% if competition.get_poules() == [] %}
+          {% if competition.get_poules()|length == 0 %}
             {% if competition.est_individuelle %}
               {% if not current_user.is_admin() %}
                 {% if competition.est_inscrit(current_user.num_licence) %}
@@ -109,7 +111,7 @@
                     </form>
                   {% endif %}
                   <form action="{{ url_for('inscription_competition', id_compet = competition.id, arbitre = True) }}">
-                    <button class="btn btn-success">S'inscrire (Arbitre)</button>
+                    <button class="btn btn-secondary">S'inscrire (Arbitre)</button>
                   </form>
                 {% endif %}
               {% endif %}
@@ -202,7 +204,7 @@
               <td>{{ tireur.nom }}</td>
               <td>{{ tireur.club.nom }}</td>
               <td>0</td>
-              {% if current_user.is_admin() %}
+              {% if current_user.is_authenticated and current_user.is_admin() %}
               <td>
                 <form action="{{ url_for('desinscription_competition', id_compet = competition.id, id_tireur = tireur.num_licence) }}">
                   <button type="submit" class="btn btn-danger">Retirer</button>
