@@ -646,13 +646,16 @@ class Competition(db.Model):
         """Crée les matchs du tableau de la compétition."""
         if len(self.phases) == 0:
             self.programme_poules()
-        elif self.phases[-1].libelle == "Finale" and self.est_tour_termine():
+        elif self.est_individuelle:
             classement = self.get_tireurs_classes_poule()
+        else:
+            classement = self.get_equipes_classees()
+
+        if self.phases[-1].libelle == "Finale" and self.est_tour_termine():
             self.maj_resultat(classement)
             self.cloture()
 
         elif self.est_tour_termine():
-            classement = self.get_tireurs_classes_poule()
             self.maj_resultat(classement)
             arbitres = self.get_arbitres()
             en_lice = [Escrimeur.query.get(licence) for licence in classement.keys()]
@@ -678,8 +681,6 @@ class Competition(db.Model):
             phase = self.phases[-1]
             print(len(en_lice))
             phase.cree_matchs(list(arbitres), en_lice)
-        else:
-            print("\nLe tour précédent n'est pas terminé\n")
         db.session.commit()
 
     def maj_resultat(self, classement):
@@ -713,6 +714,9 @@ class Competition(db.Model):
     
     def est_tour_termine(self):
         """Vérifie si le dernier tour de la compétition est terminé."""
+        # Les compétitions par équipe n'ont pas de phase de poule
+        if self.est_individuelle and len(self.phases) == 0: 
+            return True
         if self.phases[-1].libelle == "Poule":
             for poule in self.phases:
                 if not poule.est_terminee():
@@ -740,7 +744,7 @@ class Competition(db.Model):
             db.session.add(classement_tireur)
         classement_cat = (Classement.query.filter_by(id_arme = self.id_arme,
                                                      id_categorie = self.id_categorie)
-                                                     .order_by(desc(Classement.points))
+                                                     .order_by(Classement.points.desc())
                                                      .all())
         rang = 1
         for classement in classement_cat:
@@ -756,6 +760,30 @@ class Competition(db.Model):
             point = ceil(self.coefficient - (self.coefficient * (log(rang) / log(participants))))
             points.append(point)
         return points
+    
+    def get_equipes_classees(self):
+        """Calcule la somme des points des tireurs de chaque équipe et renvoie le classement."""
+        if self.est_individuelle:
+            return None
+        res = {}
+        for resultat in Resultat.query.filter_by(id_competition = self.id).all():
+            if resultat.points != cst.ARBITRE:
+                if resultat.id_groupe not in res:
+                    res[resultat.id_groupe] = 0
+                # Classement le plus élevé de l'escrimeur pour l'arme de la compétition
+                classement = (Classement.query.filter_by(num_licence = resultat.id_escrimeur,
+                                                         id_arme = self.id_arme)
+                                                         .order_by(Classement.points.desc())
+                                                         .first()).points
+                if classement is not None:
+                    res[resultat.id_groupe] += classement
+        for groupe in res.keys(): # Remplacement de l'id du groupe par la licence du capitaine
+            capitaine = (Resultat.query.filter_by(id_competition = self.id,
+                                                  id_groupe = groupe,
+                                                  est_chef = True)
+                                                  .first()).id_escrimeur
+            res[capitaine] = res.pop(groupe)
+        return {k: v for k, v in sorted(res.items(), key=lambda item: item[1])}
 
     def desinscription(self, num_licence):
         """Désinscrit un escrimeur de la compétition.
