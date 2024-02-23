@@ -320,7 +320,8 @@ def competition_cree_poules(id_compet) :
         flask.Response: Renvoie la page de la compétition
     """
     competition = rq.get_competition(id_compet)
-    competition.programme_poules()
+    if competition.programme_poules() is None:
+        flash("Pas assez d'arbitres.","danger")
     return redirect(url_for("affiche_competition", id_compet=id_compet))
 
 @app.route("/competition/<int:id_compet>/phase-suivante/<int:finie>")
@@ -337,6 +338,8 @@ def phase_suivante(id_compet, finie=False):
     competition.programme_tableau()
     if finie:
         flash('La compétition est terminée', 'success')
+        competition.cloturee = True
+        db.session.commit()
     return redirect(url_for("affiche_competition", id_compet=id_compet))
 
 @app.route("/competition/<int:id_compet>/poule/<int:id_poule>")

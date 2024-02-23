@@ -594,7 +594,7 @@ class Competition(db.Model):
             len_poules += 1
             if len_poules == 10:
                 return None
-            nb_poules = tireurs.count() // len_poules
+            nb_poules = len(tireurs) // len_poules
         for i in range(1, nb_poules + 1):
             try:
                 self.ajoute_poule(i)
@@ -728,7 +728,8 @@ class Competition(db.Model):
         classement_compet = self.get_tireurs_classes()
         for licence in classement_compet.keys():
             resultat = Resultat.query.get((self.id, licence))
-            resultat.points = points[resultat.rang - 1]
+            rang = int(resultat.rang) if type(resultat.rang)==int else 0
+            resultat.points = points[rang  - 1]
             classement_tireur = Classement.query.get((licence, self.id_arme, self.id_categorie))
             if classement_tireur is None:
                 classement_tireur = Classement(rang = 0,
@@ -736,7 +737,7 @@ class Competition(db.Model):
                                                num_licence = licence,
                                                id_arme = self.id_arme,
                                                id_categorie = self.id_categorie)
-            classement_tireur.points += points[resultat.rang - 1]
+            classement_tireur.points += points[rang - 1]
             db.session.add(classement_tireur)
         classement_cat = (Classement.query.filter_by(id_arme = self.id_arme,
                                                      id_categorie = self.id_categorie)
