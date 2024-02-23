@@ -409,7 +409,7 @@ class Competition(db.Model):
         """Retourne les tireurs inscrits à la compétition, triés par rang.
 
         Returns:
-            Query: le résultat de la requête des tireurs inscrits à la compétition.
+            list: le résultat de la requête des tireurs inscrits à la compétition.
         """
         query_join = Escrimeur.query.join(Resultat)
         query_filtre = query_join.filter(Resultat.id_competition == self.id, Resultat.points != -2)
@@ -417,7 +417,7 @@ class Competition(db.Model):
         condition = Classement.id_arme == self.id_arme
         condition2 = Classement.id_categorie == self.id_categorie
         query_filtre2 = query_outer.filter(condition & condition2)
-        return query_filtre2.order_by(Classement.rang)
+        return query_filtre2.order_by(Classement.rang).all()
 
     def get_tireurs_sans_rang(self) -> list :
         """Retourne les tireurs inscrits à la compétition, sans rang.
@@ -425,12 +425,7 @@ class Competition(db.Model):
         Returns:
             Query: le résultat de la requête des tireurs inscrits à la compétition.
         """
-        liste = self.get_tireurs_order_by_rang()
-        liste2 = []
-        for tireur in self.get_tireurs() :
-            if tireur not in liste :
-                liste2.append(tireur)
-        return liste2
+        return [tireur for tireur in self.get_tireurs() if tireur not in self.get_tireurs_order_by_rang()]
     
     def get_arbitres(self):
         """Retourne les arbitres inscrits à la compétition.

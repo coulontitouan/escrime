@@ -4,23 +4,17 @@
 <link rel="stylesheet" href="{{url_for('static', filename='home.css')}}">
 {% endblock %}
 {% block content %}
-<!-- Ajoutez ceci à l'endroit où vous souhaitez afficher les messages flash -->
-{% for message in get_flashed_messages()  %}
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    {{ message }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-{% endfor %}
 <div id="body">
     <h1>Les compétitions :</h1>
     <div id="filtresBox">
         <h2>Filtres :</h2>
         <form id="filtres" action="{{ url_for('home') }}" method="post" role="form">
               {{ form.categoriesField(class="form-select" )}}
-              {{ form.armesField(class="form-select" )}}
-              {{ form.genresField(class="form-select" )}}
+              {{ form.armesField(class="form-select") }}
+              {{ form.genresField(class="form-select") }}
+              {{ form.equipeField(class="form-select") }}
               <button class="btn btn-outline-success">Filtrer</button>
-              {% if form.categoriesField.data != "Catégorie" and form.categoriesField.data != "1" or form.armesField.data != "Arme" and form.armesField.data != "1" or form.genresField.data != "Genre" and form.genresField.data != "1" %}
+              {% if form.categoriesField.data != "Catégorie" and form.categoriesField.data != "1" or form.armesField.data != "Arme" and form.armesField.data != "1" or form.genresField.data != "Genre" and form.genresField.data != "1"  or form.equipeField.data != "Format" and form.equipeField.data != "1" %}
                 <a class="btn btn-outline-danger" href="{{ url_for('home') }}">Enlever les filtres</a>
               {% endif %}
         </form>
@@ -34,7 +28,7 @@
                 <th>Genre</th>
                 <th>Lieu</th>
                 <th>Date</th>
-                <th>Groupe</th>
+                <th>Format</th>
                 <th style="color: white; user-select: none;"></th>
             </tr>
         </thead>
@@ -44,7 +38,7 @@
                 <td>{{ c.nom }}</td>
                 <td>{{ c.get_categorie().libelle }}</td>
                 <td>{{ c.get_arme().libelle }}</td>
-                <td>{{ c.sexe }}</td>
+                <td>{{ 'Homme' if c.sexe=='Homme' else 'Dame' }}</td>
                 <td>{{ c.get_lieu().nom }}</td>
                 <td>{{ c.date.strftime(to_date) }}</td>
                 <td>{{ 'Individuel' if c.est_individuelle else 'Équipe' }}</td>

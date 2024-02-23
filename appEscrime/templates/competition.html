@@ -4,14 +4,6 @@
   <link rel="stylesheet" href="{{ url_for('static', filename = 'competition.css') }}" />
 {% endblock %}
 {% block content %}
-  <!-- Ajoutez ceci à l'endroit où vous souhaitez afficher les messages flash -->
-  {% for message in get_flashed_messages(with_categories = true) %}
-    <div class="alert alert-{{ message[0] }} alert-dismissible fade show" role="alert">
-      {{ message[1] }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-  {% endfor %}
-
   <h1>{{ competition.nom }}</h1>
   {% if current_user.is_authenticated %}
     {% if competition.peux_genere_phase_suivante() and current_user.is_admin() %}
@@ -176,6 +168,11 @@
               {% endif %}
             </tr>
           {% endfor %}
+          {% if dico.keys()|length == 0 %}
+          <tr>
+              <td colspan="100%">Aucun match joué</td>
+          </tr>
+          {% endif %}
         </tbody>
       </table>
       <table id="Cnational" class="scroll" style="display:none;">
@@ -210,6 +207,11 @@
               <td>0</td>
             </tr>
           {% endfor %}
+          {% if competition.get_tireurs_order_by_rang()|length == 0 and competition.get_tireurs_sans_rang()|length == 0 %}
+          <tr>
+              <td colspan="100%">Aucun tireur inscrit</td>
+          </tr>
+          {% endif %}
         </tbody>
       </table>
     </div>

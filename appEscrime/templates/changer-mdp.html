@@ -4,12 +4,31 @@
 <link rel="stylesheet" href="{{url_for('static', filename='changer-mdp.css')}}">
 {% endblock %}
 {% block content %}
-<section>
+<section class="shadow p-3 mb-5 bg-body rounded">
     <h1>Changer son mot de passe</h1>
     <form action="{{ url_for('changer_mdp') }}" 
     method="post" 
-    role="Changer_mdp">
-        {{ formChanger_mdp.new_mdp(class = test ,class_="form-control1", placeholder ="nouveau mot de passe")}}
+    role="form" id="changer-mdp">
+    {% for field in form %}
+    {% if field.type == "PasswordField" %}
+    <div class="form-group">
+        {{ field.label }} {{ field(placeholder = field.label.text) }}
+        <span class="fa fa-fw fa-eye field-icon toggle-password"></span>
+    </div>
+    {% endif %}
+    {% endfor %}
+    <button id="button" type="submit" class="btn btn-primary">Changer de mot de passe</button>
     </form>
 </section>
+<script>
+    toggles = document.querySelectorAll(".toggle-password")
+    toggles.forEach(toggle => {
+        toggle.addEventListener("click", function(){
+            input = toggle.parentElement.querySelector("input")
+            console.log(input.name)
+            toggle.classList.contains("fa-eye") ? toggle.classList.replace("fa-eye", "fa-eye-slash") : toggle.classList.replace("fa-eye-slash","fa-eye")
+            "password" == input.getAttribute("type") ? input.setAttribute("type", "text") : input.setAttribute("type", "password")
+        })
+    })
+</script>
 {% endblock %}
