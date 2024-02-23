@@ -594,7 +594,7 @@ class Competition(db.Model):
             len_poules += 1
             if len_poules == 10:
                 return None
-            nb_poules = tireurs.count() // len_poules
+            nb_poules = len(tireurs) // len_poules
         for i in range(1, nb_poules + 1):
             try:
                 self.ajoute_poule(i)
@@ -650,12 +650,12 @@ class Competition(db.Model):
             classement = self.get_tireurs_classes_poule()
         else:
             classement = self.get_equipes_classees()
-
+        
         if self.phases[-1].libelle == "Finale" and self.est_tour_termine():
             self.maj_resultat(classement)
             self.cloture()
-
-        elif self.est_tour_termine():
+        print('FEUR')
+        if self.est_tour_termine():
             self.maj_resultat(classement)
             arbitres = self.get_arbitres()
             en_lice = [Escrimeur.query.get(licence) for licence in classement.keys()]
@@ -717,6 +717,8 @@ class Competition(db.Model):
         # Les compétitions par équipe n'ont pas de phase de poule
         if self.est_individuelle and len(self.phases) == 0: 
             return True
+        if len(self.phases) == 0:
+            return False
         if self.phases[-1].libelle == "Poule":
             for poule in self.phases:
                 if not poule.est_terminee():
