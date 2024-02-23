@@ -8,6 +8,7 @@ from flask_login import UserMixin
 import appEscrime.constants as cst
 from .app import db, login_manager
 from collections import defaultdict
+from math import ceil, log
 
 
 class Lieu(db.Model):
@@ -434,7 +435,7 @@ class Competition(db.Model):
         """
         query_tireur = Escrimeur.query.join(Resultat)
         query_tireur_filtre = query_tireur.filter(Resultat.id_competition == self.id,
-                                                    Resultat.points != -2)
+                                                  Resultat.points != -2)
         return query_tireur_filtre.order_by(Resultat.points.desc())
 
     def get_tireurs_order_by_rang(self) :
@@ -648,6 +649,7 @@ class Competition(db.Model):
         elif self.phases[-1].libelle == "Finale" and self.est_tour_termine():
             classement = self.get_tireurs_classes_poule()
             self.maj_resultat(classement)
+            self.cloture()
 
         elif self.est_tour_termine():
             classement = self.get_tireurs_classes_poule()
@@ -695,8 +697,10 @@ class Competition(db.Model):
                                                      id_escrimeur=licence).first().statut == cst.PERDANT:
                         if pos == 4: # Car la 3ème place est partagée
                             pos = 3
-                        Resultat.query.get((self.id, licence)).rang = pos
-                        if pos != 3: # Car la 3ème place est partagée
+                            Resultat.query.get((self.id, licence)).rang = pos
+                            pos = 4
+                        else:
+                            Resultat.query.get((self.id, licence)).rang = pos
                             pos -= 1
                 except AttributeError:
                     pass
@@ -717,6 +721,41 @@ class Competition(db.Model):
             if not self.phases[-1].est_terminee():
                 return False
         return True
+    
+    def cloture(self):
+        """Met à jour le classement national à partir des résultats de la compétition"""
+        points = self.calcule_points_attribues()
+        classement_compet = self.get_tireurs_classes()
+        for licence in classement_compet.keys():
+            resultat = Resultat.query.get((self.id, licence))
+            resultat.points = points[resultat.rang - 1]
+            classement_tireur = Classement.query.get((licence, self.id_arme, self.id_categorie))
+            if classement_tireur is None:
+                classement_tireur = Classement(rang = 0,
+                                               points = 0,
+                                               num_licence = licence,
+                                               id_arme = self.id_arme,
+                                               id_categorie = self.id_categorie)
+            classement_tireur.points += points[resultat.rang - 1]
+            db.session.add(classement_tireur)
+        classement_cat = (Classement.query.filter_by(id_arme = self.id_arme,
+                                                     id_categorie = self.id_categorie)
+                                                     .order_by(desc(Classement.points))
+                                                     .all())
+        rang = 1
+        for classement in classement_cat:
+            classement.rang = rang
+            rang += 1
+        db.session.commit()
+    
+    def calcule_points_attribues(self):
+        """Calcule les points attribués à chaque tireur à l'issue de la compétition."""
+        points = []
+        participants = self.get_nb_participants()
+        for rang in range(1, participants + 1):
+            point = ceil(self.coefficient - (self.coefficient * (log(rang) / log(participants))))
+            points.append(point)
+        return points
 
     def desinscription(self, num_licence):
         """Désinscrit un escrimeur de la compétition.
