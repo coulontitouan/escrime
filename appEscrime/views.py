@@ -453,7 +453,7 @@ def creation_equipe(id_compet) :
         tireurs.insert(0, tireurs.pop(int(form.chef_equipe.data)-1)) # Mettre le chef en premier
         valide = True
         for tireur in tireurs:
-            if not tireur.peut_sinscrire(competition.id):
+            if tireur.sexe != competition.sexe or competition.est_inscrit(tireur.num_licence):
                 flash(f'{tireur.nom} {tireur.prenom} ne peut pas participer à cette compétition.', 'warning')
                 valide = False
         tireurs = [tireur.num_licence for tireur in tireurs]
