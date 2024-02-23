@@ -66,12 +66,12 @@
         {{ form_match.hidden_tag() }}
         <div class="form-group">
           {% with participant = participations[0].get_escrimeur() %}
-            {{ participant.nom }} {{ participant.prenom }} {{ form_match.touches1(onKeyUp = 'checkPoints()') }}
+            {{ participant.nom }} {{ participant.prenom }} {{ form_match.touches1(onchange = 'checkPoints()') }}
           {% endwith %}
         </div>
         <div class="form-group">
           {% with participant = participations[1].get_escrimeur() %}
-            {{ participant.nom }} {{ participant.prenom }} {{ form_match.touches2(onKeyUp = 'checkPoints()') }}
+            {{ participant.nom }} {{ participant.prenom }} {{ form_match.touches2(onchange = 'checkPoints()') }}
           {% endwith %}
         </div>
         <button class="btn btn-success" id="bouton-valider">Valider</button>
@@ -79,18 +79,7 @@
       <button onclick="document.getElementById('valider').classList.remove('visible');" class="btn btn-secondary">Fermer</button>
     </aside>
     <script style="display: none;">
-      var started = false
-      let message = document.getElementById('message')
-      
-      function showMessage() {
-        message.style.display = 'block'
-        setTimeout(function () {
-          message.style.display = 'none'
-        }, 2000)
-      }
-      
       let touchesMax = document.getElementById('touches-max').innerHTML
-      
       function valider() {
         let points = document.querySelectorAll('.points')
         let touches1 = 0
@@ -120,7 +109,9 @@
       
       function checkPoints() {
         let touches1 = document.querySelector('input[name="touches1"]').value
+        document.querySelector('.tireur:nth-child(2) .points span').innerHTML = (touches1>touchesMax) ? touchesMax : (touches1<0) ? 0 : touches1
         let touches2 = document.querySelector('input[name="touches2"]').value
+        document.querySelector('.tireur:nth-child(4) .points span').innerHTML = (touches2>touchesMax) ? touchesMax : (touches2<0) ? 0 : touches2
         let boutton = document.getElementById('bouton-valider')
         if (touches1 == touches2 || touches1 + touches2 == 0) {
           boutton.disabled = true
