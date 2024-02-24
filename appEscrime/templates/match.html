@@ -19,22 +19,27 @@
   </head>
 
   <body>
-    <a id="retour" href="{{ url_for('affiche_poule', id_compet = competition.id, id_poule = poule.id) }}"><button class="btn btn-primary">Retour à la phase</button></a>
-    {% if match.etat == constants.MATCH_A_VENIR %}
-      <span id="message">
-        Le match n'a pas encore commencé.<form action="{{ url_for('affiche_match', id_compet = competition.id, id_poule = poule.id, id_match = match.id) }}" method="post" role="form_start">
-          {{ form_start.hidden_tag() }}
-          <button class="btn btn-primary">Commencer le match</button>
-        </form>
-      </span>
+    {% if match.etat != constants.MATCH_EN_COURS %}
+    <span id="message">
+      {% if match.etat == constants.MATCH_A_VENIR %}
+      Le match n'a pas encore commencé.<form action="{{ url_for('affiche_match', id_compet = competition.id, id_poule = poule.id, id_match = match.id) }}" method="post" role="form_start">
+        {{ form_start.hidden_tag() }}
+        <button class="btn btn-primary">Commencer le match</button>
+      </form>
+      {% else %}
+      Le match est terminé.
+      <a href="{{ url_for('affiche_poule', id_compet = competition.id, id_poule = poule.id) }}"><button class="btn btn-primary">Retour à la phase</button></a>
+      {% endif %}
+    </span>
     {% endif %}
+    <a id="retour" href="{{ url_for('affiche_poule', id_compet = competition.id, id_poule = poule.id) }}"><button class="btn btn-primary">Retour à la phase</button></a>
     {% for participation in participations %}
       <div class="tireur">
         {% with participant = participation.get_escrimeur() %}
           <span class="nom">{{ participant.nom[0] }}.{{ participant.prenom }}</span>
           <div class="points" onclick="ajoutpoints(this)">
             <p>
-              <span>0</span> touche(s)
+              <span>{{ participation.touches if match.etat == constants.MATCH_TERMINE else 0 }}</span> touche(s)
             </p>
           </div>
           <div class="moins" onclick="retirepoints(this)">
@@ -109,9 +114,9 @@
       
       function checkPoints() {
         let touches1 = document.querySelector('input[name="touches1"]').value
-        document.querySelector('.tireur:nth-child(2) .points span').innerHTML = (touches1>touchesMax) ? touchesMax : (touches1<0) ? 0 : touches1
+        document.querySelector('.tireur:nth-child(2) .points span').innerHTML = touches1 > touchesMax ? touchesMax : touches1 < 0 ? 0 : touches1
         let touches2 = document.querySelector('input[name="touches2"]').value
-        document.querySelector('.tireur:nth-child(4) .points span').innerHTML = (touches2>touchesMax) ? touchesMax : (touches2<0) ? 0 : touches2
+        document.querySelector('.tireur:nth-child(4) .points span').innerHTML = touches2 > touchesMax ? touchesMax : touches2 < 0 ? 0 : touches2
         let boutton = document.getElementById('bouton-valider')
         if (touches1 == touches2 || touches1 + touches2 == 0) {
           boutton.disabled = true
@@ -128,12 +133,19 @@
       function ajoutpoints(elem) {
         elem = elem.querySelector('span')
         if (parseInt(elem.innerHTML) < touchesMax) elem.innerHTML = parseInt(elem.innerHTML) + 1
+        else {
+          elem.parentElement.style.color = 'red'
+          setTimeout(() => (elem.parentElement.style.color = 'initial'), 300)
+        }
       }
       
       function retirepoints(elem) {
         elem = elem.previousElementSibling.querySelector('span')
         if (parseInt(elem.innerHTML) > 0) {
           elem.innerHTML = parseInt(elem.innerHTML) - 1
+        } else {
+          elem.parentElement.style.color = 'red'
+          setTimeout(() => (elem.parentElement.style.color = 'initial'), 300)
         }
       }
     </script>

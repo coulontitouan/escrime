@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="{{url_for('static', filename='poule.css')}}">
 {% endblock %}
 {% block content %}
-<a href="{{ url_for('affiche_competition', id_compet = competition.id) }}"><button
+<a id="retour" href="{{ url_for('affiche_competition', id_compet = competition.id) }}"><button
         class="btn btn-outline-secondary">Retour à la compétition : {{competition.nom}} </button></a>
 <div class="titre">
     <h1>{{ poule.libelle }} {% if poule.libelle == "Poule" %}{{ poule.id }}{% endif %}</h1>

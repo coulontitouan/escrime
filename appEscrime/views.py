@@ -10,7 +10,7 @@ from wtforms.validators import DataRequired, NumberRange
 from flask_wtf import FlaskForm
 import appEscrime.constants as cst
 from .app import app ,db
-from .models import Escrimeur, Club, Competition, Lieu
+from .models import Escrimeur, Club, Competition, Lieu, Match
 from . import requests as rq
 from .commands import newuser
 
@@ -566,25 +566,21 @@ def suppr_competition(id_compet : int) :
         flash('Compétition supprimée avec succès', 'warning')
     return redirect(url_for('home'))
 
-class BracketForm(FlaskForm):
-    """Classe formulaire pour la verification d'un match à élimination.
+class PointsForm(FlaskForm):
+    """Classe formulaire pour la saisie des points d'un match.
 
     Args:
-        FlaskForm (FlaskForm): Classe formulaire de Flask.
+        Match (Match): Match pour lequel on saisit les points.
     """
-    touches1 = IntegerField('touches1',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_BRACKET, min=0)])
-    touches2 = IntegerField('touches2',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_BRACKET, min=0)])
+    touches1 = IntegerField('touches1',validators=[DataRequired()])
+    touches2 = IntegerField('touches2',validators=[DataRequired()])
     next=HiddenField()
 
-class PouleForm(FlaskForm):
-    """Classe formulaire pour la verification d'un match de poule.
-
-    Args:
-        FlaskForm (FlaskForm): Classe formulaire de Flask.
-    """
-    touches1 = IntegerField('touches1',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_POULE, min=0)])
-    touches2 = IntegerField('touches2',validators=[DataRequired(), NumberRange(max=cst.TOUCHES_POULE, min=0)])
-    next=HiddenField()
+    def __init__(self, match:Match):
+        super().__init__()
+        number_range = NumberRange(max=match.phase.type.touches_victoire, min=0)
+        self.touches1.validators.append(number_range)
+        self.touches2.validators.append(number_range)
 
 class StartForm(FlaskForm):
     """Classe formulaire pour le début d'un match.
@@ -613,14 +609,15 @@ def affiche_match(id_compet, id_poule, id_match):
     if current_user.is_arbitre(id_compet) or current_user.is_admin() :
         match = poule.get_match_id(id_match)
         participations = match.get_tireurs_match(poule.id)
-        if match.id_phase == 1:
-            form_match = PouleForm()
-        else:
-            form_match = BracketForm()
+        form_match = PointsForm(match=match)
         form_start = StartForm()
         if form_start.is_submitted():
             form_start.next.data = request.args.get("next")
-            match.set_en_cours()
+            if match.etat != cst.MATCH_TERMINE:
+                match.set_en_cours()
+            else:
+                flash('Le match est déjà terminé', 'warning')
+                return redirect(url_for("affiche_poule", id_compet=id_compet, id_poule=id_poule))
         return render_template(
             "match.html",
             competition = competition, 
@@ -650,19 +647,20 @@ def valide_resultats(id_compet, id_poule, id_match):
     poule = competition.get_phases_id(id_poule)
     match = poule.get_match_id(id_match)
     participations = match.get_tireurs_match(poule.id)
-    if match.id_phase == 1:
-        form_match = PouleForm()
-    else:
-        form_match = BracketForm()
+    form_match = PointsForm(match=match)
     if not form_match.is_submitted():
         form_match.next.data = request.args.get("next")
     else:
-        tireur1, tireur2 = (participations[0].id_escrimeur,form_match.touches1.data),(participations[1].id_escrimeur,form_match.touches2.data)
+        if match.etat != cst.MATCH_TERMINE:
+            tireur1, tireur2 = (participations[0].id_escrimeur,form_match.touches1.data),(participations[1].id_escrimeur,form_match.touches2.data)
 
-        vainqueur = tireur1 if tireur1[1] > tireur2[1] else tireur2
-        perdant = tireur1 if tireur1[1] < tireur2[1] else tireur2
+            vainqueur = tireur1 if tireur1[1] > tireur2[1] else tireur2
+            perdant = tireur1 if tireur1[1] < tireur2[1] else tireur2
 
-        match.valide_resultat(vainqueur, perdant)
+            match.valide_resultat(vainqueur, perdant, current_user.num_licence)
+            flash('Résultat validé', 'success')
+        else:
+            flash('Le match a déja un résultat', 'warning')
         return redirect(url_for("affiche_poule", id_compet=id_compet, id_poule=id_poule))
     form_start = StartForm()
     return render_template(
@@ -687,24 +685,19 @@ def desinscription_competition(id_compet : int, id_tireur = None) :
         flask.Response: Renvoie la page de la compétition
     """
     competition = rq.get_competition(id_compet)
-    if id_tireur is None:
+    if current_user.is_admin():
         competition.desinscription(current_user.num_licence)
         flash('Vous êtes désinscrit', 'warning')
     else:
-        if current_user.is_admin() :
-            competition.desinscription(id_tireur)
-            tireur = rq.get_tireur(id_tireur)
-            flash(f'{tireur.prenom} {tireur.nom} est retiré de la compétition', 'warning')
-        else:
-            competition.desinscription(current_user.num_licence)
-            flash('Vous êtes désinscrit', 'warning')
+        id_tireur = id_tireur if id_tireur is not None else current_user.num_licence
+        competition.desinscription(id_tireur)
+        tireur = rq.get_tireur(id_tireur)
+        flash(f'{tireur.prenom} {tireur.nom} est retiré de la compétition', 'warning')
     return redirect(url_for('affiche_competition',id_compet = id_compet))
 
 @app.route("/competition/<int:id_compet>/affichage-grand-ecran", methods=("GET", "POST"))
 def affichage_grand_ecran(id_compet) :
     competition = rq.get_competition(id_compet)
-    flash('Vous êtes désinscrit', 'warning')
-
     return render_template('affichageGE.html',
                            competition=competition,get_tireur = rq.get_tireur)
 

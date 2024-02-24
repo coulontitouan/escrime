@@ -12,10 +12,6 @@ def get_all_categories()->list[Categorie]:
     """Récupère toutes les catégories dans la base de données"""
     return Categorie.query.all()
 
-def get_all_competitions()->list[Competition]:
-    """Récupère toutes les compétitions dans la base de données"""
-    return Competition.query.all()
-
 def get_arme(id_arme)->Arme:
     """Récupère une arme dans la base de données à partir de son id
 
@@ -80,22 +76,6 @@ def get_tireur(num_licence)->Escrimeur:
     """
     return Escrimeur.query.get(num_licence)
 
-def get_match(id_match)->Match:
-    """Récupère un match dans la base de données à partir de son id
-
-    Args:
-        id_match (int): l'id d'un match
-    """
-    return Match.query.get(id_match)
-
-def get_type_phase(id_type)->TypePhase:
-    """Récupère un type de phase dans la base de données à partir de son id
-
-    Args:
-        id_type (int): l'id d'un type de phase
-    """
-    return TypePhase.query.get(id_type)
-
 def get_max_competition_id()->int:
     """Récupère l'id de la dernière compétition créée"""
     if Competition.query.count() == 0:
@@ -111,27 +91,6 @@ def get_lieu(nom, adresse, ville)->Lieu:
         ville (str): la ville d'un lieu
     """
     return Lieu.query.filter_by(nom = nom, adresse = adresse, ville = ville).first()
-
-def get_tireurs_competition(id_compet)->list[Escrimeur]:
-    """Récupère tous les tireurs d'une compétition à partir de son id
-
-    Args:
-        id_compet (int): l'id d'une compétition
-    """
-    return get_competition(id_compet).get_tireurs()
-
-def get_est_inscrit(num_licence, id_compet)->bool:
-    """Vérifie si un tireur donné est inscrit à une compétition donnée
-
-    Args:
-        num_licence (int): le numéro de licence d'un tireur
-        id_compet (int): l'id d'une compétition
-    """
-    requete = Resultat.query.filter_by(id_competition = id_compet,
-                                 id_escrimeur = num_licence).first()
-    if requete is None :
-        return False
-    return True
 
 def delete_competition(id_compet:int)->None:
     """Supprime une compétion dans la BD à partir de son id
@@ -152,9 +111,4 @@ def cree_liste_nom_objet(liste)->list:
     Args:
         liste (list): une liste d'objets
     """
-    cpt = 1
-    liste2 = []
-    for element in liste :
-        liste2.append((cpt, element.libelle))
-        cpt += 1
-    return liste2
+    return [(i+1, liste[i].libelle) for i in range(len(liste))]
