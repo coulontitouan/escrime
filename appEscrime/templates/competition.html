@@ -7,7 +7,7 @@
   <h1>{{ competition.nom }}</h1>
   {% if current_user.is_authenticated %}
     {% if competition.peux_genere_phase_suivante() and current_user.is_admin() %}
-      <a href="{{ url_for('phase_suivante', id_compet = competition.id) }}"><button class="btn btn-primary" type="button">Générer phase suivante</button></a>
+      <a href="{{ url_for('phase_suivante', id_compet = competition.id, finie = False) }}"><button class="btn btn-primary" type="button">Générer phase suivante</button></a>
     {% elif competition.est_finie() %}
       <a href="{{ url_for('phase_suivante', id_compet = competition.id, finie = True) }}"><button class="btn btn-primary" type="button">Clôturer la compétition</button></a>
     {% endif %}
@@ -44,7 +44,7 @@
             </a>
           {% endfor %}
         {% endif %}
-        {%if competition.est_individuelle%}
+        {% if competition.est_individuelle %}
         <h2>Poules :</h2>
         {% for poule in competition.get_poules() %}
           <a href="{{ url_for('affiche_poule', id_compet = competition.id, id_poule = loop.index) }}">
@@ -137,9 +137,6 @@
             {% if not competition.est_individuelle %}
               <th>Équipe</th>
             {% endif %}
-            {% if current_user.is_admin %}
-              <th></th>
-            {% endif %}
           </tr>
         </thead>
         <tbody>
@@ -188,13 +185,13 @@
               <td>{{ tireur.nom }}</td>
               <td>{{ tireur.club.nom }}</td>
               <td>{{ tireur.get_classement(competition.id_arme, competition.id_categorie).points }}</td>
-              {% if current_user.is_admin() %}
-              <td>
-                <form action="{{ url_for('desinscription_competition', id_compet = competition.id, id_tireur = tireur.num_licence) }}">
-                  <button type="submit" class="btn btn-danger">Retirer</button>
-                </form>
-              </td>
-            {% endif %}
+              {% if current_user.is_authenticated and current_user.is_admin() %}
+                <td>
+                  <form action="{{ url_for('desinscription_competition', id_compet = competition.id, id_tireur = tireur.num_licence) }}">
+                    <button type="submit" class="btn btn-danger">Retirer</button>
+                  </form>
+                </td>
+              {% endif %}
             </tr>
           {% endfor %}
           {% for tireur in competition.get_tireurs_sans_rang() %}

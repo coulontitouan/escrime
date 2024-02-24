@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-<a id="retourCompet" href="{{ url_for('affiche_competition', id_compet = competition.id) }}"><button
+<a id="retour" href="{{ url_for('affiche_competition', id_compet = competition.id) }}"><button
     class="btn btn-outline-secondary">Retour à la compétition : {{competition.nom}} </button></a>
 <div class="escrimeur-info">
   <h2>Informations sur {{ escrimeur.prenom }} {{ escrimeur.nom }}</h2>
