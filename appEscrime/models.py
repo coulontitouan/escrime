@@ -420,7 +420,12 @@ class Competition(db.Model):
         """
         liste_part = Resultat.query.filter(Resultat.id_competition == self.id, 
                               Resultat.points != cst.ARBITRE).all()
-        return len(liste_part) if self.est_individuelle else len([resultat for resultat in liste_part if resultat.est_chef])
+        return (len(liste_part) 
+                if self.est_individuelle else 
+                len([
+                    resultat 
+                    for resultat in liste_part 
+                    if resultat.est_chef]))
 
     def get_tireurs_order_by_rang(self)->list:
         """Retourne les tireurs inscrits à la compétition, triés par rang.
