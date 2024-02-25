@@ -286,7 +286,11 @@ def affiche_competition(id_compet) :
     competition = rq.get_competition(id_compet)
     return render_template(
         "competition.html",
-        competition = competition, get_tireur=rq.get_tireur,dico = competition.get_tireurs_classes(),dicopoule = competition.get_tireurs_classes_poule()
+        competition = competition, 
+        get_tireur = rq.get_tireur, 
+        dico = competition.get_tireurs_classes(), 
+        dicopoule = competition.get_tireurs_classes_poule(),
+        rq = rq
     )
 
 @app.route("/competition/<int:id_competition>/escrimeur/<int:id_escrimeur>")
@@ -338,8 +342,6 @@ def phase_suivante(id_compet, finie=False):
     competition.programme_tableau()
     if finie:
         flash('La compétition est terminée', 'success')
-        competition.cloturee = True
-        db.session.commit()
     return redirect(url_for("affiche_competition", id_compet=id_compet))
 
 @app.route("/competition/<int:id_compet>/poule/<int:id_poule>")
