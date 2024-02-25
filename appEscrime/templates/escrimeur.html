@@ -50,7 +50,11 @@
       <tr>
         <td>{{ participation.statut }}</td>
         <td>{{ participation.id_match }}</td>
+        {% if not competition.est_cloturee %}
         <td><a href="{{ url_for('affiche_poule', id_compet = competition.id, id_poule = participation.get_phase().id) }}">
+        {% else %}
+        <td>
+        {% endif %}
         {% if participation.get_phase().libelle == 'Poule' %}
         {{ participation.get_phase().libelle }} {{ participation.get_phase().id }}
         {% else %}
