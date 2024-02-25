@@ -14,6 +14,7 @@
   {% endif %}
   <div id="body">
     <div id="un">
+      {% if not competition.est_cloturee %}
       {% if competition.nb_phases() != 0 %}
         {% if competition.nb_poules() < competition.nb_phases() %}
           <h2>Phase à élimination directe :</h2>
@@ -86,6 +87,9 @@
           {% endif %}
         {% endif %}
       {% endif %}
+      {% else %}
+          <p>La competition est terminée</p>
+      {% endif %}
     </div>
     <div id="deux">
       <div class="header-class">
@@ -126,14 +130,17 @@
       <table id="Cprovisoire" class="scroll">
         <thead>
           <tr>
+            {% if not competition.est_cloturee %}
             <th id="intitule" colspan="100%">Classement provisoire</th>
+            {% else %}
+            <th id="intitule" colspan="100%">Classement final</th>
+            {% endif %}
           </tr>
           <tr>
             <th>N°</th>
             <th>Prénom</th>
             <th>Nom</th>
             <th>Club</th>
-            <th>Points</th>
             {% if not competition.est_individuelle %}
               <th>Équipe</th>
             {% endif %}
@@ -151,7 +158,6 @@
               <td>{{ tireur.prenom }}</td>
               <td>{{ tireur.nom }}</td>
               <td>{{ tireur.club.nom }}</td>
-              <td>{{ dico[num_tireur]['victoires'] }}</td>
               {% if not competition.est_individuelle %}
                 <td>{{ rq.get_id_groupe(competition.id, tireur.num_licence) }}</td>
               {% endif %}
