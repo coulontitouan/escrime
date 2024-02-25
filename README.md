@@ -44,3 +44,18 @@ WARNING: This is a development server. Do not use it in a production deployment.
 Press CTRL+C to quit
 ```
 Pour fermer l'application il suffit de faire la combinaison de touche CTRL+C dans le terminal
+---
+# Rapports Individuels Finaux
+
+## Killian OUZET
+<div align="justify">
+
+Durant cette dernière semaine de projet sur notre application de gestion de compétition d'escrime j’ai pu principalement faire des correctifs ainsi qu’ ajouter des fonctionnalités mineures ayant pour objectif d’améliorer l’utilisation de l’application par les utilisateurs. 
+
+Les premiers jours de cette semaine je me suis donc concentré en priorité sur la correction de différentes fonctionnalités qui avaient été déréglées du à certains changements backend. En effet, lors d’un projet il arrive que des anciennes fonctions changent à cause de l’avancé du projet mais que nous oublions donc de modifier des fonctionnalités en lien. Et cette situation est arrivée, le classement intra-poule n’était plus correctement affiché. Noam qui avait développé cela précédemment m’a donc expliqué son code et j’ai pu ainsi le modifier pour qu’il soit en accord avec les derniers changements de l’application afin de ré-afficher dans le bon ordre les escrimeurs des poules. À la suite de cela j’ai corrigé la répartition des poules, qui se fait lorsqu’un admin clique sur un bouton afin de lancer la compétition. Après avoir fini ces corrections je me suis tourné vers l’ajout de vérification pour les fonctionnalités de l’appli, comme par exemple la vérification du statut de l’utilisateur pour l’accès aux pages ou bien enlever les boutons Inscription désinscription si la compétition a commencé. Et enfin, j’ai terminé cette semaine par rendre fonctionnel l’historique des compétitions d’un escrimeur dans sa page profil. Fonctionnalités que j’avais préparées lors d’une semaine précédente mais que je n’avais pas faites car ce n’était pas très important à ce moment. Je peux aussi citer la petite animation en javascript que j’ai travaillé pendant des moments creux de la semaine qui consiste à l’allongement de l’épée de l’escrimeur du logo en haut à gauche de la page lorsque l’on clique dessus.
+
+En revanche, ce vendredi je n’ai pas pu participer à l'avancée du projet car je n’étais pas présent ( entretien avec une entreprise) et donc la soutenance aussi.
+
+### Bilan personnel
+Pour conclure ce bilan, je dirai que j’ai apprécié participé à ce projet et le sujet était intéressant en plus de permettre un vrai travail derrière. Mais ce qui m’a principalement marqué durant cette SAE est le temps donné. En effet c’était la première fois que nous avions plusieurs semaines complètes pour un projet et je trouve cela beaucoup plus plaisant. ça nous permet déjà de rendre quelque chose de beaucoup plus travaillé et réfléchi avec une continuité durant l’année. Nous pouvons aussi utiliser d’autres technologies que nous avons découvertes tout du long du semestre. Je dirai donc que je préfère même avec un projet qui dure plutôt qu’un que nous fassions une fois puis que nous oublions.
+</div>
