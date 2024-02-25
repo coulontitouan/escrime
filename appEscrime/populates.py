@@ -7,6 +7,7 @@ from sqlalchemy import and_
 import appEscrime.constants as cst
 from .app import db
 from .models import Classement, Lieu, Competition, Phase, Match, Participation, Resultat, Club, Escrimeur, TypePhase, Arme, Categorie # pylint: disable=line-too-long
+from . import requests as rq
 
 def load_escrimeurs(contenu, lecteur, escrimeurs, clubs, armes, categories):
     """Charge les escrimeurs, classements, armes, catégories et clubs dans la base de données
@@ -115,7 +116,7 @@ def load_competitions(lecteur, armes, categories, competitions, lieux):
                                   date = datetime(int(date_compet[2]),
                                                   int(date_compet[1]),
                                                   int(date_compet[0])),
-                                  coefficient = ligne['coefficient'],
+                                  coefficient = ligne['coeff'],
                                   sexe = ligne['sexe'],
                                   id_arme = arme.id,
                                   id_categorie = categorie.id,
@@ -138,14 +139,13 @@ def load_resultats(contenu, lecteur):
                                 points = ligne['points']))
 
 
-
 def save_competitions():
     """Sauvegarde les compétitions dans des fichiers csv"""
     with open('./data/competitions_CEB.csv', 'w', encoding = 'utf-8') as fichier:
         print('competitions_CEB')
         writer = csv.writer(fichier, delimiter = ";")
         writer.writerow(
-            ['nom','date','sexe','categorie','arme','coefficient','lieu','ville','adresse']
+            ['nom','date','sexe','format','categorie','arme','coeff','lieu','ville','adresse']
         )
         for competition in Competition.query.all():
             writer.writerow(competition.to_csv())
@@ -157,8 +157,8 @@ def save_competitions():
                   'w', encoding = 'utf-8') as fichier:
             print(titre)
             writer = csv.writer(fichier, delimiter = ";")
-            writer.writerow(['rang','adherent','points'])
-            for resultat in Resultat.query.filter(Resultat.id_competition == competition.id).all():
+            writer.writerow(['rang','adherent','points','equipe','chef'])
+            for resultat in rq.get_resultats_compet(competition.id):
                 writer.writerow(resultat.to_csv())
         fichier.close()
 

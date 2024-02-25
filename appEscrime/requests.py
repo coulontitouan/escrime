@@ -60,6 +60,14 @@ def get_competition(id_compet)->Competition:
     """
     return Competition.query.get(id_compet)
 
+def get_resultats_compet(id_compet)->list[Resultat]:
+    """Récupère tous les résultats d'une compétition dans la base de données à partir de son id
+
+    Args:
+        id_compet (int): l'id d'une compétition
+    """
+    return Resultat.query.filter(Resultat.id_competition == id_compet).all()
+
 def get_participation(id_part)->Participation:
     """Récupère une participation dans la base de données à partir de son id
 

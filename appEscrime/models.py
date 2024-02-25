@@ -629,10 +629,10 @@ class Competition(db.Model):
         else:
             if self.est_individuelle:
                 classement = self.get_tireurs_classes_poule()
+                self.maj_resultat(classement)
             else:
                 classement = self.get_equipes_classees()
-                
-            self.maj_resultat(classement)
+                self.maj_resultat(classement)
             
             if self.est_finie():
                 self.cloture()
@@ -668,9 +668,13 @@ class Competition(db.Model):
 
     def maj_resultat(self, classement:dict)->None:
         """Met à jour le résultat de la compétition."""
-        pos = len(Resultat.query.filter_by(id_competition = self.id,
-                                           rang = "",
-                                           points = cst.TIREUR).all())
+        multiplicateur = 4 if not self.est_individuelle else 1 # 4 tireurs par équipe
+        pos = Resultat.query.filter_by(id_competition = self.id,
+                                       rang = "",
+                                       points = cst.TIREUR).count()
+        print(pos, flush=True)
+        pos = pos // multiplicateur
+        print(pos, flush=True)
         if self.phases[-1].libelle != "Poule": # Si on au moins au premier tour du tableau
             classement_inverse = list(reversed(list(classement.keys())))
             for licence in classement_inverse:
@@ -680,20 +684,29 @@ class Competition(db.Model):
                                                      id_escrimeur=licence).first().statut == cst.PERDANT:
                         if pos == 4: # Car la 3ème place est partagée
                             pos = 3
-                            Resultat.query.get((self.id, licence)).rang = pos
-                            pos = 4
-                        else:
-                            Resultat.query.get((self.id, licence)).rang = pos
-                            pos -= 1
+                        res_chef = Resultat.query.get((self.id, licence))
+                        res_chef.rang = pos
+                        for i in range(multiplicateur-1):
+                            Resultat.query.filter_by(id_competition=self.id,
+                                                     id_groupe=res_chef.id_groupe,
+                                                     rang="").first().rang = pos
+                        pos -= 1 if pos != 3 else 0
                 except AttributeError:
                     pass
         if pos == 1:
-            vainqueur = Participation.query.filter_by(id_competition=self.id,
-                                                      id_phase=self.phases[-1].id,
-                                                      statut=cst.VAINQUEUR).first().id_escrimeur
-            Resultat.query.get((self.id, vainqueur)).rang = 1
+            for res in Resultat.query.filter_by(id_competition=self.id,
+                                                rang="",
+                                                points=cst.TIREUR).all():
+                res.rang = 1
         db.session.commit()
-    
+
+    def maj_resultat_equipe(self, res_capitaine:'Resultat', position:int)->None:
+        """Met à jour le résultat d'une équipe entière"""
+        res_equipe = Resultat.query.filter(Resultat.id_competition == self.id,
+                                           Resultat.id_groupe == res_capitaine.id_groupe).all()
+        for res in res_equipe:
+            res.rang = position
+
     def est_tour_termine(self)->bool:
         """Vérifie si le dernier tour de la compétition est terminé."""
         # Les compétitions par équipe n'ont pas de phase de poule
@@ -884,7 +897,7 @@ class Competition(db.Model):
         def cle_tri(cle):
             return (
                 dico[cle]["rang"],
-                dico[cle]["victoires"] / dico[cle]["matchs"],  
+                dico[cle]["victoires"] / (dico[cle]["matchs"]+1),  
                 dico[cle]["touches"] 
             )
         return dict(sorted(dico.items(), key=lambda x: cle_tri(x[0]), reverse=True))
@@ -949,9 +962,13 @@ class Competition(db.Model):
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de la compétition dans un fichier csv."""
         date_csv = self.date.strftime(cst.TO_DATE)
-        descr = [self.nom, date_csv, self.sexe]
-        coef = [self.coefficient]
-        return descr + self.categorie.to_csv() + self.arme.to_csv() + coef + self.lieu.to_csv()
+        if self.est_individuelle:
+            format = 'individuelle'
+        else:
+            format = 'equipe'
+        descr = [self.nom, date_csv, self.sexe, format]
+        coeff = [self.coefficient]
+        return descr + self.categorie.to_csv() + self.arme.to_csv() + coeff + self.lieu.to_csv()
 
 class TypePhase(db.Model):
     """Classe représentant un type de phase d'une compétition."""
@@ -1402,7 +1419,9 @@ class Resultat(db.Model):
     )
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture du résultat dans un fichier csv."""
-        return [self.rang, self.id_escrimeur, self.points]
+        if self.est_chef:
+            return [self.rang, self.id_escrimeur, self.points, self.id_groupe, "Chef"]
+        return [self.rang, self.id_escrimeur, self.points, self.id_groupe, ""]
 
 
 @login_manager.user_loader
