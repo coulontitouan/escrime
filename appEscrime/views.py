@@ -12,7 +12,7 @@ import appEscrime.constants as cst
 from .app import app ,db
 from .models import Escrimeur, Club, Competition, Lieu, Match
 from . import requests as rq
-from .commands import newuser
+from .commands import newuser, savebd
 
 with app.app_context() :
     class CreeCompetitionForm(FlaskForm) :
@@ -523,6 +523,7 @@ def shutdown() :
     Returns:
         flask.Response: Renvoie un message de confirmation
     """
+    savebd()
     os.kill(os.getpid(), signal.SIGINT)
     return jsonify({"success": True, "message": "Server is shutting down..."})
 

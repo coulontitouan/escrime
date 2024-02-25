@@ -95,9 +95,9 @@ def deletebd():
     if os.path.exists(DB_DIR):
         os.remove(DB_DIR)
 
-@app.cli.command()
 def savebd():
     """Sauvegarde la base de données dans des fichiers csv"""
+    print(os.getcwd(), flush=True)
     for nom_fichier in os.listdir('./data'):
         if os.path.splitext(nom_fichier)[1] == '.csv':
             os.remove('./data/' + nom_fichier)
