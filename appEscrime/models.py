@@ -962,11 +962,8 @@ class Competition(db.Model):
     def to_csv(self):
         """Retourne les données nécessaires à l'écriture de la compétition dans un fichier csv."""
         date_csv = self.date.strftime(cst.TO_DATE)
-        if self.est_individuelle:
-            format = 'individuelle'
-        else:
-            format = 'equipe'
-        descr = [self.nom, date_csv, self.sexe, format]
+        format_csv = 'individuelle' if self.est_individuelle else 'equipe'
+        descr = [self.nom, date_csv, self.sexe, format_csv]
         coeff = [self.coefficient]
         return descr + self.categorie.to_csv() + self.arme.to_csv() + coeff + self.lieu.to_csv()
 
