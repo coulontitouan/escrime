@@ -130,6 +130,8 @@ def load_competitions(lecteur, armes, categories, competitions, lieux):
                                                   int(date_compet[0])),
                                   coefficient = ligne['coeff'],
                                   sexe = ligne['sexe'],
+                                  est_individuelle = ligne['format'] == 'individuelle',
+                                  est_cloturee = True,
                                   id_arme = arme.id,
                                   id_categorie = categorie.id,
                                   id_lieu = lieu.id)
