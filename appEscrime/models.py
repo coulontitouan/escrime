@@ -248,19 +248,6 @@ class Escrimeur(db.Model, UserMixin):
                                           Participation.id_escrimeur == self.num_licence)
                                           .first().id_match)
     
-    def get_id_groupe(self, id_compet:int)->int:
-        """Récupère l'id du groupe d'un escrimeur dans une compétition donnée
-
-        Args:
-            id_compet (int): l'identifiant de la compétition
-
-        Returns:
-            int: l'identifiant du groupe de l'escrimeur dans la compétition donnée
-        """
-        return (Participation.query.filter(Participation.id_competition == id_compet,
-                                          Participation.id_escrimeur == self.num_licence)
-                                          .first().id_groupe)
-    
     def get_historique_resultat(self)->list:
         """Récupère l'historique des résultats d'un tireur.
 
@@ -337,7 +324,7 @@ class Competition(db.Model):
     coefficient = db.Column(db.Integer())
     sexe = db.Column(db.String(6))
     est_individuelle = db.Column(db.Boolean, default=True)
-    cloturee = db.Column(db.Boolean, default=False)
+    est_cloturee = db.Column(db.Boolean, default=False)
     # Clé étrangère vers le lieu
     id_lieu = db.Column(db.Integer(), db.ForeignKey('lieu.id'))
     # Relation plusieurs-à-un : Une compétition se déroule dans un seul lieu
@@ -554,7 +541,10 @@ class Competition(db.Model):
             bool: True si la compétition est terminée, False sinon.
         """
         if len(self.phases) > 0:
-            return self.est_tour_termine() and self.phases[-1].libelle == "Finale" and not self.cloturee
+            tour_courant = self.phases[-1].libelle
+            if tour_courant == "Finale E":
+                tour_courant = "Finale"
+            return self.est_tour_termine() and tour_courant == "Finale" and not self.est_cloturee
         return False
 
     def ajoute_poule(self, id_poule)->None:
@@ -620,7 +610,7 @@ class Competition(db.Model):
         if self.est_individuelle:
             touches_victoire = cst.TOUCHES_BRACKET
         else:
-            touches_victoire = cst.TOUCHES_EQUIPES
+            touches_victoire = cst.TOUCHES_EQUIPE
         try:
             db.session.add(TypePhase(libelle = libelle,
                                      touches_victoire = touches_victoire))
@@ -644,7 +634,7 @@ class Competition(db.Model):
                 
             self.maj_resultat(classement)
             
-            if self.phases[-1].libelle == "Finale" and self.est_tour_termine():
+            if self.est_finie():
                 self.cloture()
                 
             elif self.est_tour_termine():
@@ -673,7 +663,6 @@ class Competition(db.Model):
 
                 self.ajoute_tour_tableau(tour)
                 phase = self.phases[-1]
-                print(len(en_lice))
                 phase.cree_matchs(list(arbitres), en_lice)
         db.session.commit()
 
@@ -682,7 +671,6 @@ class Competition(db.Model):
         pos = len(Resultat.query.filter_by(id_competition = self.id,
                                            rang = "",
                                            points = cst.TIREUR).all())
-        print("pos", pos)
         if self.phases[-1].libelle != "Poule": # Si on au moins au premier tour du tableau
             classement_inverse = list(reversed(list(classement.keys())))
             for licence in classement_inverse:
@@ -725,31 +713,35 @@ class Competition(db.Model):
     
     def cloture(self)->None:
         """Met à jour le classement national à partir des résultats de la compétition"""
-        points = self.calcule_points_attribues()
-        classement_compet = self.get_tireurs_classes()
-        for licence in classement_compet.keys():
-            resultat = Resultat.query.get((self.id, licence))
-            rang = int(resultat.rang) if type(resultat.rang)==int else 0
-            resultat.points = points[rang  - 1]
-            classement_tireur = Classement.query.get((licence, self.id_arme, self.id_categorie))
-            if classement_tireur is None:
-                classement_tireur = Classement(rang = 0,
-                                               points = 0,
-                                               num_licence = licence,
-                                               id_arme = self.id_arme,
-                                               id_categorie = self.id_categorie)
-            classement_tireur.points += points[rang - 1]
-            db.session.add(classement_tireur)
-        classement_cat = (Classement.query.filter_by(id_arme = self.id_arme,
-                                                     id_categorie = self.id_categorie)
-                                                     .order_by(Classement.points.desc())
-                                                     .all())
-        rang = 1
-        for classement in classement_cat:
-            classement.rang = rang
-            rang += 1
+        print(self.est_finie())
+        print(self.est_individuelle)
+        if self.est_finie() and self.est_individuelle:
+            points = self.calcule_points_attribues()
+            classement_compet = self.get_tireurs_classes()
+            for licence in classement_compet.keys():
+                resultat = Resultat.query.get((self.id, licence))
+                rang = int(resultat.rang) if type(resultat.rang)==int else 0
+                resultat.points = points[rang  - 1]
+                classement_tireur = Classement.query.get((licence, self.id_arme, self.id_categorie))
+                if classement_tireur is None:
+                    classement_tireur = Classement(rang = 0,
+                                                   points = 0,
+                                                   num_licence = licence,
+                                                   id_arme = self.id_arme,
+                                                   id_categorie = self.id_categorie)
+                classement_tireur.points += points[rang - 1]
+                db.session.add(classement_tireur)
+            classement_cat = (Classement.query.filter_by(id_arme = self.id_arme,
+                                                         id_categorie = self.id_categorie)
+                                                         .order_by(Classement.points.desc())
+                                                         .all())
+            rang = 1
+            for classement in classement_cat:
+                classement.rang = rang
+                rang += 1
+        self.est_cloturee = True
         db.session.commit()
-    
+
     def calcule_points_attribues(self)->list:
         """Calcule les points attribués à chaque tireur à l'issue de la compétition."""
         points = []
@@ -777,15 +769,12 @@ class Competition(db.Model):
                 if classement is not None:
                     groupes[resultat.id_groupe] += classement.points
         for groupe in groupes.keys(): # Remplacement de l'id du groupe par la licence du capitaine
-            print(self.id, groupe, type(groupe))
             capitaine = (Resultat.query.filter_by(id_competition = self.id,
                                                   id_groupe = groupe,
                                                   est_chef = True)
                                                   .first()).id_escrimeur
             res[capitaine] = groupes[groupe]
-        print(res)
         res = {k: v for k, v in sorted(res.items(), key=lambda item: -item[1])}
-        print(res)
         return res
 
     def desinscription(self, num_licence:int)->None:
@@ -915,11 +904,16 @@ class Competition(db.Model):
             )
         return dict(sorted(dico.items(), key=lambda x: cle_tri(x[0]), reverse=True))
     
-    def peux_genere_phase_suivante(self)->bool:
-        for phase in self.phases :
-            for match in phase.matchs :
-                if match.etat != cst.MATCH_TERMINE or Phase.query.filter_by(id_competition = self.id).order_by(Phase.id.desc()).first().libelle == "Finale":
-                    return False
+    def peut_generer_phase_suivante(self)->bool:
+        """Vérifie si la compétition peut générer une phase suivante."""
+        derniere_phase = (Phase.query.filter_by(id_competition = self.id)
+                          .order_by(Phase.id.desc())
+                          .first()).libelle
+        if derniere_phase == "Finale" or derniere_phase == "Finale E":
+            return False
+        for phase in self.phases:
+            if not phase.est_terminee():
+                return False
         return True if len(self.phases) != 0 else False
     
     def get_participation(self, id_tireur, id_phase, id_match)->'Participation':
@@ -995,9 +989,11 @@ class Phase(db.Model):
         return len({participation.tireur for match in self.matchs for participation in match.participations if participation.id_phase == self.id})
 
     def get_tireurs(self) -> list :
-        return Escrimeur.query.join(Participation).filter(Participation.id_competition == self.id_competition, Participation.id_phase == self.id).order_by(Participation.id_match)
+        return (Escrimeur.query.join(Participation).filter(Participation.id_competition == self.id_competition,
+                                                           Participation.id_phase == self.id)
+                                                           .order_by(Participation.id_match))
 
-    def get_arbitre(self) -> 'Escrimeur' :
+    def get_arbitre(self) -> Escrimeur :
         """Récupère l'arbitre de la phase.
 
         Returns:
@@ -1012,8 +1008,6 @@ class Phase(db.Model):
             arbitres (list): la liste des arbitres de la phase.
             tireurs (list): la liste des tireurs de la phase.
         """
-        print(len(tireurs))
-        print(self.competition.phases)
         try:
             phase_precedente = self.competition.phases[-2]
         except IndexError:
@@ -1039,25 +1033,16 @@ class Phase(db.Model):
         elif phase_precedente.libelle == 'Barrages' or phase_precedente.libelle == 'Poule': # En cas de tour de l'arbre complet
             if phase_precedente.libelle == 'Barrages': # En cas de premier tour de l'arbre complet après barrages
                 vainqueurs_barrages = phase_precedente.get_vainqueurs() # Les tireurs qualifiés via le tour préliminaire
-                print("vainqueurs_barrages",vainqueurs_barrages,"\n")
                 barragistes = sorted([participation.tireur for participation in vainqueurs_barrages], # Classement par l'identifiant du barrage remporté
                                      key=lambda participation : participation.participations[-1].id_match)
-                print("barragistes",barragistes,"\n")
                 tireurs = [tireur for tireur in tireurs if tireur not in barragistes] # Les tireurs qualifiés directement
-                print("tireurs1",tireurs,"\n")
                 tireurs = tireurs + barragistes[::-1]
-                print("tireurs2",tireurs,"\n")
 
             top_seed = tireurs[:len(tireurs) // 2] # Les tireurs les mieux classés
-            print("top_seed",top_seed,"\n")
             bottom_seed = tireurs[len(tireurs) // 2:] # Les tireurs les moins bien classés
-            print("bottom_seed",bottom_seed,"\n")
             bottom_seed = bottom_seed[::-1] # Inversion afin de correspondre au seeding car le dernier affronte le premier, etc.
-            print("bottom_seed_reversed",bottom_seed,"\n")
             top_top_seed = top_seed[:len(top_seed) // 2] # Les meilleurs top seed (jouant les matchs impairs)
-            print("top_top_seed",top_top_seed,"\n")
             bottom_top_seed = top_seed[len(top_seed) // 2:] # Les moins bons top seed (jouant les matchs pairs)
-            print("bottom_top_seed",bottom_top_seed,"\n")
 
             for i in range(1, len(top_seed), 2):
                 tireur1 = top_top_seed[0]
@@ -1177,11 +1162,6 @@ class Phase(db.Model):
             bool: True si la phase est terminée, False sinon.
         """
         return all(match.etat == cst.MATCH_TERMINE for match in self.matchs)
-    
-    def verrouille_resultats(self)->None:
-        """Valide les résultats de la phase et gère la création de la suivante."""
-        if self.est_terminee() and self.libelle != 'Finale' and self.libelle != 'Poule':
-            self.competition.programme_tableau()
     
     def get_matchs_tireur(self, id_tireur : int) -> list:
         """Récupère les matchs d'un tireur dans la phase
@@ -1306,8 +1286,6 @@ class Match(db.Model):
             elif participation.id_escrimeur == num_perdant:
                 participation.statut = cst.PERDANT
                 participation.touches = touches_perdant
-            else:
-                print("Tireur inconnu wtf ?!")
         self.etat = cst.MATCH_TERMINE
         self.num_arbitre = num_licence_arbitre
         db.session.commit()

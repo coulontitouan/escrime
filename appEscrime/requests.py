@@ -82,6 +82,15 @@ def get_max_competition_id()->int:
         return 0
     return Competition.query.order_by(desc(Competition.id)).first().id
 
+def get_id_groupe(id_compet, id_tireur)->int:
+    """Récupère l'id d'un groupe dans la base de données à partir de l'id d'une compétition et l'id d'un tireur
+
+    Args:
+        id_compet (int): l'id d'une compétition
+        id_tireur (int): l'id d'un tireur
+    """
+    return Resultat.query.filter(Resultat.id_competition == id_compet, Resultat.id_escrimeur == id_tireur).first().id_groupe
+
 def get_lieu(nom, adresse, ville)->Lieu:
     """Récupère un lieu dans la base de données à partir de son nom, son adresse et sa ville
 

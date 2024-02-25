@@ -6,7 +6,7 @@
 {% block content %}
   <h1>{{ competition.nom }}</h1>
   {% if current_user.is_authenticated %}
-    {% if competition.peux_genere_phase_suivante() and current_user.is_admin() %}
+    {% if competition.peut_generer_phase_suivante() and current_user.is_admin() %}
       <a href="{{ url_for('phase_suivante', id_compet = competition.id, finie = False) }}"><button class="btn btn-primary" type="button">Générer phase suivante</button></a>
     {% elif competition.est_finie() %}
       <a href="{{ url_for('phase_suivante', id_compet = competition.id, finie = True) }}"><button class="btn btn-primary" type="button">Clôturer la compétition</button></a>
@@ -153,7 +153,7 @@
               <td>{{ tireur.club.nom }}</td>
               <td>{{ dico[num_tireur]['victoires'] }}</td>
               {% if not competition.est_individuelle %}
-                <td>{{ tireur.get_id_groupe(competition.id) }}</td>
+                <td>{{ rq.get_id_groupe(competition.id, tireur.num_licence) }}</td>
               {% endif %}
             </tr>
           {% endfor %}
