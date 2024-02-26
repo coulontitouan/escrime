@@ -129,13 +129,15 @@
           boutton.innerHTML = 'Valider'
         }
       }
-      
+      function clignote(elem) {
+        elem.style.color = 'red'
+        setTimeout(() => (elem.style.color = 'initial'), 300)
+      }
       function ajoutpoints(elem) {
         elem = elem.querySelector('span')
         if (parseInt(elem.innerHTML) < touchesMax) elem.innerHTML = parseInt(elem.innerHTML) + 1
         else {
-          elem.parentElement.style.color = 'red'
-          setTimeout(() => (elem.parentElement.style.color = 'initial'), 300)
+          clignote(elem)
         }
       }
       
@@ -144,8 +146,7 @@
         if (parseInt(elem.innerHTML) > 0) {
           elem.innerHTML = parseInt(elem.innerHTML) - 1
         } else {
-          elem.parentElement.style.color = 'red'
-          setTimeout(() => (elem.parentElement.style.color = 'initial'), 300)
+          clignote(elem)
         }
       }
     </script>
