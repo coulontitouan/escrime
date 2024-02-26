@@ -919,15 +919,18 @@ class Competition(db.Model):
     
     def peut_generer_phase_suivante(self)->bool:
         """Vérifie si la compétition peut générer une phase suivante."""
-        derniere_phase = (Phase.query.filter_by(id_competition = self.id)
-                          .order_by(Phase.id.desc())
-                          .first()).libelle
-        if derniere_phase == "Finale" or derniere_phase == "Finale E":
-            return False
+        if len(self.phases) > 0:
+            derniere_phase = (Phase.query.filter_by(id_competition = self.id)
+                            .order_by(Phase.id.desc())
+                            .first()).libelle
+            if derniere_phase in ["Finale","Finale E"]:
+                return False
+        else:
+            return True
         for phase in self.phases:
             if not phase.est_terminee():
                 return False
-        return True if len(self.phases) != 0 else False
+        return True
     
     def get_participation(self, id_tireur, id_phase, id_match)->'Participation':
         """Récupère la participation du tireur concurent au tireur donné dans un match donné.
@@ -1055,10 +1058,11 @@ class Phase(db.Model):
             top_seed = tireurs[:len(tireurs) // 2] # Les tireurs les mieux classés
             bottom_seed = tireurs[len(tireurs) // 2:] # Les tireurs les moins bien classés
             bottom_seed = bottom_seed[::-1] # Inversion afin de correspondre au seeding car le dernier affronte le premier, etc.
-            top_top_seed = top_seed[:len(top_seed) // 2] # Les meilleurs top seed (jouant les matchs impairs)
-            bottom_top_seed = top_seed[len(top_seed) // 2:] # Les moins bons top seed (jouant les matchs pairs)
+            top_top_seed = top_seed[:ceil(len(top_seed) / 2)] # Les meilleurs top seed (jouant les matchs impairs)
+            bottom_top_seed = top_seed[ceil(len(top_seed) / 2):] # Les moins bons top seed (jouant les matchs pairs)
 
-            for i in range(1, len(top_seed), 2):
+            nb_matchs = len(top_seed) if len(top_seed) != 1 else 2
+            for i in range(1, nb_matchs, 2):
                 tireur1 = top_top_seed[0]
                 tireur2 = bottom_seed[top_seed.index(tireur1)]
                 self.ajoute_match(i,
