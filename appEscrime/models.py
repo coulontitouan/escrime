@@ -546,6 +546,9 @@ class Competition(db.Model):
                 tour_courant = "Finale"
             return self.est_tour_termine() and tour_courant == "Finale" and not self.est_cloturee
         return False
+    
+    def assez_d_arbitres(self)->bool: 
+        return len(self.get_arbitres()) > 0 and ((self.get_nb_participants() // len(self.get_arbitres()) < 10) if self.est_individuelle else True) 
 
     def ajoute_poule(self, id_poule)->None:
         """Ajoute une poule à la compétition.
@@ -1016,7 +1019,7 @@ class Phase(db.Model):
         Returns:
             Escrimeur: l'arbitre de la phase.
         """
-        return Escrimeur.query.get(self.matchs[0].num_arbitre)      
+        return Escrimeur.query.get(self.matchs[0].num_arbitre)
 
     def cree_matchs(self, arbitres, tireurs)->None:
         """Crée les matchs de la phase.

@@ -7,6 +7,7 @@
     <main>  
         <div id="un" >
             {% if competition.nb_phases() != 0 %}
+            {% if competition.est_individuelle %}
             {% for poule in competition.get_poules() %}
                 <table class="scroll poule">
                     <thead>
@@ -67,6 +68,7 @@
 
 
             {% endfor %}
+            {% endif %}
             {% else %}
                 <p>Aucune poule créée</p>
             {% endif %}

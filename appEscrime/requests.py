@@ -109,6 +109,35 @@ def get_lieu(nom, adresse, ville)->Lieu:
     """
     return Lieu.query.filter_by(nom = nom, adresse = adresse, ville = ville).first()
 
+def get_est_chef(id_compet, id_tireur)->bool:
+    """Récupère le statut de chef de groupe d'un tireur dans une compétition
+
+    Args:
+        id_compet (int): l'id d'une compétition
+        id_tireur (int): l'id d'un tireur
+    """
+    return Resultat.query.filter(Resultat.id_competition == id_compet, Resultat.id_escrimeur == id_tireur).first().est_chef
+
+def get_chef_groupe(id_escrimeur, id_compet)->Escrimeur:
+    """Récupère le chef de groupe d'une compétition
+
+    Args:
+        id_escrimeur (int): l'id d'un tireur
+        id_compet (int): l'id d'une compétition
+    """
+    id_groupe = get_id_groupe(id_compet, id_escrimeur)
+    return [res.escrimeur for res in Resultat.query.filter(Resultat.id_competition == id_compet, Resultat.id_groupe == id_groupe, Resultat.est_chef == True).all()][0]
+
+def get_membres_equipe(id_compet, id_tireur)->list[Escrimeur]:
+    """Récupère les membres d'une équipe dans une compétition
+
+    Args:
+        id_compet (int): l'id d'une compétition
+        id_tireur (int): l'id d'un tireur
+    """
+    id_groupe = get_id_groupe(id_compet, id_tireur)
+    return [res.escrimeur for res in Resultat.query.filter(Resultat.id_competition == id_compet, Resultat.id_groupe == id_groupe).all()]
+
 def delete_competition(id_compet:int)->None:
     """Supprime une compétion dans la BD à partir de son id
 

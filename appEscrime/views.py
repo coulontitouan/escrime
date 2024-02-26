@@ -304,13 +304,16 @@ def affiche_escrimeur(id_escrimeur, id_competition) :
     Returns:
         flask.Response: Renvoie la page de l'escrimeur
     """
+    if not rq.get_est_chef(id_competition, id_escrimeur):
+        return redirect(url_for("affiche_escrimeur", id_escrimeur=rq.get_chef_groupe(id_escrimeur, id_competition).num_licence, id_competition=id_competition))
     escrimeur = rq.get_tireur(id_escrimeur)
     competition = rq.get_competition(id_competition)
     return render_template(
         "escrimeur.html",
         escrimeur = escrimeur,
         competition = competition,
-        to_date = cst.TO_DATE
+        to_date = cst.TO_DATE,
+        rq = rq
     ) 
 
 @app.route("/competition/<int:id_compet>/creer-poule")
@@ -324,7 +327,10 @@ def competition_cree_poules(id_compet) :
         flask.Response: Renvoie la page de la compétition
     """
     competition = rq.get_competition(id_compet)
-    if competition.programme_poules() is None:
+    if competition.assez_d_arbitres():
+        competition.programme_poules()
+        flash("Poules créées avec succès.","success")
+    else:
         flash("Pas assez d'arbitres.","danger")
     return redirect(url_for("affiche_competition", id_compet=id_compet))
 
@@ -688,14 +694,17 @@ def desinscription_competition(id_compet : int, id_tireur = None) :
         flask.Response: Renvoie la page de la compétition
     """
     competition = rq.get_competition(id_compet)
+    if competition.nb_poules() > 0:
+        flash('Vous ne pouvez pas vous désinscrire, les matchs sont déja disponibles.', 'warning')
+        return redirect(url_for('affiche_competition',id_compet = id_compet))
     if current_user.is_admin():
-        competition.desinscription(current_user.num_licence)
-        flash('Vous êtes désinscrit', 'warning')
-    else:
         id_tireur = id_tireur if id_tireur is not None else current_user.num_licence
         competition.desinscription(id_tireur)
         tireur = rq.get_tireur(id_tireur)
         flash(f'{tireur.prenom} {tireur.nom} est retiré de la compétition', 'warning')
+    else:
+        competition.desinscription(current_user.num_licence)
+        flash('Vous êtes désinscrit', 'warning')
     return redirect(url_for('affiche_competition',id_compet = id_compet))
 
 @app.route("/competition/<int:id_compet>/affichage-grand-ecran", methods=("GET", "POST"))

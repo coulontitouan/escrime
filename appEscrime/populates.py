@@ -2,6 +2,7 @@
 
 import csv
 from datetime import datetime
+import time
 
 from sqlalchemy import and_, not_
 import appEscrime.constants as cst
