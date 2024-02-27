@@ -14,25 +14,24 @@ from .models import Escrimeur, Club, Competition, Lieu, Match
 from . import requests as rq
 from .commands import newuser, savebd
 
-with app.app_context() :
-    class CreeCompetitionForm(FlaskForm) :
-        """Classe formulaire pour la création d'une compétition.
+class CreeCompetitionForm(FlaskForm) :
+    """Classe formulaire pour la création d'une compétition.
 
-        Args:
-            FlaskForm (FlaskForm): Classe formulaire de Flask.
-        """
-        nom_lieu = StringField('Nom lieu', validators=[DataRequired()])
-        adresse_lieu = StringField('Adresse lieu', validators=[DataRequired()])
-        ville_lieu = StringField('Ville lieu', validators=[DataRequired()])
-        nom_competition = StringField('Nom compétition', validators=[DataRequired()])
-        date_competition = DateField('Date compétition',
-                                     format='%Y-%m-%d', validators=[DataRequired()])
-        sexe_competition = RadioField('Sexe', choices = ['Homme','Femme'])
-        coefficient_competition = IntegerField('Coefficient', validators=[DataRequired()])
-        nom_arme = SelectField("Arme", coerce=str, default=1)
-        nom_categorie = SelectField("Catégorie", coerce=str, default=1)
-        est_individuelle = RadioField('Type de compétition', choices = ['Individuelle','En équipe'])
-        next = HiddenField()
+    Args:
+        FlaskForm (FlaskForm): Classe formulaire de Flask.
+    """
+    nom_lieu = StringField('Nom lieu', validators=[DataRequired()])
+    adresse_lieu = StringField('Adresse lieu', validators=[DataRequired()])
+    ville_lieu = StringField('Ville lieu', validators=[DataRequired()])
+    nom_competition = StringField('Nom compétition', validators=[DataRequired()])
+    date_competition = DateField('Date compétition',
+                                    format='%Y-%m-%d', validators=[DataRequired()])
+    sexe_competition = RadioField('Sexe', choices = ['Homme','Femme'], validators=[DataRequired()])
+    coefficient_competition = IntegerField('Coefficient', validators=[DataRequired()])
+    nom_arme = SelectField("Arme", coerce=str, default=1, validators=[DataRequired()])
+    nom_categorie = SelectField("Catégorie", coerce=str, default=1, validators=[DataRequired()])
+    est_individuelle = RadioField('Type de compétition', choices = ['Individuelle','En équipe'], validators=[DataRequired()])
+    next = HiddenField()
 
 class SearchForm(FlaskForm) :
     """Classe formulaire pour la recherche d'une compétition.
@@ -304,17 +303,15 @@ def affiche_escrimeur(id_escrimeur, id_competition) :
     Returns:
         flask.Response: Renvoie la page de l'escrimeur
     """
-    if not rq.get_est_chef(id_competition, id_escrimeur):
-        return redirect(url_for("affiche_escrimeur", id_escrimeur=rq.get_chef_groupe(id_escrimeur, id_competition).num_licence, id_competition=id_competition))
-    escrimeur = rq.get_tireur(id_escrimeur)
     competition = rq.get_competition(id_competition)
+    escrimeur = rq.get_tireur(id_escrimeur)
     return render_template(
         "escrimeur.html",
         escrimeur = escrimeur,
         competition = competition,
         to_date = cst.TO_DATE,
         rq = rq
-    ) 
+    )
 
 @app.route("/competition/<int:id_compet>/creer-poule")
 def competition_cree_poules(id_compet) :

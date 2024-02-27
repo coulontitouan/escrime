@@ -11,24 +11,24 @@
 <div class="escrimeur-info">
   <h2>Informations sur {{ escrimeur.prenom if competition.est_individuelle else "Équipe de" }} {{ escrimeur.nom }}</h2>
   {% if competition.est_individuelle %}
-  <p>
-    <strong>Date de naissance:</strong> {{ escrimeur.date_naissance.strftime(to_date) }}
-  </p>
-  <p>
-    <strong>Numéro de licence:</strong> {{ escrimeur.num_licence }}
-  </p>
+    <p>
+      <strong>Date de naissance:</strong> {{ escrimeur.date_naissance.strftime(to_date) }}
+    </p>
+    <p>
+      <strong>Numéro de licence:</strong> {{ escrimeur.num_licence }}
+    </p>
   {% else %}
-  <p>
-    <strong>Membres de l'équipe:</strong>
-  </p>
-  <ul>
-    {% for escrimeur in rq.get_membres_equipe(competition.id,escrimeur.num_licence) %}
-    <li>
-      {{ escrimeur.prenom }} {{ escrimeur.nom }}<br>
-      Numéro de licence : {{ escrimeur.num_licence }}
-    </li>
-    {% endfor %}
-  </ul>
+    <p>
+      <strong>Membres de l'équipe:</strong>
+    </p>
+    <ul>
+      {% for escrimeur in rq.get_membres_equipe(competition.id,escrimeur.num_licence) %}
+        <li>
+          {{ escrimeur.prenom }} {{ escrimeur.nom }}<br>
+          Numéro de licence : {{ escrimeur.num_licence }}
+        </li>
+      {% endfor %}
+    </ul>
   {% endif %}
   <p>
     <strong>Club:</strong> {{ escrimeur.get_club() }}

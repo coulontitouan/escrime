@@ -922,18 +922,17 @@ class Competition(db.Model):
     
     def peut_generer_phase_suivante(self)->bool:
         """Vérifie si la compétition peut générer une phase suivante."""
-        if len(self.phases) > 0:
-            derniere_phase = (Phase.query.filter_by(id_competition = self.id)
-                            .order_by(Phase.id.desc())
-                            .first()).libelle
-            if derniere_phase in ["Finale","Finale E"]:
-                return False
-        else:
-            return True
-        for phase in self.phases:
-            if not phase.est_terminee():
-                return False
-        return True
+        if self.est_cloturee :
+            return False
+        else :
+            if self.phases :
+                if Phase.query.filter_by(id_competition = self.id).order_by(Phase.id.desc()).first().libelle in ("Finale", "Finale E") :
+                    return False
+                else :
+                    for phase in self.phases :
+                        if not phase.est_terminee() :
+                            return False
+                    return True
     
     def get_participation(self, id_tireur, id_phase, id_match)->'Participation':
         """Récupère la participation du tireur concurent au tireur donné dans un match donné.
