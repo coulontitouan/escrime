@@ -59,3 +59,14 @@ En revanche, ce vendredi je n’ai pas pu participer à l'avancée du projet car
 ### Bilan personnel
 Pour conclure ce bilan, je dirai que j’ai apprécié participé à ce projet et le sujet était intéressant en plus de permettre un vrai travail derrière. Mais ce qui m’a principalement marqué durant cette SAE est le temps donné. En effet c’était la première fois que nous avions plusieurs semaines complètes pour un projet et je trouve cela beaucoup plus plaisant. ça nous permet déjà de rendre quelque chose de beaucoup plus travaillé et réfléchi avec une continuité durant l’année. Nous pouvons aussi utiliser d’autres technologies que nous avons découvertes tout du long du semestre. Je dirai donc que je préfère même avec un projet qui dure plutôt qu’un que nous fassions une fois puis que nous oublions.
 </div>
+
+---
+## Anthony Gardelle
+<div align="justify">
+
+Lors des premiers jours de cette dernière semaine de SAE, je me suis principalement occupé du tableau avec le récapitulatif des touches lors de phases de poules en collaboration avec Titouan. Cet affichage m’a pris un peu plus de temps que prévu à réaliser, j’avais un affichage des bordures qui ne se faisait pas en raison du javascript utilisé pour la création des cases noires dans le tableau.Titouan m’a donc aidé et expliquait comment le résoudre.  Le tableau est un modèle identique à celui espéré avec un ajout des touches données par le joueur. Pour réaliser ce tableau j’ai utilisé les balises html classique à la réalisation d’un tableau (table, tbody, td, tr, ...) et aussi un peu de javascript. 
+
+Enfin pour la deuxième partie de la semaine je me suis occupé de la page d’information sur un escrimeur participant à une compétition individuelle. La réalisation de cette page a été assez simple et ne m’a pas trop pris de temps car nous avons une simplicité d’accès aux données grâce à une bonne conception de la BD principalement réalisée par Arthur. Dans cette page on peut retrouver des informations globales sur l’escrimeur ainsi qu’un récapitulatif des matchs effectué par l’escrimeur (adversaire, phase, résultat, …). J’ai donc pour accéder à cette page ajouter un indicateur en passant sa souris sur la ligne du tableau réserver à l’escrimeur sur lequel nous avons envie de nous renseigner dans le classement provisoire de la compétition.
+
+Cette dernière semaine de projet a été pour moi une semaine éprouvante avec une grande diversité de langage utilisé, après plusieurs semaines de pause avec les semaines précédentes, j’ai pu avoir un œil différent sur le projet ce qui a permis l’amélioration de mon esprit critique. En travaillant avec mes camarades, j’ai pu améliorer mes compétences en programmation, tout cela a été possible grâce à une excellente cohésion avec le groupe et une organisation du travail millimétrée.
+</div>
