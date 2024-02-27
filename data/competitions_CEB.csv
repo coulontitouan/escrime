@@ -1,2 +1,4 @@
-nom;date;sexe;categorie;arme;coefficient;lieu;ville;adresse
-Competition Test;02/09/2004;Homme;M15;Sabre;50;Chez Lucas;Tours;25 rue des Premiers Années
+nom;date;sexe;format;categorie;arme;coeff;lieu;ville;adresse
+Competition Test;02/09/2004;Homme;individuelle;M15;Sabre;50;Chez Lucas;Tours;25 rue des Premiers Années
+team;24/02/2024;Homme;equipe;Seniors;Sabre;1;team;team;team
+team epee;25/02/2024;Homme;equipe;Seniors;Epée;2;team epee;team epee;team epee

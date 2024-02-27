@@ -8,33 +8,41 @@
     margin: auto;
 }
 
-
-#formulaire2 {
+#formulaire form {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
 }
-
-.form-group {
+#formulaire form>*{
+    flex-basis: 100%;
+    flex-grow: 1;
+}
+#formulaire form ul{
+    padding-left: 0;
+}
+#formulaire form ul select{
+    min-width: 70%;
+}
+#formulaire .form-group {
     margin-bottom: 20px;
 }
 
-.form-group label, label{
+#formulaire label{
     display: block;
     font-weight: bold;
     color: #555;
     margin-bottom: 8px;
 }
 
-.form-group input , #radio{
-    width: 100%;
+#formulaire .form-group input {
+    margin-right: 10px;
     padding: 12px;
     box-sizing: border-box;
     border: 1px solid #ddd;
     border-radius: 4px;
 }
 
-.btn-submit {
+#formulaire .btn-submit {
     background-color: #3498db;
     color: #fff;
     padding: 14px 20px;
@@ -44,21 +52,10 @@
     transition: background-color 0.3s ease;
 }
 
-.btn-submit:hover {
+#formulaire .btn-submit:hover {
     background-color: #2980b9;
 }
 
-#radio > ul {
-	display: flex;
-    justify-content: space-around;
-	width: 100%;
-	padding: 0%;
-}
-
-#categorie {
-    flex-basis: 100%;
-}
-
-#button {
+#formulaire #button {
     width: 100%;
 }

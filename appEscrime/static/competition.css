@@ -8,7 +8,8 @@ h2 {
   margin: 0;
 }
 
-.scroll , .scroll th{
+.scroll,
+.scroll th {
   border-bottom: 1px solid black;
   border-top: 1px solid black;
 }
@@ -18,17 +19,18 @@ h2 {
 }
 
 #un table thead {
-  display:block;
+  display: block;
 }
 
 #un table tbody {
   width: 100%;
-  display:block;
-  max-height:15vh;
-  overflow-y:auto;
+  display: block;
+  max-height: 15vh;
+  overflow-y: auto;
 }
 
-#un table td, th {
+#un table td,
+th {
   width: 10vw;
   text-align: center;
 }
@@ -38,7 +40,7 @@ h2 {
   width: auto;
 }
 
-#intitule{
+#intitule {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: clip;
@@ -60,7 +62,8 @@ h2 {
   width: 100%;
 }
 
-#deux table td, th {
+#deux table td,
+th {
   width: 10vw;
   text-align: center;
 }
@@ -70,12 +73,17 @@ h2 {
   width: 100%;
 }
 
-#deux table thead > tr {
+#deux table thead>tr {
   border-bottom: 1px solid black;
 }
 
 table {
   margin-top: 5vh;
+  transition: all 0.3s linear;
+}
+
+a:hover table {
+  box-shadow: 0 0 5px 5px rgba(0, 0, 0, 0.2);
 }
 
 .header-class {
@@ -100,12 +108,13 @@ tbody tr:nth-child(even) {
   border: 2px solid black;
 }
 
-.header-class > ul {
-	display: flex;
-  justify-content: space-evenly; 
-	width: 100%;
-	padding: 0%;
+.header-class>ul {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+  padding: 0%;
 }
+
 #uneimage {
   width: 70%;
   height: auto;
@@ -116,12 +125,19 @@ tbody tr:nth-child(even) {
   justify-content: space-between;
 }
 
-#closebtn{
+#closebtn {
   width: 10%;
   height: 100%;
   display: flex;
   justify-content: end;
 
 }
-.role{
-  font-size: medium;}
+
+h2:last-of-type:not(:first-of-type) {
+  margin-top: 5vh;
+}
+
+.clickable-row:hover {
+  box-shadow: 0 0 5px 5px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}

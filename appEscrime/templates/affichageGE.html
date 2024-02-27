@@ -7,6 +7,7 @@
     <main>  
         <div id="un" >
             {% if competition.nb_phases() != 0 %}
+            {% if competition.est_individuelle %}
             {% for poule in competition.get_poules() %}
                 <table class="scroll poule">
                     <thead>
@@ -67,6 +68,7 @@
 
 
             {% endfor %}
+            {% endif %}
             {% else %}
                 <p>Aucune poule créée</p>
             {% endif %}
@@ -74,10 +76,10 @@
         </div>
         <div id="deux">
             <div id="heure"></div>
-            <table id="Cprovisoire" class = "scroll" style="display:table;">
+            <table id="Cprovisoire" class = "scroll">
                 <thead>
                     <tr>
-                        <th id="intitule" colspan="5">Classement provisoire <a href="https://openclassrooms.com/forum/sujet/scroll-vertical-sur-balise-table"><img id="info" src="../static/images/istockphoto-1140611970-612x612-removebg-preview(1).png" alt=""></a></th>
+                        <th id="intitule" colspan="100%">Classement provisoire</th>
                     </tr>
                     <tr>
                         <th>N°</th>

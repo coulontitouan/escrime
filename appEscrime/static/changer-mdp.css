@@ -1,0 +1,45 @@
+section:has(#changer-mdp){
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+section:has(#changer-mdp) > h1::before{
+    content: "🔒";
+}
+
+#changer-mdp{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 75%;
+}
+
+#changer-mdp>*{
+    flex-basis: 100%;
+    width: 100%;
+    margin: 1em;
+}
+
+.form-group label{
+    display: block;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.form-group input{
+    width: 100%;
+    padding: 12px;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.field-icon {
+    float: right;
+    margin-left: -25px;
+    margin-top: -25px;
+    position: relative;
+    z-index: 2;
+  }

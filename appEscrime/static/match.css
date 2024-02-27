@@ -4,6 +4,10 @@
     text-align: center;
 }
 
+a:hover {
+    text-decoration: none;
+}
+
 html,
 body {
     height: 100%;
@@ -20,6 +24,11 @@ body>* {
     flex-direction: column;
     flex-wrap: nowrap;
 }
+
+body:has(#message) *:not(#message, #message *, #retour) {
+    pointer-events: none;
+    user-select: none;
+  }
 
 #informations {
     flex-basis: 10%;
@@ -44,7 +53,6 @@ body>* {
 
 .tireur div span {
     font-size: 10vh;
-    align-self: flex-end;
 }
 
 .tireur .moins {
@@ -152,4 +160,15 @@ aside > button{
 
 aside.visible{
     display: unset;
+}
+
+#retour {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    font-size: 3rem;
+}
+
+body:has(#message a)>a{
+    display: none;
 }

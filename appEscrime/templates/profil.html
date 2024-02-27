@@ -52,7 +52,41 @@
         <li id="historique">
             <h2>Historique des compétitions</h2>
             <table>
-                <tr>Trier par resultats ou par date</th>
+                <thead>
+                    <tr>
+                        <th>Compétition</th>
+                        <th>Catégorie</th>
+                        <th>Arme</th>
+                        <th>Coefficient</th>
+                        <th>Date</th>
+                        <th>Participants</th>
+                        <th>Résultat</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for resultat in current_user.get_historique_resultat() %}
+                    {% if resultat.rang != ""  %}
+                    {% with competition = rq.get_competition(resultat.id_competition) %}
+                    <tr>
+                        <td>{{competition.nom}}</td>
+                        <td>{{rq.get_categorie(competition.id_categorie).libelle}}</td>
+                        <td>{{rq.get_arme(competition.id_arme).libelle}}</td>
+                        <td>{{competition.coefficient}}</td>
+                        <td>{{competition.date.strftime(to_date)}}</td>
+                        <td>{{competition.get_nb_participants()}}</td>
+                        <td>{{resultat.rang}}</td>
+                        <td><a href="{{url_for('affiche_competition', id_compet=competition.id)}}"><button class="favorite styled" type="button" >Voir plus</button></a></td>
+                    </tr>
+                    {% endwith %}
+                    {% endif %}
+                    {% endfor %}
+                    {% if current_user.get_historique_resultat()|length == 0 %}
+                    <tr>
+                        <td colspan="100%">Aucun résultat disponible</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
             </table>
         </li>
     </ul>

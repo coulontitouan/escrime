@@ -4,58 +4,145 @@
 <link rel="stylesheet" href="{{url_for('static', filename='poule.css')}}">
 {% endblock %}
 {% block content %}
+<a id="retour" href="{{ url_for('affiche_competition', id_compet = competition.id) }}"><button
+        class="btn btn-outline-secondary">Retour à la compétition : {{competition.nom}} </button></a>
 <div class="titre">
-    <h1>Poule A</h1>
-    <div class="status">
+    <h1>{{ poule.libelle }} {% if poule.libelle == "Poule" %}{{ poule.id }}{% endif %}</h1>
+    {% if poule.libelle == "Poule" %}
+    <div id="pouleNorme">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Club</th>
+                    <th></th>
+                    {% for i in range(1, poule.nb_tireurs() + 1) %}
+                    <th>{{i}}</th>
+                    {% endfor %}
+                    <th>TOUCHES PORTÉES</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tireur in poule.get_tireurs() %}
+                <tr>
+                    <td>{{tireur.nom}}</td>
+                    <td>{{tireur.get_club()}}</td>
+                    <td>{{loop.index}}</td>
+                    {% for match in poule.get_matchs_tireur(tireur.num_licence) %}
+                    <td>{{ match.get_participation(tireur.num_licence).touches }}</td>
+                    {% endfor %}
+                    <td>{{poule.get_total_touches_realisees_tireur(tireur.num_licence)}}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="3">TOUCHES RECUES</td>
+                    {% for tireur in poule.get_tireurs() %}
+                    <td>{{poule.get_total_touches_recues_tireur(tireur.num_licence)}}</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
+        <div class="status">
         <svg width="100" height="15" id="codeCouleur">
-            <circle cx="7.5" cy="7.5" r="3.75" fill="orange"/>
+            <circle cx="7.5" cy="7.5" r="3.75" fill="orange" />
             <text x="25" y="7.5" dominant-baseline="middle">{{ constants.MATCH_A_VENIR }}</text>
         </svg>
         <svg width="100" height="15" id="codeCouleur">
-            <circle cx="7.5" cy="7.5" r="3.75" fill="green"/>
+            <circle cx="7.5" cy="7.5" r="3.75" fill="green" />
             <text x="25" y="7.5" dominant-baseline="middle">{{ constants.MATCH_EN_COURS }}</text>
         </svg>
         <svg width="100" height="15" id="codeCouleur">
-            <circle cx="7.5" cy="7.5" r="3.75" fill="cornflowerblue"/>
+            <circle cx="7.5" cy="7.5" r="3.75" fill="cornflowerblue" />
             <text x="25" y="7.5" dominant-baseline="middle">{{ constants.MATCH_TERMINE }}</text>
         </svg>
+        <input type="search" placeholder="Rechercher un tireur..." oninput="recherche()" id="rechercheTireur" list="tireurs">
+        <datalist id="tireurs">
+            {% for tireur in poule.get_tireurs() %}
+            <option value="{{ tireur.nom }}.{{ tireur.prenom[0] }}">{{ tireur.nom }} {{ tireur.prenom }}</option>
+            {% endfor %}
+        </datalist>
+        <script>
+            function recherche() {
+                let recherche = document.getElementById("rechercheTireur").value;
+                let petits = document.getElementById("gros").querySelectorAll(".petit");
+                for (let petit of petits) {
+                    let contient = false;
+                    for (let p of petit.querySelectorAll("div:nth-child(2)>p:not(:nth-of-type(2):not(:last-child))")) {
+                        if (p.textContent.toLowerCase().includes(recherche.toLowerCase())) {
+                            contient = true;
+                        }
+                    }
+                    contient ? petit.classList.remove('dontshow') : petit.classList.add('dontshow');
+                }
+                countPetit = document.getElementById("gros").querySelectorAll("#gros div.dontshow");
+                if (petits.length != (countPetit ? countPetit.length : 0) || recherche == "") {
+                    document.getElementById("noresult").classList.toggle('dontshow',true);
+                }else{
+                    document.getElementById("noresult").classList.toggle('dontshow',false);
+                }
+            }
+            {% if poule.libelle == "Poule" %}
+            document.addEventListener('DOMContentLoaded', function() {
+                let table = document.querySelector('#pouleNorme table tbody');
+                let rows = table.rows;
+                let counter = 0
+                for (let row of rows) {
+                    if([...rows].indexOf(row) == rows.length - 1){
+                        td = row.insertCell(row.cells.length);
+                        td.style.backgroundColor = "white";
+                        td.style.border = "1px solid white";
+                    }else{
+                        td = row.insertCell(counter + 3);
+                        td.style.backgroundColor = "black";
+                    }
+                    counter++;
+                }
+            });
+            {% endif %}
+        </script>
     </div>
 </div>
 <div id="gros">
     {% for match in poule.matchs %}
         {% if match.etat != constants.MATCH_TERMINE %}
+            {% if current_user.is_authenticated and current_user.is_arbitre(competition.id) %}
             <a href="{{url_for('affiche_match', id_compet = competition.id , id_poule = poule.id, id_match = match.id)}}">
+            {% endif %}
             {% if match.etat == constants.MATCH_EN_COURS %}
                 <div class="petit encours">
             {% else %}
                 <div class="petit avenir">
             {% endif %}
-        {% else %}
-            <div class="petit termine">
-        {% endif %}
-                <div class="head">
-                    <p>Piste {{ match.piste }}</p>
-                </div>
-                <div>
-                    {% with tireurs = match.get_tireurs_match(poule.id) %}
-                    {% with tireur1 = tireurs[0].get_escrimeur() %}
-                    <p>{{ tireur1.nom }}.{{ tireur1.prenom[0] }} ( {{ tireur1.get_classement(competition.id_arme, competition.id_categorie).points }} )</p>
-                    {% endwith %}
-                    {% if match.etat == constants.MATCH_TERMINE %}
-                        <p>{{ match.participations[0].touches }} - {{ match.participations[1].touches }}</p>
-                    {% endif %}
-                    {% with tireur2 = tireurs[1].get_escrimeur() %}
-                    <p>{{ tireur2.nom }}.{{ tireur2.prenom[0] }} ( {{ tireur2.get_classement(competition.id_arme, competition.id_categorie).points }} )</p>
-                    {% endwith %}
-                    {% endwith %}
-                </div>
-                <div class="foot">
-                    <p>Arbitré par {{ match.get_arbitre().prenom }}  {{ match.get_arbitre().nom }}</p>
-                </div>
-            </div>
-        {% if match.etat != constants.MATCH_TERMINE %}
-        </a>
-        {% endif %}
+            {% else %}
+                <div class="petit termine">
+            {% endif %}
+        <div class="head">
+            <p>Piste {{ match.piste }}</p>
+        </div>
+        <div>
+            {% with tireurs = match.get_tireurs_match(poule.id) %}
+            {% with tireur1 = tireurs[0].get_escrimeur() %}
+            <p{% if match.get_gagnant() == tireur1.num_licence %} class='gagnant' {% endif %}>{{ tireur1.nom }}.{{ tireur1.prenom[0] }} ({{ tireur1.get_classement(competition.id_arme,competition.id_categorie).points }})</p>
+            {% endwith %}
+            {% if match.etat == constants.MATCH_TERMINE %}
+            <p>{{ match.participations[0].touches }} - {{ match.participations[1].touches }}</p>
+            {% endif %}
+            {% with tireur2 = tireurs[1].get_escrimeur() %}
+            <p{% if match.get_gagnant() == tireur2.num_licence %} class='gagnant' {% endif %}>{{ tireur2.nom }}.{{ tireur2.prenom[0] }} ({{ tireur2.get_classement(competition.id_arme,
+                competition.id_categorie).points }})</p>
+            {% endwith %}
+            {% endwith %}
+        </div>
+        <div class="foot">
+            <p>Arbitré par {{ match.get_arbitre().prenom }} {{ match.get_arbitre().nom }}</p>
+        </div>
+    </div>
+    {% if match.etat != constants.MATCH_TERMINE and current_user.is_authenticated and
+    current_user.is_arbitre(competition.id) %}
+    </a>
+    {% endif %}
     {% endfor %}
+    <p id="noresult" class="dontshow">Aucun résultat</p>
 </div>
 {% endblock %}
