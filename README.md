@@ -74,3 +74,12 @@ Cette dernière semaine de projet a été pour moi une semaine éprouvante avec 
 ## Titouan Coulon
 
 Pendant cette semaine de SAE, nous avons dû régler les problèmes laissés en suspens lors de la dernière semaine de développement et ajouter un mode par équipe à ce projet. Personnellement, j'ai résolu différents problèmes tels que l'ordre des phases avec l'arrivée des phases finales, certaines redondances dans le code à plusieurs endroits. J'ai également assisté Anthony sur le JavaScript du tableau des scores dans les poules et de la recherche d'un tireur lors d'une phase pour visualiser ses matchs. J'ai créé les formulaires de création d'une équipe pour l'administrateur, de changement de mot de passe, et j'ai géré l'affichage en fonction du type de compétition dans la page d'un tireur (escrimeur.html) ainsi que sur la page d'accueil d'une compétition. Cette semaine m'a permis de m'améliorer en développement en revenant sur un projet que nous n'avions pas avancé depuis quelques semaines et d'avoir un oeil nouveau sur les choses que j'avais déjà faites pour les améliorer et rendre le code plus maintenable.
+
+## Noam Doucet
+<div align="justify">
+Durant cette dernière semaine, j’ai surtout effectué des petits ajouts ou des corrections comme notamment l’inscription d’un tireur classé nationalement. Corriger les points affichés dans une poule qui devaient s'arrêter aux points de la phase de poule.
+J’ai aussi dû gérer une nouvelle contrainte le dernier jour : un escrimeur ne pouvait se surclasser que d’une catégorie et non pas autant qu’il voulait. J’ai aussi participé à l’inscription d’un groupe dans une compétition en équipe et changé l’affichage grand écran quand une compétition passait en phase éliminatoire.
+
+<br>
+Cette dernière semaine était un peu différents car, il y a eu une plus grande pause dans le projet, et même dans notre apprentissage de flask, car pendant les autres semaines, il y avait aussi la sae festival. Se replonger dans le projet a donc était plus dur, mais en même temps avec ce recul on voyait beaucoup de nouvelles petites choses à améliorer. Je suis satisfait de notre travail ainsi que de notre cohésion tout au long de ces 4 semaines. Et j'espère avoir plus de gros projets comme celui-ci, car je trouve ça plus enrichissant et motivant.
+</div>
