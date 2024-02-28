@@ -47,9 +47,43 @@ Pour fermer l'application il suffit de faire la combinaison de touche CTRL+C dan
 ---
 # Rapports Individuels Finaux
 
+## Titouan COULON
+<div align="justify">
+Pendant cette semaine de SAE, nous avons dû régler les problèmes laissés en suspens lors de la dernière semaine de développement et ajouter un mode par équipe à ce projet. Personnellement, j'ai résolu différents problèmes tels que l'ordre des phases avec l'arrivée des phases finales, certaines redondances dans le code à plusieurs endroits. J'ai également assisté Anthony sur le JavaScript du tableau des scores dans les poules et de la recherche d'un tireur lors d'une phase pour visualiser ses matchs. J'ai créé les formulaires de création d'une équipe pour l'administrateur, de changement de mot de passe, et j'ai géré l'affichage en fonction du type de compétition dans la page d'un tireur (escrimeur.html) ainsi que sur la page d'accueil d'une compétition. Cette semaine m'a permis de m'améliorer en développement en revenant sur un projet que nous n'avions pas avancé depuis quelques semaines et d'avoir un oeil nouveau sur les choses que j'avais déjà faites pour les améliorer et rendre le code plus maintenable.
+</div>
+
+---
+## Noam DOUCET
+<div align="justify">
+Durant cette dernière semaine, j’ai surtout effectué des petits ajouts ou des corrections comme notamment l’inscription d’un tireur classé nationalement. Corriger les points affichés dans une poule qui devaient s'arrêter aux points de la phase de poule.
+J’ai aussi dû gérer une nouvelle contrainte le dernier jour : un escrimeur ne pouvait se surclasser que d’une catégorie et non pas autant qu’il voulait. J’ai aussi participé à l’inscription d’un groupe dans une compétition en équipe et changé l’affichage grand écran quand une compétition passait en phase éliminatoire.
+
+<br>
+Cette dernière semaine était un peu différents car, il y a eu une plus grande pause dans le projet, et même dans notre apprentissage de flask, car pendant les autres semaines, il y avait aussi la sae festival. Se replonger dans le projet a donc était plus dur, mais en même temps avec ce recul on voyait beaucoup de nouvelles petites choses à améliorer. Je suis satisfait de notre travail ainsi que de notre cohésion tout au long de ces 4 semaines. Et j'espère avoir plus de gros projets comme celui-ci, car je trouve ça plus enrichissant et motivant.
+</div>
+
+---
+## Anthony GARDELLE
+<div align="justify">
+Lors des premiers jours de cette dernière semaine de SAE, je me suis principalement occupé du tableau avec le récapitulatif des touches lors de phases de poules en collaboration avec Titouan. Cet affichage m’a pris un peu plus de temps que prévu à réaliser, j’avais un affichage des bordures qui ne se faisait pas en raison du javascript utilisé pour la création des cases noires dans le tableau.Titouan m’a donc aidé et expliquait comment le résoudre.  Le tableau est un modèle identique à celui espéré avec un ajout des touches données par le joueur. Pour réaliser ce tableau j’ai utilisé les balises html classique à la réalisation d’un tableau (table, tbody, td, tr, ...) et aussi un peu de javascript. 
+
+Enfin pour la deuxième partie de la semaine je me suis occupé de la page d’information sur un escrimeur participant à une compétition individuelle. La réalisation de cette page a été assez simple et ne m’a pas trop pris de temps car nous avons une simplicité d’accès aux données grâce à une bonne conception de la BD principalement réalisée par Arthur. Dans cette page on peut retrouver des informations globales sur l’escrimeur ainsi qu’un récapitulatif des matchs effectué par l’escrimeur (adversaire, phase, résultat, …). J’ai donc pour accéder à cette page ajouter un indicateur en passant sa souris sur la ligne du tableau réserver à l’escrimeur sur lequel nous avons envie de nous renseigner dans le classement provisoire de la compétition.
+
+Cette dernière semaine de projet a été pour moi une semaine éprouvante avec une grande diversité de langage utilisé, après plusieurs semaines de pause avec les semaines précédentes, j’ai pu avoir un œil différent sur le projet ce qui a permis l’amélioration de mon esprit critique. En travaillant avec mes camarades, j’ai pu améliorer mes compétences en programmation, tout cela a été possible grâce à une excellente cohésion avec le groupe et une organisation du travail millimétrée.
+</div>
+
+---
+## Arthur GOUDAL
+<div align="justify">
+J'ai consacré cette dernière semaine de SAE à la création des arbres de compétition. En effet la fonctionnalité n'avait pas été terminée à l'issue de la semaine 3 car nous souhaitons pouvoir créer des compétitions avec un nombre infini de participants, tout en respectant scrupuleusement les règles de la FFE (répartition des poules en fonction du classement national + arbre seedé). A cause de cela, nous avions besoin de temps pour développer des algorithmes génériques fonctionnant avec notre structure de données établie depuis la semaine 1.
+Dans la continuité, j'ai ensuite mis en place la clôture des compétitions comprenant la distribution des points aux tireurs suivant la formule de la FFE et la mise à jour des classements nationaux. J'ai également actualisé la persistance de la base de données dans des fichiers CSV car plusieurs éléments avait évolué depuis la fin de la semaine 2, dernière fois que la sauvegarde et le chargement de la BD avaient été mis à jour.
+Pour finir, j'ai reproduit tous ces éléments pour la nouvelle demande : les compétitions par équipes. Les algorithmes existant déjà, la difficulté était de donner en entrée au programme un dictionnaire lui permettant de calculer les arbres de compétition. En effet, tout notre programme reposait sur les résultats des poules, mais les compétitions par équipe ne comprennent pas de poules. Une poule fictive est donc générée par le programme dont le résultat est égal à la somme des points au classement national des membres de chaque équipe. Les compétitions par équipes ont nécéssité des changements dans la base de données et, par conséquence, dans les fichiers CSV.
+Enfin le dernier week-end, j'ai résolu de nombreux bugs mineurs, notamment au niveau de la connexion entre back-end et front-end.
+</div>
+
+---
 ## Killian OUZET
 <div align="justify">
-
 Durant cette dernière semaine de projet sur notre application de gestion de compétition d'escrime j’ai pu principalement faire des correctifs ainsi qu’ ajouter des fonctionnalités mineures ayant pour objectif d’améliorer l’utilisation de l’application par les utilisateurs. 
 
 Les premiers jours de cette semaine je me suis donc concentré en priorité sur la correction de différentes fonctionnalités qui avaient été déréglées du à certains changements backend. En effet, lors d’un projet il arrive que des anciennes fonctions changent à cause de l’avancé du projet mais que nous oublions donc de modifier des fonctionnalités en lien. Et cette situation est arrivée, le classement intra-poule n’était plus correctement affiché. Noam qui avait développé cela précédemment m’a donc expliqué son code et j’ai pu ainsi le modifier pour qu’il soit en accord avec les derniers changements de l’application afin de ré-afficher dans le bon ordre les escrimeurs des poules. À la suite de cela j’ai corrigé la répartition des poules, qui se fait lorsqu’un admin clique sur un bouton afin de lancer la compétition. Après avoir fini ces corrections je me suis tourné vers l’ajout de vérification pour les fonctionnalités de l’appli, comme par exemple la vérification du statut de l’utilisateur pour l’accès aux pages ou bien enlever les boutons Inscription désinscription si la compétition a commencé. Et enfin, j’ai terminé cette semaine par rendre fonctionnel l’historique des compétitions d’un escrimeur dans sa page profil. Fonctionnalités que j’avais préparées lors d’une semaine précédente mais que je n’avais pas faites car ce n’était pas très important à ce moment. Je peux aussi citer la petite animation en javascript que j’ai travaillé pendant des moments creux de la semaine qui consiste à l’allongement de l’épée de l’escrimeur du logo en haut à gauche de la page lorsque l’on clique dessus.
@@ -58,28 +92,4 @@ En revanche, ce vendredi je n’ai pas pu participer à l'avancée du projet car
 
 ### Bilan personnel
 Pour conclure ce bilan, je dirai que j’ai apprécié participé à ce projet et le sujet était intéressant en plus de permettre un vrai travail derrière. Mais ce qui m’a principalement marqué durant cette SAE est le temps donné. En effet c’était la première fois que nous avions plusieurs semaines complètes pour un projet et je trouve cela beaucoup plus plaisant. ça nous permet déjà de rendre quelque chose de beaucoup plus travaillé et réfléchi avec une continuité durant l’année. Nous pouvons aussi utiliser d’autres technologies que nous avons découvertes tout du long du semestre. Je dirai donc que je préfère même avec un projet qui dure plutôt qu’un que nous fassions une fois puis que nous oublions.
-</div>
-
----
-## Anthony Gardelle
-<div align="justify">
-
-Lors des premiers jours de cette dernière semaine de SAE, je me suis principalement occupé du tableau avec le récapitulatif des touches lors de phases de poules en collaboration avec Titouan. Cet affichage m’a pris un peu plus de temps que prévu à réaliser, j’avais un affichage des bordures qui ne se faisait pas en raison du javascript utilisé pour la création des cases noires dans le tableau.Titouan m’a donc aidé et expliquait comment le résoudre.  Le tableau est un modèle identique à celui espéré avec un ajout des touches données par le joueur. Pour réaliser ce tableau j’ai utilisé les balises html classique à la réalisation d’un tableau (table, tbody, td, tr, ...) et aussi un peu de javascript. 
-
-Enfin pour la deuxième partie de la semaine je me suis occupé de la page d’information sur un escrimeur participant à une compétition individuelle. La réalisation de cette page a été assez simple et ne m’a pas trop pris de temps car nous avons une simplicité d’accès aux données grâce à une bonne conception de la BD principalement réalisée par Arthur. Dans cette page on peut retrouver des informations globales sur l’escrimeur ainsi qu’un récapitulatif des matchs effectué par l’escrimeur (adversaire, phase, résultat, …). J’ai donc pour accéder à cette page ajouter un indicateur en passant sa souris sur la ligne du tableau réserver à l’escrimeur sur lequel nous avons envie de nous renseigner dans le classement provisoire de la compétition.
-
-Cette dernière semaine de projet a été pour moi une semaine éprouvante avec une grande diversité de langage utilisé, après plusieurs semaines de pause avec les semaines précédentes, j’ai pu avoir un œil différent sur le projet ce qui a permis l’amélioration de mon esprit critique. En travaillant avec mes camarades, j’ai pu améliorer mes compétences en programmation, tout cela a été possible grâce à une excellente cohésion avec le groupe et une organisation du travail millimétrée.
-</div>
-
-## Titouan Coulon
-
-Pendant cette semaine de SAE, nous avons dû régler les problèmes laissés en suspens lors de la dernière semaine de développement et ajouter un mode par équipe à ce projet. Personnellement, j'ai résolu différents problèmes tels que l'ordre des phases avec l'arrivée des phases finales, certaines redondances dans le code à plusieurs endroits. J'ai également assisté Anthony sur le JavaScript du tableau des scores dans les poules et de la recherche d'un tireur lors d'une phase pour visualiser ses matchs. J'ai créé les formulaires de création d'une équipe pour l'administrateur, de changement de mot de passe, et j'ai géré l'affichage en fonction du type de compétition dans la page d'un tireur (escrimeur.html) ainsi que sur la page d'accueil d'une compétition. Cette semaine m'a permis de m'améliorer en développement en revenant sur un projet que nous n'avions pas avancé depuis quelques semaines et d'avoir un oeil nouveau sur les choses que j'avais déjà faites pour les améliorer et rendre le code plus maintenable.
-
-## Noam Doucet
-<div align="justify">
-Durant cette dernière semaine, j’ai surtout effectué des petits ajouts ou des corrections comme notamment l’inscription d’un tireur classé nationalement. Corriger les points affichés dans une poule qui devaient s'arrêter aux points de la phase de poule.
-J’ai aussi dû gérer une nouvelle contrainte le dernier jour : un escrimeur ne pouvait se surclasser que d’une catégorie et non pas autant qu’il voulait. J’ai aussi participé à l’inscription d’un groupe dans une compétition en équipe et changé l’affichage grand écran quand une compétition passait en phase éliminatoire.
-
-<br>
-Cette dernière semaine était un peu différents car, il y a eu une plus grande pause dans le projet, et même dans notre apprentissage de flask, car pendant les autres semaines, il y avait aussi la sae festival. Se replonger dans le projet a donc était plus dur, mais en même temps avec ce recul on voyait beaucoup de nouvelles petites choses à améliorer. Je suis satisfait de notre travail ainsi que de notre cohésion tout au long de ces 4 semaines. Et j'espère avoir plus de gros projets comme celui-ci, car je trouve ça plus enrichissant et motivant.
 </div>
